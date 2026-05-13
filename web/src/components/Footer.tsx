@@ -6,7 +6,7 @@ export default function Footer() {
           <strong>79th Unit OSINT</strong> &nbsp;|&nbsp; Facts First. Question Everything.
         </p>
         <p className="footer-line">
-          Built on CLEARSKY methodology. Not medical advice. Not affiliated with WHO,
+          Built on NATO Admiralty source qualification methodology. Not medical advice. Not affiliated with WHO,
           CDC, ECDC, or PAHO.
         </p>
         <p className="footer-line">

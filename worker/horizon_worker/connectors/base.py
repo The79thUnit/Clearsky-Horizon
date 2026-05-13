@@ -112,7 +112,7 @@ class BaseConnector(abc.ABC):
     async def run(self) -> FetchResult:
         """Convenience wrapper that creates a default client.
 
-        Two-phase fetch identical to clearsky-web/api/helpers/page_fetch.py:
+        Two-phase fetch strategy:
 
           1. Try curl_cffi with Chrome TLS-fingerprint impersonation.
              This defeats Akamai/Cloudflare bot-fight checks that key off
@@ -182,8 +182,7 @@ class BaseConnector(abc.ABC):
         query_params = dict(getattr(self, "QUERY_PARAMS", {}) or {})
 
         # Browser-like headers. Anti-bot WAFs look at the full header
-        # set, not just the TLS handshake. Mirror clearsky-web's
-        # page_fetch.py header bundle.
+        # set, not just the TLS handshake.
         headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "

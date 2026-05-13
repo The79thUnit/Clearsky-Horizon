@@ -9,9 +9,8 @@ crawler.
 
 ## Manual submission via QuickStatements
 
-1. Sign in to <https://www.wikidata.org/> with the
-   `operator@79thunit.co.uk` Google account (or create a Wikidata
-   account if none yet).
+1. Sign in to <https://www.wikidata.org/> with the operator Wikidata
+   account (or create one if none yet).
 2. Open <https://quickstatements.toolforge.org/#/batch>.
 3. Paste the v1 syntax block below into the textarea.
 4. Click **Import V1 commands → Run**. QuickStatements creates a new
@@ -79,7 +78,7 @@ LAST	P1297	"17133814"	/* Companies House identifier */
 LAST	P856	"https://79thunit.co.uk/"	/* official website */
 LAST	P452	Q6671777	/* industry: intelligence */
 LAST	P452	Q1497384	/* industry: open-source intelligence */
-LAST	P127	Q123456	/* owned by Phoenix Valentino — fill with his QID if exists */
+LAST	P127	Q123456	/* owned by 79th Unit Limited — fill with operator QID */
 ```
 
 ## SPARQL verification (after import)

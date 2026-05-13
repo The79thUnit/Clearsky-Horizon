@@ -40,3 +40,7 @@ CMD uvicorn horizon_api.main:app \
     --workers ${WORKERS:-1} \
     --proxy-headers \
     --forwarded-allow-ips='*'
+# Note: forwarded-allow-ips='*' is safe here because port 8000 is never
+# exposed directly — all traffic arrives exclusively via the nginx reverse
+# proxy on the Docker internal network. TrustedHostMiddleware provides an
+# additional layer that rejects any request with an unrecognised Host header.

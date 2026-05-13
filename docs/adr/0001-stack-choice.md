@@ -3,7 +3,6 @@
 **Status:** Accepted
 **Date:** 2026-05-11
 **Decision-maker:** 79th Unit Limited
-**Implementer:** 79th Unit engineering
 
 ## Context
 
@@ -14,20 +13,20 @@ outbreaks worldwide. It must:
 - Apply source qualification (ICD 206 SRC + NATO Admiralty + dual confidence)
 - Serve a public web UI showing case lists, source quality, outbreak map
 - Run on a single dev laptop locally with no cloud dependency
-- Be skill-transferable from CLEARSKY so the operator does not learn a new stack
-- Avoid coupling to CLEARSKY production so failure here does not affect CLEARSKY
+- Be skill-transferable from the operator's existing stack so no new toolchain is required
+- Remain fully independent from other production systems so failure here is isolated
 
 ## Options considered
 
-### Option A: Match CLEARSKY stack (Python 3.12 + FastAPI + Postgres 16 + Vite/React/TS + Docker Compose)
+### Option A: Match the operator's platform stack (Python 3.12 + FastAPI + Postgres 16 + Vite/React/TS + Docker Compose)
 
 Pros:
-- Every CLEARSKY skill transfers. Same async patterns, same frontend conventions.
+- Every the operator's platform skill transfers. Same async patterns, same frontend conventions.
 - Postgres permits adding PostGIS + pgvector later without a rewrite.
 - Docker Compose deploys locally with one command.
 
 Cons:
-- Shares dependency surface area with CLEARSKY production. CVE patching affects both.
+- Shares dependency surface area with the operator's platform production. CVE patching affects both.
 - Heavier than strictly necessary for a single-domain tracker.
 
 ### Option B: Lighter stack (SQLite + FastAPI + plain JS)
@@ -36,7 +35,7 @@ Pros:
 - Smaller surface area. Can run without Docker.
 
 Cons:
-- Cannot do PostGIS / pgvector later. Frontend pattern diverges from CLEARSKY.
+- Cannot do PostGIS / pgvector later. Frontend pattern diverges from the operator's platform.
 - Lower learning transfer.
 
 ### Option C: Node-only stack (Node + Express + Postgres + Next.js)
@@ -45,32 +44,32 @@ Pros:
 - Single language across stack.
 
 Cons:
-- Discards all CLEARSKY Python skill. Different connector pattern from CLEARSKY's
+- Discards all the operator's platform Python skill. Different connector pattern from the operator's platform's
   YAML connector library. Worker scheduling needs a separate solution.
 
 ## Decision
 
-**Option A.** Match CLEARSKY stack: Python 3.12 + FastAPI + PostgreSQL 16 + Redis 7 +
+**Option A.** Match the operator's platform stack: Python 3.12 + FastAPI + PostgreSQL 16 + Redis 7 +
 Celery + Vite/React 18/TypeScript + Docker Compose.
 
-No Kubernetes. No k3s. No CLEARSKY ontology dependency. Local-first via Docker
+No Kubernetes. No k3s. No the operator's platform ontology dependency. Local-first via Docker
 Compose. Per-service `Dockerfile` in `api/`, `worker/`, `web/`.
 
 ## Consequences
 
 Pros (realised):
-- Operator's CLEARSKY skill carries over 1:1
+- Operator's the operator's platform skill carries over 1:1
 - Async patterns, dependency tooling, test framework identical
 - Postgres permits adding PostGIS + pgvector later without a rewrite
 
 Cons (accepted, mitigated):
-- Dependency surface overlaps CLEARSKY -> patch both when CVEs hit
+- Dependency surface overlaps the operator's platform -> patch both when CVEs hit
 - Heavier than strictly necessary for a single-domain tracker
 
 Mitigations:
 - HORIZON declares its own `pyproject.toml` per service with pinned, audited deps
-- Versions can drift from CLEARSKY if operationally useful
-- No shared code modules between HORIZON and CLEARSKY (independence preserved)
+- Versions can drift from the operator's platform if operationally useful
+- No shared code modules between HORIZON and the operator's platform (independence preserved)
 
 ## Related decisions
 

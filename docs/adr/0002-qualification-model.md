@@ -3,7 +3,6 @@
 **Status:** Accepted
 **Date:** 2026-05-11
 **Decision-maker:** 79th Unit Limited
-**Implementer:** 79th Unit engineering
 
 ## Context
 

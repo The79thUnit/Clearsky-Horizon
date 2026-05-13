@@ -43,7 +43,7 @@ export default function MobileMenu({ tabs, view, setView, onClose }: Props) {
       <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
         <header className="mobile-menu-head">
           <span className="mobile-menu-brand">
-            CLEARSKY <span className="accent">HORIZON</span>
+            <span className="accent">HORIZON</span>
           </span>
           <button
             className="mobile-menu-close"
