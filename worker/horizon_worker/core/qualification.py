@@ -7,7 +7,7 @@ analyst_confidence:  set by human analyst after review.
                      Stored separately. UI surfaces both side by side.
 
 This is HORIZON's primary differentiator. Every change requires a new ADR
-and Phoenix sign-off (see CLAUDE.md hard stops).
+and Phoenix sign-off (see docs/adr/0002-qualification-model.md).
 """
 
 from __future__ import annotations

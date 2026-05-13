@@ -6,7 +6,7 @@ Versioning: [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html). Status: pre-1.0
 ## [Unreleased]
 
 ### Added
-- Project scaffold: directory structure, CLAUDE.md, README.md, docs/adr/0001-stack-choice.md
+- Project scaffold: directory structure, README.md, docs/adr/0001-stack-choice.md
 - Docker Compose with PostgreSQL 16 + Redis 7 (api/worker/web services declared via --profile app)
 - Workspace pyproject.toml with ruff + mypy strict + bandit + pytest + coverage config
 - Quality gate scripts: scripts/check.sh, scripts/format.sh, scripts/test.sh, scripts/bootstrap.sh

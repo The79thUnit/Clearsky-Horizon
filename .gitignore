@@ -66,8 +66,9 @@ celerybeat.pid
 *.log
 *.tmp
 
-# --- Claude Code local files ---
+# --- Claude Code local files (never push) ---
 .claude/
+CLAUDE.md
 
 # --- Deploy / bootstrap ephemeral scripts ---
 .first_boot_runner.py

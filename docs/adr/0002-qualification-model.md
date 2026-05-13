@@ -76,7 +76,7 @@ Cons (accepted, mitigated):
 
 ## Hard stops on changes
 
-Per CLAUDE.md, **any** change to this model requires:
+**Any** change to this model requires:
 1. New ADR (do not modify this one)
 2. Phoenix sign-off
 3. Re-test of every NATO score in the existing test matrix
