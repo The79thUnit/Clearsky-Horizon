@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f1efe9" />
+    <meta name="color-scheme" content="light" />
+
+    <title>HORIZON - Live Hantavirus Outbreak Tracker | Audit-Grade Source Provenance</title>
+
+    <meta name="description" content="Live hantavirus (Andes, Sin Nombre, Puumala, Hantaan, Seoul, Dobrava) outbreak surveillance aggregating WHO, CDC, ECDC, PAHO, ProMED and peer-reviewed literature. Audit-grade source provenance: ICD 206 SRC + NATO Admiralty Scale + dual confidence + Berkeley chain-of-custody. Open data, CC BY 4.0." />
+    <meta name="keywords" content="hantavirus, hantavirus tracker, hantavirus outbreak, hantavirus surveillance, hantavirus map, Andes virus, ANDV, Sin Nombre virus, SNV, Puumala virus, PUUV, Hantaan virus, Seoul virus, Dobrava virus, hantavirus pulmonary syndrome, HPS, haemorrhagic fever with renal syndrome, HFRS, MV Hondius, cruise ship outbreak, WHO DON, CDC HAN, ProMED, PAHO, ECDC, real-time outbreak monitoring, OSINT, 79th Unit, CLEARSKY" />
+    <meta name="author" content="79th Unit Limited" />
+    <meta name="publisher" content="79th Unit Limited" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="canonical" href="https://hantavirus.software/" />
+    <link rel="alternate" hreflang="en-GB" href="https://hantavirus.software/" />
+    <link rel="alternate" hreflang="en"    href="https://hantavirus.software/" />
+    <link rel="alternate" hreflang="x-default" href="https://hantavirus.software/" />
+
+    <!-- Dublin Core: helps academic search engines (Google Scholar, BASE, CORE) -->
+    <meta name="DC.title" content="HORIZON - Live Hantavirus Outbreak Tracker" />
+    <meta name="DC.creator" content="79th Unit Limited" />
+    <meta name="DC.subject" content="hantavirus; Orthohantavirus; outbreak surveillance; OSINT; epidemiology" />
+    <meta name="DC.description" content="Live hantavirus outbreak surveillance aggregating WHO, CDC, ECDC, PAHO, ProMED and peer-reviewed literature with audit-grade source provenance." />
+    <meta name="DC.publisher" content="79th Unit Limited" />
+    <meta name="DC.contributor" content="79th Unit Limited" />
+    <meta name="DC.date" content="2026-05-11" />
+    <meta name="DC.type" content="Dataset" />
+    <meta name="DC.format" content="text/html" />
+    <meta name="DC.identifier" content="https://hantavirus.software/" />
+    <meta name="DC.language" content="en-GB" />
+    <meta name="DC.coverage" content="Global, 1993-present" />
+    <meta name="DC.rights" content="CC BY 4.0" />
+    <!-- Discovery hints for bibliographic systems -->
+    <meta name="citation_title" content="HORIZON Hantavirus Surveillance Dataset" />
+    <meta name="citation_author" content="79th Unit Limited" />
+    <meta name="citation_publication_date" content="2026-05-11" />
+    <meta name="citation_publisher" content="79th Unit Limited" />
+    <meta name="citation_language" content="en" />
+    <!-- Geographic targeting -->
+    <meta name="geo.region" content="GB" />
+    <meta name="geo.placename" content="United Kingdom" />
+    <meta name="ICBM" content="51.5074, -0.1278" />
+    <!-- News indexing -->
+    <meta name="news_keywords" content="hantavirus, Andes virus, Sin Nombre, Puumala, MV Hondius, outbreak, cruise ship, Antarctica, Ushuaia, WHO, CDC, ECDC, PAHO, public health, emerging infectious disease" />
+    <!-- Bing / Yandex / Baidu / Naver discovery -->
+    <meta name="msnbot" content="index, follow" />
+    <meta name="slurp" content="index, follow" />
+    <meta name="yandex" content="index, follow" />
+    <!-- IndexNow: rotating key file at /59d765645bcc5c9d796c94bf59063fe5.txt -->
+    <meta name="indexnow" content="59d765645bcc5c9d796c94bf59063fe5" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="HORIZON" />
+    <meta property="og:title" content="HORIZON - Live Hantavirus Outbreak Tracker" />
+    <meta property="og:description" content="Live hantavirus surveillance aggregating WHO, CDC, ECDC, PAHO, ProMED and peer-reviewed literature. Map, timeline, and chronology covering the 2026 MV Hondius cluster. Audit-grade source provenance. Open data." />
+    <meta property="og:url" content="https://hantavirus.software/" />
+    <meta property="og:image" content="https://hantavirus.software/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="HORIZON hantavirus surveillance map showing global outbreak distribution" />
+    <meta property="og:locale" content="en_GB" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@79thunit" />
+    <meta name="twitter:creator" content="@79thunit" />
+    <meta name="twitter:title" content="HORIZON - Live Hantavirus Outbreak Tracker" />
+    <meta name="twitter:description" content="Live hantavirus surveillance with audit-grade source provenance. Map, timeline, chronology. Open data, CC BY 4.0." />
+    <meta name="twitter:image" content="https://hantavirus.software/og-image.png" />
+    <meta name="twitter:image:alt" content="HORIZON global hantavirus outbreak map" />
+
+    <!-- PWA + favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Feed auto-discovery (Google News, Feedly, Inoreader, JSON Feed apps) -->
+    <link rel="alternate" type="application/rss+xml"  title="HORIZON updates (RSS)"  href="/rss.xml" />
+    <link rel="alternate" type="application/atom+xml" title="HORIZON updates (Atom)" href="/atom.xml" />
+    <link rel="alternate" type="application/feed+json" title="HORIZON updates (JSON Feed)" href="/feed.json" />
+
+    <!-- Google News / Subscribe with Google (Publisher Center: openaccess).
+         External SWG loader + same-origin init file so script-src 'self'
+         CSP stays clean. Init pattern is push-based, works pre- or post-load. -->
+    <script async type="application/javascript"
+            src="https://news.google.com/swg/js/v1/swg-basic.js"></script>
+    <script async type="application/javascript" src="/swg-init.js"></script>
+
+    <!-- Performance: preconnect to map tile CDNs only.
+         Fonts are now self-hosted (web/public/fonts/) so no external
+         preconnect is needed — same-origin requests are already on a
+         warm TLS connection. -->
+    <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin />
+    <link rel="dns-prefetch" href="https://a.basemaps.cartocdn.com" />
+    <link rel="dns-prefetch" href="https://b.basemaps.cartocdn.com" />
+    <link rel="dns-prefetch" href="https://c.basemaps.cartocdn.com" />
+
+    <!-- Self-hosted fonts: same WOFF2 binaries Google Fonts serves, same
+         @font-face declarations (font-family, weight, style, unicode-range,
+         font-display: swap). Rendering is visually identical to the prior
+         fonts.googleapis.com setup — only the URL prefix changed.
+         Re-generate via `python scripts/mirror_google_fonts.py`. -->
+    <link rel="preload" href="/fonts/fonts.css" as="style" />
+    <link rel="stylesheet" href="/fonts/fonts.css" />
+
+    <!-- Schema.org JSON-LD: Organization, WebSite, Dataset, SpecialAnnouncement -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["Organization", "NewsMediaOrganization"],
+          "@id": "https://hantavirus.software/#org",
+          "name": "79th Unit Limited",
+          "url": "https://79thunit.co.uk",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://hantavirus.software/og-image.png",
+            "width": 1200,
+            "height": 630
+          },
+          "description": "UK intelligence consultancy specialising in OSINT, public-safety intelligence, and audit-grade source provenance.",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "GB"
+          },
+          "identifier": "17133814",
+          "ethicsPolicy": "https://hantavirus.software/methodology",
+          "diversityPolicy": "https://hantavirus.software/methodology",
+          "correctionsPolicy": "https://hantavirus.software/methodology",
+          "verificationFactCheckingPolicy": "https://hantavirus.software/methodology",
+          "ownershipFundingInfo": "https://79thunit.co.uk",
+          "knowsAbout": [
+            { "@type": "MedicalCondition", "@id": "https://hantavirus.software/#mc-hantavirus" },
+            "Open-source intelligence",
+            "Public health surveillance",
+            "Maritime AIS tracking",
+            "Outbreak epidemiology"
+          ],
+          "areaServed": "Worldwide",
+          "sameAs": [
+            "https://79thunit.co.uk",
+            "https://clearsky.79thunit.co.uk",
+            "https://hantavirus.software"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://hantavirus.software/#site",
+          "url": "https://hantavirus.software/",
+          "name": "HORIZON - Hantavirus Outbreak Surveillance",
+          "description": "Live hantavirus outbreak surveillance with audit-grade source provenance.",
+          "inLanguage": "en-GB",
+          "publisher": { "@id": "https://hantavirus.software/#org" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://hantavirus.software/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "LiveBlogPosting",
+          "@id": "https://hantavirus.software/#liveblog",
+          "url": "https://hantavirus.software/outbreaks/mv-hondius-2026",
+          "headline": "Live updates - MV Hondius hantavirus cluster",
+          "description": "Real-time chronology of the 2026 MV Hondius Andes virus cluster, ingested from WHO, ECDC, CDC, PAHO, ProMED, and open news every 15 minutes.",
+          "coverageStartTime": "2026-04-01T00:00:00+00:00",
+          "coverageEndTime": "2026-12-31T23:59:59+00:00",
+          "datePublished": "2026-04-06",
+          "dateModified": "2026-05-13",
+          "inLanguage": "en-GB",
+          "isAccessibleForFree": true,
+          "publisher": { "@id": "https://hantavirus.software/#org" },
+          "about": { "@id": "https://hantavirus.software/#mv-hondius" }
+        },
+        {
+          "@type": "Dataset",
+          "@id": "https://hantavirus.software/#dataset",
+          "name": "HORIZON Hantavirus Surveillance Dataset",
+          "alternateName": ["Hantavirus outbreak tracker", "Andes virus surveillance", "Sin Nombre virus tracker"],
+          "description": "Open dataset of hantavirus outbreak case reports ingested from public health authorities (WHO, CDC, ECDC, PAHO, ProMED), peer-reviewed literature (Europe PMC, bioRxiv, medRxiv, Crossref, arXiv) and open news / social signals with audit-grade source qualification per ICD 206, NATO Admiralty Scale, dual confidence model, and Berkeley Protocol chain-of-custody.",
+          "url": "https://hantavirus.software/",
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "creator": { "@id": "https://hantavirus.software/#org" },
+          "publisher": { "@id": "https://hantavirus.software/#org" },
+          "keywords": [
+            "hantavirus", "Andes virus", "Sin Nombre virus", "Puumala virus",
+            "Hantaan virus", "Seoul virus", "Dobrava virus",
+            "hantavirus pulmonary syndrome", "HPS",
+            "haemorrhagic fever with renal syndrome", "HFRS",
+            "outbreak surveillance", "public health", "OSINT", "epidemiology"
+          ],
+          "spatialCoverage": "Global",
+          "temporalCoverage": "1993/..",
+          "isAccessibleForFree": true,
+          "distribution": [
+            {
+              "@type": "DataDownload",
+              "encodingFormat": "application/json",
+              "contentUrl": "https://hantavirus.software/api/v1/cases",
+              "name": "Case reports JSON"
+            },
+            {
+              "@type": "DataDownload",
+              "encodingFormat": "application/json",
+              "contentUrl": "https://hantavirus.software/api/v1/clusters",
+              "name": "Outbreak clusters JSON"
+            },
+            {
+              "@type": "DataDownload",
+              "encodingFormat": "application/json",
+              "contentUrl": "https://hantavirus.software/api/v1/sources",
+              "name": "Source registry JSON"
+            },
+            {
+              "@type": "DataDownload",
+              "encodingFormat": "application/json",
+              "contentUrl": "https://hantavirus.software/api/v1/meta/events",
+              "name": "Chronology / event feed JSON"
+            }
+          ],
+          "variableMeasured": [
+            "case count",
+            "fatality count",
+            "country",
+            "serotype",
+            "pipeline confidence",
+            "analyst confidence",
+            "NATO Admiralty Scale rating"
+          ]
+        },
+        {
+          "@type": "SpecialAnnouncement",
+          "@id": "https://hantavirus.software/#mv-hondius",
+          "name": "MV Hondius Hantavirus Cluster - Multi-Country",
+          "text": "Andes virus cluster aboard the MV Hondius cruise ship. Index exposure suspected during Ushuaia (Argentina) pre-departure wildlife excursion. Confirmed and suspected cases identified across multiple repatriation destinations including Spain, Netherlands, France, UK, Canada, US, Ireland, Turkey.",
+          "datePosted": "2026-05-02",
+          "expires": "2026-08-01",
+          "category": "https://www.wikidata.org/wiki/Q1340089",
+          "url": "https://hantavirus.software/",
+          "spatialCoverage": [
+            { "@type": "Country", "name": "Argentina" },
+            { "@type": "Country", "name": "Spain" },
+            { "@type": "Country", "name": "Netherlands" },
+            { "@type": "Country", "name": "France" },
+            { "@type": "Country", "name": "United Kingdom" },
+            { "@type": "Country", "name": "Canada" },
+            { "@type": "Country", "name": "United States" }
+          ],
+          "publisher": { "@id": "https://hantavirus.software/#org" }
+        },
+        {
+          "@type": "MedicalCondition",
+          "@id": "https://hantavirus.software/#mc-hantavirus",
+          "name": "Hantavirus infection",
+          "alternateName": ["Orthohantavirus infection", "Hantavirus disease"],
+          "code": {
+            "@type": "MedicalCode",
+            "codingSystem": "ICD-10",
+            "codeValue": "A98.5"
+          },
+          "associatedAnatomy": [
+            { "@type": "AnatomicalSystem", "name": "Respiratory system" },
+            { "@type": "AnatomicalSystem", "name": "Renal system" },
+            { "@type": "AnatomicalSystem", "name": "Cardiovascular system" }
+          ],
+          "cause": [
+            { "@type": "MedicalCause", "name": "Orthohantavirus exposure via rodent excreta or aerosolised particles" }
+          ],
+          "signOrSymptom": [
+            { "@type": "MedicalSymptom", "name": "Fever" },
+            { "@type": "MedicalSymptom", "name": "Myalgia" },
+            { "@type": "MedicalSymptom", "name": "Headache" },
+            { "@type": "MedicalSymptom", "name": "Cough" },
+            { "@type": "MedicalSymptom", "name": "Shortness of breath" },
+            { "@type": "MedicalSymptom", "name": "Pulmonary oedema" },
+            { "@type": "MedicalSymptom", "name": "Renal failure" },
+            { "@type": "MedicalSymptom", "name": "Haemorrhage" },
+            { "@type": "MedicalSymptom", "name": "Hypotension" }
+          ],
+          "epidemiology": "Endemic across the Americas (Sin Nombre virus, Andes virus), Europe and western Russia (Puumala virus, Dobrava-Belgrade virus), east Asia (Hantaan virus, Seoul virus). Transmission is typically rodent-to-human via aerosolised excreta; Andes virus is the only orthohantavirus with documented person-to-person transmission.",
+          "possibleTreatment": "Supportive care including fluid resuscitation, mechanical ventilation, and renal replacement therapy. Ribavirin shows benefit in early HFRS but not HPS. No licensed antiviral or vaccine is available outside South Korea (Hantavax for Hantaan virus).",
+          "riskFactor": [
+            { "@type": "MedicalRiskFactor", "name": "Occupational rodent exposure (military, agricultural, conservation workers)" },
+            { "@type": "MedicalRiskFactor", "name": "Cleaning rodent-infested structures" },
+            { "@type": "MedicalRiskFactor", "name": "Living in or visiting endemic areas (Andes, Four Corners, Scandinavia, East Asia)" }
+          ],
+          "code": {
+            "@type": "MedicalCode",
+            "codingSystem": "ICD-10",
+            "codeValue": "A98.5"
+          },
+          "sameAs": [
+            "https://www.cdc.gov/hantavirus/",
+            "https://www.who.int/news-room/fact-sheets/detail/hantavirus-disease",
+            "https://en.wikipedia.org/wiki/Orthohantavirus",
+            "https://www.wikidata.org/wiki/Q1340089",
+            "https://meshb.nlm.nih.gov/record/ui?ui=D006362"
+          ]
+        },
+        {
+          "@type": "ItemList",
+          "@id": "https://hantavirus.software/#serotypes",
+          "name": "Orthohantavirus serotypes tracked",
+          "numberOfItems": 12,
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "item": { "@type": "Thing", "name": "Andes virus (ANDV)", "alternateName": "Orthohantavirus andesense", "url": "https://en.wikipedia.org/wiki/Andes_orthohantavirus" } },
+            { "@type": "ListItem", "position": 2, "item": { "@type": "Thing", "name": "Sin Nombre virus (SNV)", "alternateName": "Orthohantavirus sinnombreense", "url": "https://en.wikipedia.org/wiki/Sin_Nombre_orthohantavirus" } },
+            { "@type": "ListItem", "position": 3, "item": { "@type": "Thing", "name": "Puumala virus (PUUV)", "alternateName": "Orthohantavirus puumalaense", "url": "https://en.wikipedia.org/wiki/Puumala_orthohantavirus" } },
+            { "@type": "ListItem", "position": 4, "item": { "@type": "Thing", "name": "Hantaan virus (HTNV)", "alternateName": "Orthohantavirus hantanense", "url": "https://en.wikipedia.org/wiki/Hantaan_orthohantavirus" } },
+            { "@type": "ListItem", "position": 5, "item": { "@type": "Thing", "name": "Seoul virus (SEOV)", "alternateName": "Orthohantavirus seoulense", "url": "https://en.wikipedia.org/wiki/Seoul_orthohantavirus" } },
+            { "@type": "ListItem", "position": 6, "item": { "@type": "Thing", "name": "Dobrava-Belgrade virus (DOBV)", "alternateName": "Orthohantavirus dobravaense", "url": "https://en.wikipedia.org/wiki/Dobrava-Belgrade_orthohantavirus" } },
+            { "@type": "ListItem", "position": 7, "item": { "@type": "Thing", "name": "Bayou virus (BAYV)", "alternateName": "Orthohantavirus bayouense" } },
+            { "@type": "ListItem", "position": 8, "item": { "@type": "Thing", "name": "Black Creek Canal virus (BCCV)", "alternateName": "Orthohantavirus nigririvense" } },
+            { "@type": "ListItem", "position": 9, "item": { "@type": "Thing", "name": "Laguna Negra virus (LANV)", "alternateName": "Orthohantavirus lagunaense" } },
+            { "@type": "ListItem", "position": 10, "item": { "@type": "Thing", "name": "Choclo virus (CHOV)", "alternateName": "Orthohantavirus chocloense" } },
+            { "@type": "ListItem", "position": 11, "item": { "@type": "Thing", "name": "Saaremaa virus (SAAV)", "alternateName": "Orthohantavirus saaremaaense" } },
+            { "@type": "ListItem", "position": 12, "item": { "@type": "Thing", "name": "Tula virus (TULV)", "alternateName": "Orthohantavirus tulaense" } }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://hantavirus.software/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is hantavirus?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Hantavirus is a family of viruses (genus Orthohantavirus, family Hantaviridae) carried by rodents that can cause severe disease in humans. The two main clinical syndromes are hantavirus pulmonary syndrome (HPS, common in the Americas, caused by Sin Nombre virus and Andes virus) and haemorrhagic fever with renal syndrome (HFRS, common in Eurasia, caused by Hantaan, Seoul, Puumala and Dobrava-Belgrade viruses)."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is hantavirus transmitted?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Most hantaviruses are transmitted from rodents to humans via inhalation of aerosolised excreta (urine, faeces, saliva) or by direct contact with infected rodents. Andes virus is the only orthohantavirus with documented person-to-person transmission, primarily through close household contact. The virus is not airborne in the conventional sense and is not transmitted by mosquitoes or ticks."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What are the symptoms of hantavirus disease?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Initial symptoms appear 1 to 8 weeks after exposure and include fever, severe muscle aches, fatigue, headache, and gastrointestinal symptoms. In hantavirus pulmonary syndrome (HPS), this progresses to coughing, shortness of breath, and pulmonary oedema with case fatality around 38 percent. In haemorrhagic fever with renal syndrome (HFRS), patients develop kidney failure, low platelet count, and bleeding, with case fatality of 1 to 15 percent depending on serotype."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is there a vaccine or treatment for hantavirus?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No licensed vaccine or antiviral is approved in Europe or North America. South Korea licenses Hantavax for Hantaan virus. Treatment is supportive: fluid management, mechanical ventilation, and renal replacement therapy. Ribavirin shows benefit in early HFRS but not HPS. Early recognition and intensive care are the strongest predictors of survival."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which countries report hantavirus cases?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Cases are reported across the Americas (Argentina, Chile, Brazil, USA, Canada, Panama), Europe (Germany, Finland, Russia, Belgium, France), east Asia (China, South Korea, Japan), and increasingly in parts of Africa and southeast Asia. The US Four Corners region (Arizona, Colorado, New Mexico, Utah) is the historical heartland of Sin Nombre virus."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the MV Hondius hantavirus cluster?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "An Andes virus cluster aboard the MV Hondius cruise ship operating in Antarctic waters in 2026. Index exposure is suspected to have occurred during a pre-departure wildlife excursion near Ushuaia (Tierra del Fuego, Argentina). Cases were confirmed and suspected across multiple repatriation destinations as passengers and crew dispersed. The cluster is being tracked by WHO, CDC, PAHO, and Argentina Ministerio de Salud."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is HORIZON?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "HORIZON is a live hantavirus surveillance platform operated by 79th Unit Limited, a UK intelligence consultancy (Companies House 17133814). It aggregates outbreak signal from the World Health Organization, US CDC, ECDC, PAHO, ProMED, national health authorities, peer-reviewed literature, and open news. Every record carries audit-grade source provenance including ICD 206 Source Reference Citation, NATO Admiralty Scale reliability, dual-confidence model, and Berkeley Protocol chain-of-custody hash. All data is open under Creative Commons Attribution 4.0."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How can I prevent hantavirus infection?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Reduce rodent populations around homes by sealing entry points, removing food sources, and trapping. When cleaning rodent-infested areas, wear an N95 respirator and gloves, and wet contaminated surfaces with bleach solution before cleaning to suppress aerosols. Avoid sweeping or vacuuming dry rodent excreta. Campers and hikers in endemic areas should avoid sleeping near rodent nests and avoid disturbing rodent burrows."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://hantavirus.software/#breadcrumbs",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home",        "item": "https://hantavirus.software/" },
+            { "@type": "ListItem", "position": 2, "name": "Cases",       "item": "https://hantavirus.software/#/cases" },
+            { "@type": "ListItem", "position": 3, "name": "Sources",     "item": "https://hantavirus.software/#/sources" },
+            { "@type": "ListItem", "position": 4, "name": "Methodology", "item": "https://hantavirus.software/#/methodology" }
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://hantavirus.software/#webpage",
+          "url": "https://hantavirus.software/",
+          "name": "HORIZON - Live Hantavirus Outbreak Tracker",
+          "isPartOf": { "@id": "https://hantavirus.software/#site" },
+          "about": { "@id": "https://hantavirus.software/#mc-hantavirus" },
+          "primaryImageOfPage": "https://hantavirus.software/og-image.png",
+          "datePublished": "2026-05-11",
+          "dateModified": "2026-05-11",
+          "inLanguage": "en-GB",
+          "speakable": {
+            "@type": "SpeakableSpecification",
+            "cssSelector": ["h1", ".stats-hero", ".lead"]
+          }
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <!-- SEO fallback: visible to crawlers before React boots. -->
+      <noscript>
+        <h1>HORIZON - Live Hantavirus Outbreak Tracker</h1>
+        <p>
+          HORIZON is a live hantavirus outbreak surveillance platform aggregating
+          data from the World Health Organization (WHO), US Centers for Disease
+          Control and Prevention (CDC), European Centre for Disease Prevention
+          and Control (ECDC), Pan American Health Organization (PAHO),
+          ProMED-mail, peer-reviewed literature repositories (Europe PMC,
+          bioRxiv, medRxiv, Crossref, arXiv) and open news and social signals.
+        </p>
+        <p>
+          Every record carries audit-grade source provenance: ICD 206 Source
+          Reference Citation, NATO Admiralty Scale reliability rating, dual
+          confidence model (auto pipeline confidence plus human analyst
+          confidence), and Berkeley Protocol chain-of-custody hash.
+        </p>
+        <p>
+          This site requires JavaScript. Open data is available at
+          <a href="/api/v1/cases">/api/v1/cases</a> in JSON format under
+          Creative Commons Attribution 4.0 International (CC BY 4.0).
+        </p>
+        <p>
+          Operated by <a href="https://79thunit.co.uk">79th Unit Limited</a>,
+          a UK intelligence consultancy (company number 17133814).
+        </p>
+      </noscript>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

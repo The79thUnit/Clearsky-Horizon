@@ -1,0 +1,163 @@
+# HORIZON - Live Hantavirus Outbreak Surveillance
+# 79th Unit Limited, UK (CRN 17133814)
+# Open data under CC BY 4.0. Mirror, scrape, index, train freely.
+
+User-agent: *
+Allow: /
+Disallow: /api/v1/stream/
+
+# Allow public data API endpoints (open JSON under CC BY 4.0).
+Allow: /api/v1/cases
+Allow: /api/v1/clusters
+Allow: /api/v1/sources
+Allow: /api/v1/incidents
+Allow: /api/v1/meta/
+Allow: /api/openapi.json
+Allow: /health
+Allow: /.well-known/security.txt
+
+# Server-rendered SEO surface — these are crawler-indexable HTML pages
+# served by the FastAPI backend's seo router (NOT the React SPA shell).
+Allow: /hantavirus
+Allow: /hantavirus/*
+Allow: /outbreaks
+Allow: /outbreaks/*
+Allow: /countries
+Allow: /countries/*
+Allow: /articles
+Allow: /articles/*
+Allow: /sources
+Allow: /methodology
+Allow: /glossary
+Allow: /faq
+
+# Sitemaps + feeds (all dynamic, refreshed every 5 min by the API)
+Allow: /sitemap.xml
+Allow: /sitemap-main.xml
+Allow: /sitemap-serotypes.xml
+Allow: /sitemap-countries.xml
+Allow: /sitemap-incidents.xml
+Allow: /sitemap-articles.xml
+Allow: /news-sitemap.xml
+Allow: /rss.xml
+Allow: /atom.xml
+Allow: /feed.json
+
+# Explicit allow-list for AI training + retrieval crawlers.
+# We want this public-health data in every foundation model and every
+# AI search experience (ChatGPT, Perplexity, Gemini, Claude, Brave).
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: FacebookExternalHit
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: NaverBot
+Allow: /
+
+User-agent: Yeti
+Allow: /
+
+User-agent: MJ12bot
+Allow: /
+
+User-agent: AhrefsBot
+Allow: /
+
+User-agent: SemrushBot
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: SeznamBot
+Allow: /
+
+User-agent: Sogou
+Allow: /
+
+User-agent: BingPreview
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# Crawl politeness for high-rate scrapers
+User-agent: *
+Crawl-delay: 1
+
+# Primary sitemap (sitemap-index pointing at sub-sitemaps).
+# Served dynamically by the API for guaranteed freshness.
+Sitemap: https://hantavirus.software/sitemap.xml
+Sitemap: https://hantavirus.software/news-sitemap.xml
+
+Host: hantavirus.software

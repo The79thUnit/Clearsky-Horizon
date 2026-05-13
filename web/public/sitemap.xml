@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Fallback sitemap-index. The live one is served by the API at this same
+  URL (see nginx hantavirus.software.conf). This file only ships if the
+  API route is unavailable; it points crawlers at the dynamic sub-sitemaps
+  so freshness is preserved either way.
+-->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://hantavirus.software/sitemap-main.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://hantavirus.software/sitemap-serotypes.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://hantavirus.software/sitemap-countries.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://hantavirus.software/sitemap-incidents.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://hantavirus.software/sitemap-articles.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://hantavirus.software/news-sitemap.xml</loc>
+  </sitemap>
+</sitemapindex>

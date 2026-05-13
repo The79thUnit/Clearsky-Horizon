@@ -1,0 +1,86 @@
+# HORIZON local stack.
+# Phase 1 T-01: postgres + redis only.
+# Phase 1 T-06/T-07: --profile app starts api + worker + web (once their Dockerfiles exist).
+
+name: horizon
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: horizon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-horizon}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_only}
+      POSTGRES_DB: ${POSTGRES_DB:-horizon}
+    ports:
+      - "5432:5432"
+    volumes:
+      - horizon-postgres-data:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-horizon} -d ${POSTGRES_DB:-horizon}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: horizon-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - horizon-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    profiles: ["app"]
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: horizon-api
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  worker:
+    profiles: ["app"]
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    container_name: horizon-worker
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    profiles: ["app"]
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: horizon-web
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - api
+    ports:
+      - "5173:5173"
+
+volumes:
+  horizon-postgres-data:
+  horizon-redis-data:

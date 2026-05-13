@@ -1,0 +1,20 @@
+# HORIZON — line ending normalisation
+# Store all text files with LF in the repo; checkout adapts to the platform.
+* text=auto eol=lf
+
+# Force these to always be LF (scripts break on CRLF)
+*.sh text eol=lf
+Makefile text eol=lf
+
+# Binary files — no conversion
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.db binary

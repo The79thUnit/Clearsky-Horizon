@@ -1,0 +1,28 @@
+# HORIZON worker dependencies (Phase 1)
+# Pinned, audited (CVE-free as of 2026-05-11)
+
+celery[redis]==5.4.0
+psycopg[binary]==3.2.3
+redis==5.2.0
+httpx==0.28.1
+# curl_cffi: libcurl with Chrome/Safari TLS-fingerprint impersonation.
+# Used as a fallback in BaseConnector.run() when a source is blocked by
+# TLS-fingerprint anti-bot (Akamai, Cloudflare bot-fight). Verified
+# 2026-05-13: recovers australia-health (NATO A1) which was 100% blocked
+# via plain httpx. Same lib clearsky-web/api/helpers/page_fetch.py uses.
+curl_cffi==0.7.4
+feedparser==6.0.11
+beautifulsoup4==4.12.3
+defusedxml==0.7.1
+lxml==5.3.0
+# AIS websocket daemon (services/ais_stream.py)
+websockets==13.1
+
+# Quality gate tools (also used in tests)
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+ruff==0.8.6
+mypy==1.14.1
+bandit==1.9.4
+types-redis==4.6.0.20241004

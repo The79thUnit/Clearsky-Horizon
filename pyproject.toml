@@ -1,0 +1,69 @@
+# HORIZON workspace-level Python tooling config.
+# Per-package code lives in api/ and worker/ (each with their own dependencies).
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["web", "db", "docs", "scripts"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",       # pycodestyle + pyflakes
+    "I",                  # isort
+    "N",                  # pep8-naming
+    "UP",                 # pyupgrade
+    "S",                  # bandit subset
+    "B",                  # bugbear
+    "A",                  # builtins shadowing
+    "C4",                 # comprehensions
+    "DTZ",                # datetime safety
+    "T20",                # no print
+    "RUF",                # ruff-specific
+]
+ignore = [
+    "E501",   # line length handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S", "T20"]
+"scripts/**" = ["S", "T20"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+exclude = ["web/", "db/", "docs/", "scripts/"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_reexport = true
+
+[[tool.mypy.overrides]]
+module = ["celery.*", "feedparser.*", "asyncpg.*", "psycopg.*", "psycopg.rows"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["api/tests", "worker/tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+]
+addopts = "-ra --strict-markers --strict-config"
+
+[tool.coverage.run]
+branch = true
+source = ["api/horizon_api", "worker/horizon_worker"]
+
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
+[tool.bandit]
+exclude_dirs = ["api/tests", "worker/tests"]
+skips = ["B101"]

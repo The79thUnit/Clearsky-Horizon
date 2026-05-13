@@ -1,0 +1,24 @@
+Contact: mailto:HORIZON@79thunit.com
+Contact: mailto:HORIZON@79thunit.com
+Expires: 2027-05-11T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://hantavirus.software/.well-known/security.txt
+Policy: https://hantavirus.software/security-policy
+Hiring: https://79thunit.co.uk/careers
+
+# HORIZON / CLEARSKY operated by 79th Unit Limited
+# Company number 17133814 (Companies House UK)
+#
+# Scope: hantavirus.software, horizon.79thunit.co.uk and the public API at
+# /api/v1/*. Report any vulnerability that affects data integrity, source
+# provenance, ICD 206 SRC, NATO Admiralty Scale qualification, or PII
+# handling. We treat reports under safe-harbour: good-faith research is
+# welcome and you will not be pursued under the UK Computer Misuse Act 1990
+# provided you stay within these scopes and do not exfiltrate user data.
+#
+# Out of scope: theoretical issues without proof-of-impact, social
+# engineering, DoS / volumetric attacks, scanner output without analyst
+# narrative, anything affecting third-party services (WHO, CDC, etc.).
+#
+# Coordinated disclosure: 90 days from acknowledgement, or sooner if a
+# fix ships. Credit given by name + handle unless you ask for anonymity.

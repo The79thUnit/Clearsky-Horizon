@@ -1,0 +1,20 @@
+# HORIZON API dependencies (Phase 1)
+# Pinned, audited (CVE-free as of 2026-05-11)
+
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+asyncpg==0.30.0
+pydantic==2.10.3
+
+# Server-side image rendering for dynamic OG previews (/api/v1/og/{slug}.png).
+# Pillow is widely-audited, MIT-licensed, low surface area.
+Pillow==11.0.0
+
+# Test + quality gates
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+httpx==0.28.1
+ruff==0.8.6
+mypy==1.14.1
+bandit==1.9.4

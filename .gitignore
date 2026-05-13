@@ -1,0 +1,73 @@
+# ============================================================
+# HORIZON — .gitignore
+# ============================================================
+
+# --- Secrets / credentials — NEVER commit these ---
+.env
+.env.production
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.installed.cfg
+pip-selfcheck.json
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Testing & coverage ---
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+nosetests.xml
+pytest_output.txt
+
+# --- Node / frontend ---
+node_modules/
+web/dist/
+web/build/
+web/.vite/
+
+# --- IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Docker local overrides ---
+docker-compose.override.yml
+
+# --- Celery ---
+celerybeat-schedule
+celerybeat.pid
+
+# --- Misc artifacts ---
+*.log
+*.tmp
+
+# --- Claude Code local files ---
+.claude/
+
+# --- Deploy / bootstrap ephemeral scripts ---
+.first_boot_runner.py
