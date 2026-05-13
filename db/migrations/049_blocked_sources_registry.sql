@@ -13,7 +13,7 @@
 --   burden outside China (Seoul virus, Hantaan virus, Soochong virus).
 --   URL probed: https://www.kdca.go.kr/board/board.es?mid=a20501010000&bid=0015
 --   Geo-blocked: SSL handshake failure (cURL 000) from all EU/US IPs including
---   OVH VPS hantavirus.software (Gravelines, FR). .go.kr TLD blocks non-Korean IP
+--   OVH VPS hantavirus.software (OVH Gravelines FR). .go.kr TLD blocks non-Korean IP
 --   ranges at TLS level. No accessible path, mirror, or CDN variant found.
 --   Stored DISABLED as a known gap for future re-assessment.
 --   Re-enable path: Korean residential proxy / Scraper API with KR exit node.
@@ -63,7 +63,7 @@ VALUES (
     'Korea has the highest HFRS burden outside China; Seoul virus (SEOV), '
     'Hantaan virus (HTNV), and Soochong virus (SOOV) all endemic. '
     'SSL handshake failure (cURL 000) from all EU/US IPs including OVH VPS '
-    'hantavirus.software (Gravelines FR). .go.kr TLD blocks non-Korean IP ranges. '
+    'hantavirus.software (OVH Gravelines FR). .go.kr TLD blocks non-Korean IP ranges. '
     'No accessible path, CDN variant, or English-language mirror found. '
     'Re-enable: Korean residential proxy or Scraper API with KR exit node. '
     'Beat: not scheduled (disabled on add).'
@@ -95,7 +95,7 @@ VALUES (
     'Finland is PUUV (Puumala virus) endemic with one of the highest per-capita '
     'hantavirus notification rates in Europe (Fennoscandia zone). THL publishes '
     'weekly PUUV incidence and communicable disease situation reports. '
-    'Cloudflare managed JS challenge (HTTP 403) from OVH VPS hantavirus.software. '
+    'Cloudflare managed JS challenge (HTTP 403) from hantavirus.software. '
     'sampo.thl.fi pivot service accessible from OVH but returns "Not available" '
     'for all communicable disease pivot queries. '
     'Accessible from residential IPs with rate limiting (HTTP 429, Retry-After: 8s). '

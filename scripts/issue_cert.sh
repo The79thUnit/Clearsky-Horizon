@@ -39,9 +39,9 @@ echo "==> Email: ${LETSENCRYPT_EMAIL}"
 echo
 echo "Pre-flight: all three hostnames must resolve to this server BEFORE running."
 echo "Verify:"
-echo "  dig +short ${DOMAIN}        # expect hantavirus.software"
-echo "  dig +short www.${DOMAIN}    # expect hantavirus.software"
-echo "  dig +short ${ALIAS_DOMAIN}  # expect hantavirus.software"
+echo "  dig +short ${DOMAIN}        # expect $(dig +short hantavirus.software)"
+echo "  dig +short www.${DOMAIN}    # expect $(dig +short hantavirus.software)"
+echo "  dig +short ${ALIAS_DOMAIN}  # expect $(dig +short hantavirus.software)"
 echo
 
 # Run certbot via a one-shot container that shares the webroot + letsencrypt volumes.
