@@ -7,9 +7,14 @@
 .env.production
 .env.local
 .env.*.local
+.env.example
+.env.production.example
 *.pem
 *.key
 secrets/
+
+# --- Git meta files (not needed publicly) ---
+.gitattributes
 
 # --- Python ---
 __pycache__/
