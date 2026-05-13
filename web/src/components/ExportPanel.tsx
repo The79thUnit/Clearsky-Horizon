@@ -52,7 +52,7 @@ export default function ExportPanel() {
       <h3>Data export</h3>
       <p className="export-blurb">
         All HORIZON data is freely available under <strong>CC BY 4.0</strong>. Attribute as:
-        <em> HORIZON, 79th Unit Limited (2026), accessed [date].</em> No registration
+        <em> HORIZON (hantavirus.software), 79th Unit Limited (2026), accessed [date].</em> No registration
         required. No tracking. Files are stable JSON conformant to the OpenAPI 3.x schema
         at <code>/api/openapi.json</code>.
       </p>

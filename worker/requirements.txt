@@ -9,7 +9,7 @@ httpx==0.28.1
 # Used as a fallback in BaseConnector.run() when a source is blocked by
 # TLS-fingerprint anti-bot (Akamai, Cloudflare bot-fight). Verified
 # 2026-05-13: recovers australia-health (NATO A1) which was 100% blocked
-# via plain httpx. Same lib clearsky-web/api/helpers/page_fetch.py uses.
+# via plain httpx.
 curl_cffi==0.7.4
 feedparser==6.0.11
 beautifulsoup4==4.12.3

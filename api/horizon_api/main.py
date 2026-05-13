@@ -33,7 +33,7 @@ app = FastAPI(
     title="HORIZON API",
     version=__version__,
     description=(
-        "HORIZON - hantavirus surveillance with audit-grade source qualification. "
+        "HORIZON — hantavirus outbreak surveillance with audit-grade source qualification. "
         "Public read-only. UK GDPR Art 6 lawful basis: legitimate interests "
         "(public health information). Not medical advice."
     ),

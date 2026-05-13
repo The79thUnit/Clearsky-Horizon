@@ -62,7 +62,7 @@ export default function App() {
         <header className="header">
           <div className="brand">
             <h1>
-              CLEARSKY <span className="accent">HORIZON</span>
+              <span className="accent">HORIZON</span>
             </h1>
             <p className="tagline">Hantavirus surveillance. Audit-grade source provenance.</p>
           </div>
