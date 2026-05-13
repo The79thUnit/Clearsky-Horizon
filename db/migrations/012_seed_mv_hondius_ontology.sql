@@ -1,6 +1,6 @@
 -- HORIZON migration 012: seed the MV Hondius ontology graph.
 --
--- Per CLAUDE.md rule 3 we do NOT store personal names. Person entities carry
+-- Personal names are NOT stored. Person entities carry
 -- only public attributes that have already appeared in WHO / CDC / ECDC
 -- bulletins: nationality, sex, age, role, status, dates of clinically-relevant
 -- public events (symptoms onset, hospitalisation, death). No identifying name.

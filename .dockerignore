@@ -19,7 +19,6 @@
 PROJECT_MANAGEMENT.MD
 CHANGELOG.md
 README.md
-CLAUDE.md
 docs
 scripts/check.sh
 scripts/format.sh

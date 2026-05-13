@@ -54,7 +54,6 @@ EXCLUDES=(
     '.git'
     'node_modules'
     'web/dist'
-    '.claude'
     '.env'
     '.env.production'
     '.env.local'

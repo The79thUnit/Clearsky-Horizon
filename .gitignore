@@ -71,7 +71,7 @@ celerybeat.pid
 *.log
 *.tmp
 
-# --- Claude Code local files (never push) ---
+# --- Local tool config (never push) ---
 .claude/
 CLAUDE.md
 

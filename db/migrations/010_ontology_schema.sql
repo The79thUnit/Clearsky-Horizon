@@ -4,7 +4,7 @@
 --   - Vessel (MV Hondius)
 --   - Port (Ushuaia, Saint Helena, Cape Town, Tenerife)
 --   - Excursion (Ushuaia landfill bird-watching site)
---   - Person (opaque UUID; public-label only; no names per CLAUDE.md rule 3)
+--   - Person (opaque UUID; public-label only; no personal names stored)
 --   - Voyage (vessel leg, with embark + disembark ports)
 --   - Country (ISO2; nationality vs death-location distinction)
 --
