@@ -72,3 +72,27 @@ CLAUDE.md
 
 # --- Deploy / bootstrap ephemeral scripts ---
 .first_boot_runner.py
+
+# --- Internal files — never push ---
+DEPLOYMENT_INSTRUCTIONS.md
+DEPLOYMENT_SUMMARY.txt
+QUICK_DEPLOY.sh
+docs/DEPLOY.md
+PROJECT_MANAGEMENT.MD
+SIMULATION_REFINEMENT_SUMMARY.md
+web/src/data/SIMULATION_REFINEMENT_LOG.md
+web/DEPLOY_NOTES.md
+web/DEPLOY_NOTES.md
+
+# --- TypeScript build cache & generated artifacts ---
+web/tsconfig.node.tsbuildinfo
+web/tsconfig.tsbuildinfo
+web/vite.config.d.ts
+web/vite.config.js
+
+# --- Dev-only test scripts ---
+web/test-sim.mjs
+web/test-sim-detailed.mjs
+
+# --- Server-specific bootstrap (internal) ---
+scripts/server_bootstrap.sh
