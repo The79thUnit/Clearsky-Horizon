@@ -23,13 +23,21 @@ from .types import ParsedItem
 
 class EuropePMCConnector(JSONAPIConnectorBase):
     SOURCE_CODE: ClassVar[str] = "europe-pmc"
-    PARSER_VERSION: ClassVar[str] = "0.1.0"
+    PARSER_VERSION: ClassVar[str] = "0.2.0"
     ENDPOINT: ClassVar[str] = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+    # 14 May 2026: simplified query string. The previous form with quoted
+    # phrases ('"Andes virus"') was URL-encoded by httpx in a way Europe PMC's
+    # query parser rejected, returning only {"version":"6.9"} on every call.
+    # Plain "hantavirus" yields ~13k hits; the local KEYWORDS filter below
+    # pulls out the serotype-tagged ones.
     QUERY_PARAMS: ClassVar[dict[str, str]] = {
-        "query": 'hantavirus OR "Andes virus" OR "Sin Nombre virus" OR "Puumala virus"',
+        "query": "hantavirus",
         "format": "json",
         "pageSize": "50",
-        "sort": "date desc",
+        # No `sort` param: when httpx URL-encodes 'date desc' as 'date+desc',
+        # Europe PMC's query parser rejects the whole request and returns
+        # only {"version":"6.9"}. Default relevance ordering is acceptable
+        # since we content_topic_hash-dedupe downstream.
     }
     ITEMS_PATH: ClassVar[tuple[str, ...]] = ("resultList", "result")
     KEYWORDS: ClassVar[list[str]] = [

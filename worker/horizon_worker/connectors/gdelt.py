@@ -19,14 +19,18 @@ from .types import ParsedItem
 
 class GDELTConnector(JSONAPIConnectorBase):
     SOURCE_CODE: ClassVar[str] = "gdelt"
-    PARSER_VERSION: ClassVar[str] = "0.1.0"
+    PARSER_VERSION: ClassVar[str] = "0.2.0"
     ENDPOINT: ClassVar[str] = "https://api.gdeltproject.org/api/v2/doc/doc"
+    # 14 May 2026: simplified the OR-quoted query to bare "hantavirus".
+    # The previous form ('hantavirus OR "Andes virus" OR "Sin Nombre virus"')
+    # was URL-encoded by httpx in a way GDELT's query parser couldn't handle,
+    # and we were also being rate-limited by the explicit sort=DateDesc.
+    # Default DOC API ordering + local KEYWORDS filter is fine.
     QUERY_PARAMS: ClassVar[dict[str, str]] = {
-        "query": 'hantavirus OR "Andes virus" OR "Sin Nombre virus"',
+        "query": "hantavirus",
         "mode": "ArtList",
         "format": "json",
-        "maxrecords": "50",
-        "sort": "DateDesc",
+        "maxrecords": "75",
     }
     ITEMS_PATH: ClassVar[tuple[str, ...]] = ("articles",)
     KEYWORDS: ClassVar[list[str]] = [
@@ -56,7 +60,7 @@ class GDELTConnector(JSONAPIConnectorBase):
         if not country_iso2:
             country_iso2 = detect_country(title)
 
-        serotype = detect_serotype(title)
+        serotype = detect_serotype(title, country_iso2=country_iso2)
         domain = item.get("domain", "")
 
         canonical = "\n".join([url, title, date_str]).encode("utf-8")

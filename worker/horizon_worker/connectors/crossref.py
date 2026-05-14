@@ -72,7 +72,7 @@ class CrossrefConnector(JSONAPIConnectorBase):
 
         haystack = f"{title} {abstract}"
         country = detect_country(haystack)
-        serotype = detect_serotype(haystack)
+        serotype = detect_serotype(haystack, country_iso2=country)
 
         canonical = "\n".join([str(doi), title]).encode("utf-8")
 

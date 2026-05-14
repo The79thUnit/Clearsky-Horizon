@@ -13,5 +13,8 @@ from .biorxiv import BioRxivConnector
 
 class MedRxivConnector(BioRxivConnector):
     SOURCE_CODE: ClassVar[str] = "medrxiv"
-    PARSER_VERSION: ClassVar[str] = "0.1.0"
-    ENDPOINT: ClassVar[str] = "https://api.biorxiv.org/details/medrxiv/30d/0/json"
+    PARSER_VERSION: ClassVar[str] = "0.2.0"
+    # ENDPOINT empty to bypass curl_cffi (see BioRxivConnector for rationale).
+    ENDPOINT: ClassVar[str] = ""
+    BASE_ENDPOINT: ClassVar[str] = "https://api.biorxiv.org/details/medrxiv/"
+    SERVER: ClassVar[str] = "medrxiv"

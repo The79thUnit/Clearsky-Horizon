@@ -210,7 +210,16 @@ class HantaNetRefConnector(BaseConnector):
     """
 
     SOURCE_CODE: ClassVar[str] = "cdc-hantanet-ref"
-    PARSER_VERSION: ClassVar[str] = "0.1.0"
+    PARSER_VERSION: ClassVar[str] = "0.2.0"
+
+    # Override run() with a custom esearch+esummary flow. Provide trivial
+    # implementations of the abstract methods so abc.ABCMeta lets us
+    # instantiate the class.
+    async def fetch_raw(self, client: httpx.AsyncClient) -> tuple[bytes, int]:
+        raise NotImplementedError("HantaNetRefConnector implements run() directly")
+
+    def parse(self, raw: bytes) -> list[ParsedItem]:
+        raise NotImplementedError("HantaNetRefConnector implements run() directly")
 
     async def run(self) -> FetchResult:
         start = datetime.now(tz=UTC)
@@ -224,13 +233,15 @@ class HantaNetRefConnector(BaseConnector):
                 esearch_resp = await client.get(_ESEARCH_URL, params=_ESEARCH_PARAMS)
                 if esearch_resp.status_code in {429, 502, 503, 504}:
                     return FetchResult(
-                        source_code=self.SOURCE_CODE,
-                        parser_version=self.PARSER_VERSION,
+                        items=[],
                         http_status=esearch_resp.status_code,
                         latency_ms=int(
                             (datetime.now(tz=UTC) - start).total_seconds() * 1000
                         ),
-                        items_seen=0, items=[], items_filtered=0, error=None,
+                        items_seen=0,
+                        items_filtered=0,
+                        parser_version=self.PARSER_VERSION,
+                        error=None,
                     )
                 esearch_resp.raise_for_status()
                 esearch_result = esearch_resp.json().get("esearchresult", {})
@@ -242,11 +253,12 @@ class HantaNetRefConnector(BaseConnector):
                 if not total or not web_env:
                     latency = int((datetime.now(tz=UTC) - start).total_seconds() * 1000)
                     return FetchResult(
-                        source_code=self.SOURCE_CODE,
-                        parser_version=self.PARSER_VERSION,
+                        items=[],
                         http_status=200,
                         latency_ms=latency,
-                        items_seen=0, items=[], items_filtered=0,
+                        items_seen=0,
+                        items_filtered=0,
+                        parser_version=self.PARSER_VERSION,
                         error="esearch returned 0 results",
                     )
 
@@ -276,13 +288,12 @@ class HantaNetRefConnector(BaseConnector):
             items = self._parse_docs(all_docs)
             latency = int((datetime.now(tz=UTC) - start).total_seconds() * 1000)
             return FetchResult(
-                source_code=self.SOURCE_CODE,
-                parser_version=self.PARSER_VERSION,
+                items=items,
                 http_status=200,
                 latency_ms=latency,
                 items_seen=len(items),
-                items=items,
                 items_filtered=0,
+                parser_version=self.PARSER_VERSION,
                 error=None,
             )
 
@@ -290,11 +301,13 @@ class HantaNetRefConnector(BaseConnector):
             latency = int((datetime.now(tz=UTC) - start).total_seconds() * 1000)
             logger.exception("HantaNet RefSeq fetch failed")
             return FetchResult(
-                source_code=self.SOURCE_CODE,
-                parser_version=self.PARSER_VERSION,
-                http_status=None,
+                items=[],
+                http_status=0,
                 latency_ms=latency,
-                items_seen=0, items=[], items_filtered=0, error=str(exc),
+                items_seen=0,
+                items_filtered=0,
+                parser_version=self.PARSER_VERSION,
+                error=str(exc),
             )
 
     def _parse_docs(self, docs: list[dict]) -> list[ParsedItem]:

@@ -209,7 +209,17 @@ class KraemerOxfordConnector(BaseConnector):
     """Fetch the Oxford Kraemer Lab MV Hondius ANDV individual line list."""
 
     SOURCE_CODE: ClassVar[str] = "kraemer-oxford"
-    PARSER_VERSION: ClassVar[str] = "0.1.0"
+    PARSER_VERSION: ClassVar[str] = "0.2.0"
+
+    # We override run() with a custom CSV flow, so the abstract methods on
+    # BaseConnector are not actually used. Provide trivial implementations
+    # so Python's abc.ABCMeta lets us instantiate the class.
+    async def fetch_raw(self, client: httpx.AsyncClient) -> tuple[bytes, int]:
+        raise NotImplementedError("KraemerOxfordConnector implements run() directly")
+
+    def parse(self, raw: bytes) -> list[ParsedItem]:
+        # The CSV variant of parse: bytes -> ParsedItems via _parse_linelist.
+        return self._parse_linelist(raw.decode("utf-8", errors="replace"))
 
     async def run(self) -> FetchResult:
         start = datetime.now(tz=UTC)
@@ -222,13 +232,15 @@ class KraemerOxfordConnector(BaseConnector):
                 response = await client.get(_CSV_URL)
                 if response.status_code in {429, 502, 503, 504}:
                     return FetchResult(
-                        source_code=self.SOURCE_CODE,
-                        parser_version=self.PARSER_VERSION,
+                        items=[],
                         http_status=response.status_code,
                         latency_ms=int(
                             (datetime.now(tz=UTC) - start).total_seconds() * 1000
                         ),
-                        items_seen=0, items=[], items_filtered=0, error=None,
+                        items_seen=0,
+                        items_filtered=0,
+                        parser_version=self.PARSER_VERSION,
+                        error=None,
                     )
                 response.raise_for_status()
                 raw = response.text
@@ -236,24 +248,25 @@ class KraemerOxfordConnector(BaseConnector):
             items = self._parse_linelist(raw)
             latency = int((datetime.now(tz=UTC) - start).total_seconds() * 1000)
             return FetchResult(
-                source_code=self.SOURCE_CODE,
-                parser_version=self.PARSER_VERSION,
+                items=items,
                 http_status=response.status_code,
                 latency_ms=latency,
                 items_seen=len(items),
-                items=items,
                 items_filtered=0,
+                parser_version=self.PARSER_VERSION,
                 error=None,
             )
         except Exception as exc:
             latency = int((datetime.now(tz=UTC) - start).total_seconds() * 1000)
             logger.exception("Kraemer Oxford line list fetch failed")
             return FetchResult(
-                source_code=self.SOURCE_CODE,
-                parser_version=self.PARSER_VERSION,
-                http_status=None,
+                items=[],
+                http_status=0,
                 latency_ms=latency,
-                items_seen=0, items=[], items_filtered=0, error=str(exc),
+                items_seen=0,
+                items_filtered=0,
+                parser_version=self.PARSER_VERSION,
+                error=str(exc),
             )
 
     def _parse_linelist(self, raw_csv: str) -> list[ParsedItem]:

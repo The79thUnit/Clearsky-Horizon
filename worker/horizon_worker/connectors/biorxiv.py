@@ -8,8 +8,10 @@ NATO B2 (usually reliable, probably true). Preprints precede peer review.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Any, ClassVar
+
+import httpx
 
 from .json_api_base import JSONAPIConnectorBase
 from .text_utils import (
@@ -23,9 +25,17 @@ from .types import ParsedItem
 
 class BioRxivConnector(JSONAPIConnectorBase):
     SOURCE_CODE: ClassVar[str] = "biorxiv"
-    PARSER_VERSION: ClassVar[str] = "0.1.0"
-    # Fetch the most recent 30 days of posts; we filter locally.
-    ENDPOINT: ClassVar[str] = "https://api.biorxiv.org/details/biorxiv/30d/0/json"
+    PARSER_VERSION: ClassVar[str] = "0.2.0"
+    # 14 May 2026: bioRxiv API no longer accepts the "30d" relative-date
+    # shorthand. fetch_raw computes a yyyy-mm-dd window dynamically.
+    # ENDPOINT must be empty so BaseConnector._run_via_curl_cffi short-circuits
+    # to None and the httpx path (which calls our fetch_raw) runs. Otherwise
+    # curl_cffi GETs the base URL, gets "collection":[], and returns 0 items
+    # before fetch_raw ever runs.
+    ENDPOINT: ClassVar[str] = ""
+    BASE_ENDPOINT: ClassVar[str] = "https://api.biorxiv.org/details/biorxiv/"
+    SERVER: ClassVar[str] = "biorxiv"
+    LOOKBACK_DAYS: ClassVar[int] = 30
     ITEMS_PATH: ClassVar[tuple[str, ...]] = ("collection",)
     KEYWORDS: ClassVar[list[str]] = [
         "hantavirus",
@@ -38,6 +48,19 @@ class BioRxivConnector(JSONAPIConnectorBase):
         "puuv",
         "hantaan",
     ]
+
+    async def fetch_raw(self, client: httpx.AsyncClient) -> tuple[bytes, int]:
+        today = date.today()
+        start = today - timedelta(days=self.LOOKBACK_DAYS)
+        url = (
+            f"https://api.biorxiv.org/details/{self.SERVER}/"
+            f"{start.isoformat()}/{today.isoformat()}/0/json"
+        )
+        response = await client.get(url, headers={"accept": "application/json"})
+        if response.status_code in self._TRANSIENT_STATUSES:
+            return b"", response.status_code
+        response.raise_for_status()
+        return response.content, response.status_code
 
     def parse_item(self, item: dict[str, Any]) -> ParsedItem | None:
         title = str(item.get("title", "")).strip()

@@ -60,7 +60,7 @@ class RSSConnectorBase(BaseConnector):
             haystack = f"{title} {summary or ''}"
             country = detect_country(haystack)
             region = extract_region(title)
-            serotype = detect_serotype(haystack)
+            serotype = detect_serotype(haystack, country_iso2=country)
 
             canonical = "\n".join(
                 [

@@ -150,31 +150,38 @@ _ERROR_HTML = """\
 <head>
   <meta charset="utf-8">
   <meta name="robots" content="noindex,nofollow">
+  <meta name="color-scheme" content="light">
   <title>{title} | HORIZON</title>
   <style>
     *{{box-sizing:border-box;margin:0;padding:0}}
-    body{{background:#0a0c12;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;
+    body{{background:#f1efe9;color:#111114;font-family:'Inter',-apple-system,'Helvetica Neue',Helvetica,Arial,sans-serif;
          display:flex;align-items:center;justify-content:center;min-height:100vh}}
-    .card{{text-align:center;max-width:540px;padding:3rem 2rem}}
-    h1{{font-size:3rem;font-weight:700;color:#2d7ff9;margin-bottom:.5rem}}
-    h2{{font-size:1.1rem;color:#94a3b8;margin-bottom:2rem;font-weight:400}}
-    p{{color:#64748b;font-size:.85rem;line-height:1.7;margin-bottom:1.5rem}}
-    a{{color:#2d7ff9;text-decoration:none}}
-    a:hover{{text-decoration:underline}}
-    .badge{{display:inline-block;background:rgba(45,127,249,.1);border:1px solid
-            rgba(45,127,249,.3);padding:.25rem .75rem;border-radius:4px;
-            font-size:.75rem;letter-spacing:.1em;color:#2d7ff9;margin-bottom:2rem}}
+    .card{{text-align:center;max-width:560px;padding:3rem 2rem}}
+    h1{{font-size:3rem;font-weight:700;color:#cf1f1f;margin-bottom:.5rem;
+        font-family:'Inter Tight','Inter','Helvetica Neue',Arial,sans-serif;letter-spacing:-.03em}}
+    h2{{font-size:1.05rem;color:#56565e;margin-bottom:2rem;font-weight:400}}
+    p{{color:#56565e;font-size:.875rem;line-height:1.7;margin-bottom:1.5rem}}
+    a{{color:#0e3fb0;text-decoration:none;border-bottom:1px solid rgba(14,63,176,.25)}}
+    a:hover{{border-bottom-color:#0e3fb0}}
+    .badge{{display:inline-block;border:1px solid rgba(17,17,20,.2);
+            padding:.25rem .75rem;font-size:.7rem;letter-spacing:.12em;
+            text-transform:uppercase;color:#56565e;margin-bottom:2rem}}
+    .wordmark{{font-family:'Inter Tight','Inter','Helvetica Neue',Arial,sans-serif;
+               font-weight:700;letter-spacing:-.02em;font-size:1.5rem;
+               margin-bottom:1.5rem;display:block}}
+    .wordmark b{{color:#cf1f1f}}
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="badge">HORIZON HANTAVIRUS TRACKER</div>
+    <span class="wordmark">HORIZON <b>·</b> Hantavirus Tracker</span>
+    <div class="badge">Error {code}</div>
     <h1>{code}</h1>
     <h2>{title}</h2>
     <p>{detail}</p>
-    <p><a href="/">Return to live tracker</a> &nbsp;|&nbsp;
-       <a href="/outbreaks">Outbreaks</a> &nbsp;|&nbsp;
-       <a href="/articles">Articles</a></p>
+    <p><a href="/">Return to live tracker</a> &nbsp;·&nbsp;
+       <a href="/outbreaks">Outbreaks</a> &nbsp;·&nbsp;
+       <a href="/faq">FAQ</a></p>
   </div>
 </body>
 </html>
@@ -249,7 +256,33 @@ async def security_headers(request: Request, call_next: ASGIApp) -> Response:
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Strict-Transport-Security"] = "max-age=63072000"
-    response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    # 14 May 2026: explicit charset on JSON/HTML responses.
+    # RFC 8259 says JSON is UTF-8 by default, but some legacy clients
+    # (and several monitoring tools) default to Latin-1 when no charset
+    # is declared, producing mojibake for non-ASCII content. Be explicit.
+    ct = response.headers.get("content-type", "")
+    if ct and "charset=" not in ct.lower():
+        if ct.startswith("application/json"):
+            response.headers["content-type"] = "application/json; charset=utf-8"
+        elif ct.startswith("text/html"):
+            response.headers["content-type"] = "text/html; charset=utf-8"
+        elif ct.startswith("application/x-ndjson"):
+            response.headers["content-type"] = "application/x-ndjson; charset=utf-8"
+    # CSP: HTML pages need 'unsafe-inline' for the embedded <style> block.
+    # JSON/XML API responses get the strict default-src 'none'.
+    # Nginx also sets CSP on the SPA routes — we only set it here for
+    # FastAPI-served responses (SEO pages, error pages, API).
+    content_type_for_csp = response.headers.get("content-type", "")
+    if "text/html" in content_type_for_csp:
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; "
+            "style-src 'unsafe-inline'; "
+            "font-src 'self' data:; "
+            "img-src 'self' data:; "
+            "frame-ancestors 'none'"
+        )
+    else:
+        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
     # Open data attribution -- required by CC BY 4.0 and institutional
     # data governance processes at WHO, CDC, and academic repositories.
     response.headers["X-Data-License"] = "CC-BY-4.0"

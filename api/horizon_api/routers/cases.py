@@ -25,6 +25,26 @@ from ..schemas import CaseList, CaseRecord
 
 router = APIRouter()
 
+# Topic-hash deduplication (14 May 2026).
+# When a story is reported by multiple sources, the /cases endpoint shows the
+# highest-tier representative (Tier 1 official > Tier 2 wire > Tier 3 aggregator),
+# breaking ties by NATO credibility then by earliest ingestion. Same-source
+# duplicates (multiple google-news entries for the same story) are collapsed by
+# the same partition. Records with no topic_hash partition on cr.id alone (i.e.
+# no dedup). The full record set is still available via /api/v1/cases/bulk/ndjson
+# for research transparency.
+_DEDUP_CTE = """
+WITH ranked AS (
+    SELECT cr.id,
+        ROW_NUMBER() OVER (
+            PARTITION BY COALESCE(cr.content_topic_hash, cr.id::text)
+            ORDER BY s.tier ASC, s.nato_credibility ASC, cr.ingested_at ASC, cr.id ASC
+        ) AS rn
+    FROM case_reports cr
+    JOIN sources s ON s.id = cr.source_id
+)
+"""
+
 _SELECT_COLS = """
     cr.id,
     s.code                              AS source_code,
@@ -44,14 +64,17 @@ _SELECT_COLS = """
     qs.pipeline_confidence::double precision  AS pipeline_confidence,
     COALESCE(qs.pipeline_factors, '{}'::jsonb) AS pipeline_factors,
     qs.analyst_confidence::double precision   AS analyst_confidence,
-    qs.analyst_id                             AS analyst_id
-    -- case_classification, lab_method, ihr_notified, travel_history,
-    -- gadm_gid, ecological_flags are migration-053 columns not yet applied
-    -- on production. Schema fields carry defaults; columns added when
-    -- migration 054 runs. Remove this comment block when migrated.
+    qs.analyst_id                             AS analyst_id,
+    cr.case_classification,
+    cr.lab_method,
+    cr.ihr_notified,
+    cr.travel_history,
+    cr.gadm_gid,
+    COALESCE(cr.ecological_flags, '{}'::jsonb) AS ecological_flags
 FROM case_reports cr
 JOIN sources s             ON s.id = cr.source_id
 JOIN qualification_scores qs ON qs.case_report_id = cr.id
+JOIN ranked r              ON r.id = cr.id AND r.rn = 1
 LEFT JOIN serotypes st     ON st.id = cr.serotype_id
 """
 
@@ -67,7 +90,8 @@ _REDDIT_GATE = (
 
 # Cursor-based (keyset) pagination -- stable under continuous ingest.
 _QUERY_CURSOR = (
-    "SELECT " + _SELECT_COLS
+    _DEDUP_CTE
+    + "SELECT " + _SELECT_COLS
     + "WHERE (cr.ingested_at, cr.id) < ($2::timestamptz, $3::uuid)\n"
     + _REDDIT_GATE
     + "ORDER BY cr.ingested_at DESC, cr.id DESC\n"
@@ -76,7 +100,8 @@ _QUERY_CURSOR = (
 
 # First page (no cursor) -- just order and limit.
 _QUERY_FIRST = (
-    "SELECT " + _SELECT_COLS
+    _DEDUP_CTE
+    + "SELECT " + _SELECT_COLS
     + "WHERE TRUE\n"
     + _REDDIT_GATE
     + "ORDER BY cr.ingested_at DESC, cr.id DESC\n"
@@ -85,7 +110,8 @@ _QUERY_FIRST = (
 
 # Offset-based (legacy) -- non-deterministic with live data.
 _QUERY_OFFSET = (
-    "SELECT " + _SELECT_COLS
+    _DEDUP_CTE
+    + "SELECT " + _SELECT_COLS
     + "WHERE TRUE\n"
     + _REDDIT_GATE
     + "ORDER BY cr.ingested_at DESC\n"
@@ -93,16 +119,24 @@ _QUERY_OFFSET = (
 )
 
 _QUERY_COUNT = (
-    "SELECT COUNT(*)::int AS c\n"
-    "FROM case_reports cr\n"
-    "JOIN sources s ON s.id = cr.source_id\n"
-    "LEFT JOIN qualification_scores qs ON qs.case_report_id = cr.id\n"
-    "WHERE (s.code != 'reddit' OR qs.analyst_confidence IS NOT NULL)\n"
+    _DEDUP_CTE
+    + "SELECT COUNT(*)::int AS c\n"
+    + "FROM case_reports cr\n"
+    + "JOIN sources s ON s.id = cr.source_id\n"
+    + "JOIN ranked r ON r.id = cr.id AND r.rn = 1\n"
+    + "LEFT JOIN qualification_scores qs ON qs.case_report_id = cr.id\n"
+    + "WHERE (s.code != 'reddit' OR qs.analyst_confidence IS NOT NULL)\n"
 )
 
-# NDJSON bulk export (all columns, no filtering).
+# NDJSON bulk export retains every record (no dedup, no reddit gate) so that
+# downstream researchers see the full chain of custody for every story.
 _QUERY_BULK = (
-    "SELECT " + _SELECT_COLS
+    "SELECT\n"
+    + _SELECT_COLS.split("FROM")[0].rstrip(",\n ")
+    + "\nFROM case_reports cr\n"
+    + "JOIN sources s             ON s.id = cr.source_id\n"
+    + "JOIN qualification_scores qs ON qs.case_report_id = cr.id\n"
+    + "LEFT JOIN serotypes st     ON st.id = cr.serotype_id\n"
     + "ORDER BY cr.ingested_at ASC"
 )
 

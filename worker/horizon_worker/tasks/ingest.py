@@ -75,7 +75,9 @@ from ..connectors.bbc_health import BBCHealthConnector
 from ..connectors.reuters_health import ReutersHealthConnector
 from ..connectors.ap_news import APNewsConnector
 from ..connectors.afp import AFPConnector
+from ..connectors.cnn import CNNConnector
 from ..connectors.efe import EFEConnector
+from ..connectors.kdca import KDCAConnector
 from ..connectors.mercopress import MercopressConnector
 from ..connectors.hantanet_ref import HantaNetRefConnector
 from ..connectors.kraemer_oxford import KraemerOxfordConnector
@@ -247,6 +249,11 @@ CONNECTORS: dict[str, type[BaseConnector]] = {
     # set via NCBI E-utilities (no reldate filter). Static annotation layer
     # distinct from ncbi-virus (reldate=14). NATO A1. Daily.
     HantaNetRefConnector.SOURCE_CODE: HantaNetRefConnector,
+    # 14 May 2026: wire up two connectors whose source rows existed in DB
+    # but had no Python class in CONNECTORS. CNN Health RSS (B2), KDCA
+    # English press release scraper (B2).
+    CNNConnector.SOURCE_CODE: CNNConnector,
+    KDCAConnector.SOURCE_CODE: KDCAConnector,
 }
 
 
@@ -291,26 +298,33 @@ def persist_fetch_result(
             content_hash = compute_hash(item.raw_content)
 
             # Cross-source dedup: compute a topic hash from the normalised
-            # title. If another article with the same topic hash was ingested
-            # in the last 7 days, this is the SAME news event reported by a
-            # different source. We still record it (chain of custody), but we
-            # link it to the original and DO NOT count it as a new event.
+            # title. We count DISTINCT corroborating sources (other sources
+            # that reported the same topic in the last 7 days) and feed that
+            # into the qualification scorer as `corroboration_count` so the
+            # pipeline confidence reflects multi-source reporting. We still
+            # record every duplicate (chain of custody); the /cases endpoint
+            # deduplicates at presentation time by topic_hash + highest tier.
             item_topic = topic_hash(item.title)
+            corroboration_count = 0
             existing_topic_row = None
             if item_topic:
                 cur.execute(
                     """
-                    SELECT id
+                    SELECT
+                        COUNT(DISTINCT source_id)::int AS n_sources,
+                        MIN(id::text) AS first_id
                     FROM case_reports
                     WHERE content_topic_hash = %s
                       AND ingested_at >= NOW() - INTERVAL '7 days'
                       AND source_id <> %s
-                    ORDER BY ingested_at ASC
-                    LIMIT 1
                     """,
                     (item_topic, source_id),
                 )
-                existing_topic_row = cur.fetchone()
+                corr_row = cur.fetchone()
+                if corr_row is not None:
+                    corroboration_count = corr_row["n_sources"] or 0
+                    if corr_row["first_id"]:
+                        existing_topic_row = {"id": corr_row["first_id"]}
 
             citation = SRCCitation(
                 source_code=source_code,
@@ -327,7 +341,7 @@ def persist_fetch_result(
             qresult = calculate(
                 QualificationInputs(
                     nato=nato,
-                    corroboration_count=0,
+                    corroboration_count=corroboration_count,
                     age_days=age_days,
                 )
             )

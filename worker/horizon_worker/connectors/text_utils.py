@@ -239,6 +239,49 @@ def parse_date_safe(s: str, *fmts: str) -> date | None:
     return None
 
 
+# US state names for geographic context in news articles.
+# We match these to infer SNV when no explicit serotype keyword is present.
+_US_STATE_NAMES: frozenset[str] = frozenset({
+    "new mexico", "arizona", "colorado", "utah", "nevada", "montana",
+    "wyoming", "idaho", "california", "oregon", "washington state",
+    "north dakota", "south dakota", "minnesota", "four corners",
+    "santa fe", "albuquerque", "flagstaff", "tucson", "denver",
+    "billings", "bozeman", "reno", "carson city",
+})
+
+# South American regional terms that strongly imply Andes virus (ANDV)
+_SA_ANDV_TERMS: frozenset[str] = frozenset({
+    "biobío", "biobio", "araucanía", "araucania", "los lagos",
+    "neuquén", "neuquen", "río negro", "patagonia", "chubut",
+    "penco", "alto bío bío", "temuco", "valdivia", "chillán",
+    "chillan", "concepción", "concepcion",
+})
+
+# Geographic serotype inference map: ISO 3166-1 alpha-2 -> serotype code.
+# Only applied when no explicit serotype keyword is found.
+# Inference confidence reflects endemic distribution — not 100% but
+# substantially better than unknown.
+_GEO_SEROTYPE: dict[str, str] = {
+    "US": "SNV",   # Sin Nombre virus dominant in North America
+    "CA": "SNV",   # Canada: SNV / Prospect Hill — SNV dominant for HPS
+    "MX": "SNV",   # Mexico: SNV + some ANDV-clade viruses
+    "CL": "ANDV",  # Chile: Andes virus endemic
+    "AR": "ANDV",  # Argentina: Andes virus endemic
+    "BO": "ANDV",  # Bolivia: Laguna Negra / Andes clade
+    "PA": "ANDV",  # Panama: Choclo virus (Andes clade)
+    "FI": "PUUV",  # Finland: Puumala dominant
+    "SE": "PUUV",  # Sweden: Puumala dominant
+    "NO": "PUUV",  # Norway: Puumala + Puumala-like
+    "DE": "PUUV",  # Germany: Puumala dominant (nephropathia outbreaks)
+    "BE": "PUUV",  # Belgium: Puumala (notable 2017 outbreak)
+    "NL": "PUUV",  # Netherlands: Puumala
+    "FR": "PUUV",  # France: Puumala + Tula
+    "RU": "HTNV",  # Russia: Hantaan + Puumala depending on region
+    "CN": "HTNV",  # China: Hantaan dominant
+    "KR": "HTNV",  # South Korea: Hantaan dominant
+    "JP": "SEOV",  # Japan: Seoul + Hantaan
+}
+
 # Country name -> ISO 3166-1 alpha-2. Longest-first matching avoids the
 # 'us' / 'united states' collision.
 _COUNTRY_MAP: dict[str, str] = {
@@ -310,13 +353,28 @@ _COUNTRY_MAP: dict[str, str] = {
 }
 
 # Serotype detection: most specific terms first.
+# 14 May 2026 expansion: added "andes hantavirus", "andes strain", and
+# "mv hondius" + "hondius cruise" to catch the active 2026 outbreak's
+# reporting style. Many news articles say "Andes hantavirus" or "Andes
+# strain" without the literal "Andes virus" form. PUUV expanded to include
+# "nephropathia epidemica" (clinical syndrome name in Scandinavian literature).
 _SEROTYPE_MAPPING: list[tuple[tuple[str, ...], str]] = [
-    (("andes virus", "andv"), "ANDV"),
-    (("sin nombre", "snv"), "SNV"),
-    (("puumala", "puuv"), "PUUV"),
+    (
+        (
+            "andes virus",
+            "andes hantavirus",
+            "andes strain",
+            "andv",
+            "mv hondius",
+            "hondius cruise",
+        ),
+        "ANDV",
+    ),
+    (("sin nombre", "snv", "four corners virus"), "SNV"),
+    (("puumala", "puuv", "nephropathia epidemica"), "PUUV"),
     (("hantaan", "htnv"), "HTNV"),
     (("seoul virus", "seov"), "SEOV"),
-    (("dobrava", "dobv"), "DOBV"),
+    (("dobrava", "dobv", "dobrava-belgrade"), "DOBV"),
     (("laguna negra", "lanv"), "LANV"),
     (("choclo", "chov"), "CHOV"),
     (("bayou", "bayv"), "BAYV"),
@@ -328,24 +386,69 @@ _SEROTYPE_MAPPING: list[tuple[tuple[str, ...], str]] = [
 _REGION_PAREN = re.compile(r"\(([^)]+)\)")
 
 
+_WORD_BOUNDARY = re.compile(r"\b")
+
+
 def detect_country(text: str) -> str | None:
-    """Find the first matching country name. Longest-first to avoid collisions."""
+    """Find the first matching country name. Longest-first to avoid collisions.
+
+    Short names (<=4 chars) use whole-word matching to prevent substring false
+    positives: "us" in "virus", "uk" in "sulk", "no" in "another", etc.
+    """
     if not text:
         return None
     lower = text.lower()
     for name in sorted(_COUNTRY_MAP.keys(), key=len, reverse=True):
-        if name in lower:
-            return _COUNTRY_MAP[name]
+        if len(name) <= 4:
+            # Require word boundaries: \bus\b won't match "virus" or "hantavirus"
+            if re.search(r"\b" + re.escape(name) + r"\b", lower):
+                return _COUNTRY_MAP[name]
+        else:
+            if name in lower:
+                return _COUNTRY_MAP[name]
     return None
 
 
-def detect_serotype(text: str) -> str | None:
+def detect_serotype(text: str, country_iso2: str | None = None) -> str | None:
+    """Detect hantavirus serotype from text.
+
+    First pass: explicit keyword matching (precise).
+    Second pass: geographic inference from country_iso2 or embedded location
+    terms (approximate but substantially better than unknown).
+
+    Callers can pass country_iso2 from the report record so we don't have to
+    re-scan the text for country keywords.
+    """
     if not text:
         return None
     lower = text.lower()
+
+    # --- Pass 1: explicit serotype keywords ---
     for needles, code in _SEROTYPE_MAPPING:
         if any(n in lower for n in needles):
             return code
+
+    # --- Pass 2: geographic fallback (only for confirmed hantavirus context) ---
+    if "hantavirus" not in lower and "hanta" not in lower and "hps" not in lower and "hfrs" not in lower:
+        return None  # not enough context to infer
+
+    # 2a: US-specific location terms -> SNV
+    if any(term in lower for term in _US_STATE_NAMES):
+        return "SNV"
+
+    # 2b: South-American ANDV-region terms
+    if any(term in lower for term in _SA_ANDV_TERMS):
+        return "ANDV"
+
+    # 2c: country_iso2 lookup
+    if country_iso2 and country_iso2 in _GEO_SEROTYPE:
+        return _GEO_SEROTYPE[country_iso2]
+
+    # 2d: extract country from text as final fallback
+    inferred_country = detect_country(lower)
+    if inferred_country and inferred_country in _GEO_SEROTYPE:
+        return _GEO_SEROTYPE[inferred_country]
+
     return None
 
 

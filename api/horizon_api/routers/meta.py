@@ -137,8 +137,20 @@ async def health() -> HealthResponse:
 # incident_authoritative_counts (one row per incident-source-time snapshot;
 # we use the LATEST one per incident from the HIGHEST-NATO source). The
 # report counters come from case_reports (ingested articles).
+#
+# 14 May 2026: report counters now use the same "visible" filter as /cases
+# (Reddit-gate). Without this, the headline counter inflates by the 563
+# archived Reddit records that the public listing already hides. Records
+# can still be reached via /api/v1/cases/bulk/ndjson for research transparency.
 _QUERY_COUNTERS = """
-WITH latest_count_per_incident AS (
+WITH visible_reports AS (
+    SELECT cr.id, cr.country_iso2, cr.serotype_id, cr.ingested_at
+    FROM case_reports cr
+    JOIN sources s ON s.id = cr.source_id
+    LEFT JOIN qualification_scores qs ON qs.case_report_id = cr.id
+    WHERE (s.code != 'reddit' OR qs.analyst_confidence IS NOT NULL)
+),
+latest_count_per_incident AS (
     SELECT DISTINCT ON (iac.incident_id)
         iac.incident_id,
         iac.confirmed_cases,
@@ -165,25 +177,25 @@ SELECT
         AS total_deaths_authoritative,
     (SELECT COUNT(*)::int FROM incidents WHERE status IN ('active','monitoring'))
         AS total_active_incidents,
-    (SELECT COUNT(*)::int FROM case_reports)
+    (SELECT COUNT(*)::int FROM visible_reports)
         AS total_reports_ingested,
     (SELECT COUNT(DISTINCT country_iso2)::int
-        FROM case_reports WHERE country_iso2 IS NOT NULL)
+        FROM visible_reports WHERE country_iso2 IS NOT NULL)
         AS total_countries_in_reports,
     (SELECT COUNT(*)::int FROM clusters WHERE status = 'active')
         AS total_clusters_active,
     (SELECT COUNT(DISTINCT serotype_id)::int
-        FROM case_reports WHERE serotype_id IS NOT NULL)
+        FROM visible_reports WHERE serotype_id IS NOT NULL)
         AS total_serotypes_seen,
     (SELECT COUNT(*)::int FROM sources WHERE enabled)
         AS total_sources_enabled,
-    (SELECT COUNT(*)::int FROM case_reports
+    (SELECT COUNT(*)::int FROM visible_reports
         WHERE ingested_at >= NOW() - INTERVAL '24 hours')
         AS reports_last_24h,
-    (SELECT COUNT(*)::int FROM case_reports
+    (SELECT COUNT(*)::int FROM visible_reports
         WHERE ingested_at >= NOW() - INTERVAL '7 days')
         AS reports_last_7d,
-    (SELECT COUNT(*)::int FROM case_reports
+    (SELECT COUNT(*)::int FROM visible_reports
         WHERE ingested_at >= NOW() - INTERVAL '14 days')
         AS reports_last_14d
 """
@@ -254,10 +266,25 @@ WITH ranked AS (
     FROM case_reports cr
     JOIN sources src ON src.id = cr.source_id
     WHERE
+      -- Chronology surface filter (14 May 2026): exclude noisy
+      -- aggregator/social/ecological sources from the homepage chronology.
+      -- Records are still archived in case_reports and exposed via
+      -- /api/v1/cases — they just don't promote into the headline timeline.
+      --   google-news, gdelt:               unfiltered RSS aggregators (C3)
+      --   mastodon-hantavirus, -hondius:    social toots, multilingual (C3)
+      --   reddit:                           social rumour, source disabled (E4)
+      --   inaturalist, gbif:                reservoir/wildlife observations,
+      --                                     not human-case events
+      src.code NOT IN (
+        'google-news', 'gdelt',
+        'mastodon-hantavirus', 'mastodon-hondius',
+        'reddit',
+        'inaturalist', 'gbif'
+      )
       -- Drop reports outside the active-outbreak window. The window start
       -- is controlled by EVENTS_WINDOW_START env var (default 2026-03-01)
       -- so it can be updated for future outbreaks without code changes.
-      (
+      AND (
         cr.reported_date >= $2::date
         OR (cr.reported_date IS NULL AND cr.ingested_at >= ($2::date - INTERVAL '1 day')::timestamptz)
       )
