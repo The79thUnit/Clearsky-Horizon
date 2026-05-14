@@ -577,9 +577,11 @@ GLOSSARY_TERMS: list[tuple[str, str]] = [
     ("Endemic", "Continuously present in a population at a baseline level. Sin Nombre virus is endemic in the US Four Corners region."),
     ("Epizootic", "Outbreak of disease in animal populations. Cyclical Puumala-virus epizootics in bank-vole populations drive human-case peaks across northern Europe."),
     ("Four Corners outbreak", "1993 cluster of HPS cases in the US Four Corners region (Arizona, Colorado, New Mexico, Utah) that led to the identification of Sin Nombre virus. The outbreak is the historical anchor of US hantavirus surveillance."),
+    ("HantaNet", "Reference set of Orthohantavirus genome sequences curated by the CDC Molecular Epidemiology and Bioinformatics Team (described in PMC10675615). Covers S, M, and L segments for all NCBI RefSeq Orthohantavirus reference sequences. HORIZON ingests the full HantaNet set daily, cross-linking case records to reference genome sequences."),
     ("Hantavax", "Green Cross hantavirus vaccine licensed in South Korea, covering Hantaan virus. The only licensed hantavirus vaccine; not approved in the EU or US."),
     ("HFRS", "Haemorrhagic Fever with Renal Syndrome. Old World hantavirus syndrome dominated by acute kidney injury and bleeding. Caused by Hantaan, Seoul, Puumala, Dobrava-Belgrade, and Saaremaa viruses."),
-    ("HORIZON", "The platform you are reading. Live hantavirus outbreak surveillance with audit-grade source provenance, operated by 79th Unit Limited under CC BY 4.0."),
+    ("HORIZON", "The platform you are reading. Live hantavirus outbreak surveillance with audit-grade source provenance, operated by 79th Unit Limited under CC BY 4.0. Aggregates 65+ sources including the Oxford Kraemer Lab MV Hondius individual-level ANDV line list and the NCBI RefSeq Orthohantavirus reference genome set (HantaNet)."),
+    ("Individual line list", "Per-person epidemiological dataset where each row represents one patient or suspected case. The Oxford Kraemer Lab MV Hondius line list (CC0) provides 28-column individual-level resolution for the 2026 ANDV cruise ship cluster — the highest epidemiological granularity available for that outbreak."),
     ("HPS", "Hantavirus Pulmonary Syndrome. New World hantavirus syndrome dominated by non-cardiogenic pulmonary oedema and circulatory collapse. Caused by Andes, Sin Nombre, Bayou, Black Creek Canal, Laguna Negra, and Choclo viruses."),
     ("HTNV", "Hantaan virus — prototype hantavirus, severe HFRS in east Asia. Reservoir: striped field mouse (<em>Apodemus agrarius</em>)."),
     ("ICD 206", "US intelligence-community standard formal-citation format. HORIZON uses ICD 206 Source Reference Citation format on every record."),
@@ -587,7 +589,10 @@ GLOSSARY_TERMS: list[tuple[str, str]] = [
     ("MV Hondius", "Polar expedition cruise ship operated by Oceanwide Expeditions (IMO 9818709, MMSI 244327000, Netherlands flag). Centre of the 2026 ANDV cluster tracked at /outbreaks/mv-hondius-2026."),
     ("NATO Admiralty Scale", "Source-evaluation framework per NATO AJP-2.1 with two axes: reliability (A confirmed to F unreliable) and credibility (1 confirmed to 6 cannot be judged). HORIZON tags every source with both."),
     ("Nephropathia epidemica", "Mild HFRS caused by Puumala virus. Endemic across Scandinavia, Baltic states, and central Europe; case-fatality under 1 percent."),
+    ("Nextstrain", "Open-source genomic epidemiology platform that provides real-time analysis of pathogen evolution. Andrew Rambaut (University of Edinburgh) is a co-developer. The Oxford Kraemer Lab MV Hondius line list was developed in collaboration with the Nextstrain group."),
     ("Orthohantavirus", "Genus of viruses within family <em>Hantaviridae</em>. All human-pathogenic hantaviruses belong to this genus."),
+    ("Oxford Kraemer Lab", "Laboratory of Dr Moritz Kraemer at the University of Oxford Department of Biology. Maintains the MV Hondius individual-level ANDV line list (CC0, github.com/kraemer-lab/Hondius_hantavirus_h2026), the highest-resolution epidemiological dataset available for the 2026 Andes virus cruise ship cluster. Co-created with Sam Scarpino and Andrew Rambaut (University of Edinburgh / Nextstrain)."),
+    ("Pathoplexus", "Genomic database for emerging pathogen sequences, linked to the Oxford Kraemer Lab MV Hondius line list via accession identifiers for each tracked case."),
     ("PAHO", "Pan American Health Organization — WHO regional office for the Americas. Authoritative source for hantavirus surveillance in Latin America and the Caribbean."),
     ("Peromyscus", "Genus of New World mice. <em>Peromyscus maniculatus</em> (deer mouse) is the reservoir for Sin Nombre virus across the US Four Corners and beyond."),
     ("ProMED", "Program for Monitoring Emerging Diseases — global outbreak reporting service of the International Society for Infectious Diseases. Critical early-warning feed for outbreak detection."),
@@ -721,13 +726,47 @@ rejected as cluster-total misattributions. The cap is sourced from the
 WHO Disease Outbreak News authoritative count and ECDC corroboration.
 </p>
 
-<h2>7. Open data and API</h2>
+<h2>7. Unique datasets</h2>
+<p>
+HORIZON ingests two datasets not available in any other public hantavirus
+surveillance platform:
+</p>
+<p>
+<strong>Oxford Kraemer Lab MV Hondius individual-level ANDV line list</strong>
+(CC0) — maintained by Dr Moritz Kraemer (University of Oxford, Department
+of Biology), Sam Scarpino, and Andrew Rambaut (University of Edinburgh,
+Nextstrain). Located at
+<a href="https://github.com/kraemer-lab/Hondius_hantavirus_h2026" rel="external">github.com/kraemer-lab/Hondius_hantavirus_h2026</a>.
+28-column per-person resolution: status, symptom onset date, clinical
+outcome, nationality, country of exposure, treatment received, hospitalisation,
+travel history, and Pathoplexus/GenBank accession identifiers. Each row is
+cross-referenced against WHO Disease Outbreak News DON600 and national health
+authority press releases. This is the highest epidemiological resolution
+dataset available for the 2026 MV Hondius cluster. Updated continuously
+as the outbreak evolves.
+</p>
+<p>
+<strong>NCBI RefSeq Orthohantavirus reference genome set (HantaNet)</strong>
+— curated by the CDC Molecular Epidemiology and Bioinformatics Team
+(described in <a href="https://pubmed.ncbi.nlm.nih.gov/37937497/" rel="external">PMC10675615</a>).
+Covers the full set of NCBI RefSeq Orthohantavirus reference sequences:
+S, M, and L segments for Andes virus, Sin Nombre virus, Puumala virus,
+Hantaan virus, Seoul virus, Dobrava-Belgrade virus, Bayou virus, Black
+Creek Canal virus, Laguna Negra virus, Choclo virus, Saaremaa virus,
+Tula virus, and all other listed species. Ingested daily to provide a
+permanent genomic annotation layer cross-linked against the
+epidemiological case records.
+</p>
+
+<h2>8. Open data and API</h2>
 <p>
 All non-pre-decisional data is published live at <a href="/api/v1/cases">/api/v1/cases</a>,
 <a href="/api/v1/incidents">/api/v1/incidents</a>,
 <a href="/api/v1/sources">/api/v1/sources</a>, and
 <a href="/api/v1/meta/events">/api/v1/meta/events</a> under CC BY 4.0.
+Bulk NDJSON streaming export: <a href="/api/v1/cases/bulk/ndjson">/api/v1/cases/bulk/ndjson</a>.
 OpenAPI schema: <a href="/api/openapi.json">/api/openapi.json</a>.
+Cite: <a href="/CITATION.cff">/CITATION.cff</a>.
 </p>
 
 <p><a href="/sources">→ View the full source registry</a></p>
@@ -792,6 +831,60 @@ FAQ_ENTRIES: list[tuple[str, str]] = [
     (
         "How do I report a missing source or an error?",
         "Email <a href=\"mailto:security@79thunit.co.uk\">security@79thunit.co.uk</a> — coordinates and disclosure policy in the <a href=\"/.well-known/security.txt\">security.txt</a>. Corrections to specific case records should include the record ID and a source citation.",
+    ),
+    (
+        "What is the Oxford Kraemer Lab hantavirus line list?",
+        "The Oxford Kraemer Lab MV Hondius line list is a living CC0 dataset at "
+        "<a href=\"https://github.com/kraemer-lab/Hondius_hantavirus_h2026\" rel=\"external\">github.com/kraemer-lab/Hondius_hantavirus_h2026</a>, "
+        "maintained by Dr Moritz Kraemer (University of Oxford), Sam Scarpino, and "
+        "Andrew Rambaut (University of Edinburgh / Nextstrain). It provides "
+        "28-column per-person resolution for every tracked case in the 2026 MV Hondius "
+        "Andes virus cluster, including symptom onset date, clinical outcome, "
+        "nationality, treatment, and Pathoplexus genomic accession IDs. HORIZON is "
+        "the only public surveillance platform ingesting this dataset in real time. "
+        "See the <a href=\"/methodology\">methodology page</a> for details.",
+    ),
+    (
+        "What is HantaNet and how does HORIZON use it?",
+        "HantaNet is the reference genome set for Orthohantavirus, curated by the "
+        "CDC Molecular Epidemiology and Bioinformatics Team and described in "
+        "<a href=\"https://pubmed.ncbi.nlm.nih.gov/37937497/\" rel=\"external\">PMC10675615</a>. "
+        "It covers all NCBI RefSeq Orthohantavirus reference sequences (S, M, L "
+        "segments for all major serotypes). HORIZON ingests the full HantaNet set "
+        "daily via the NCBI E-utilities API, creating a permanent genomic annotation "
+        "layer that cross-links case records to their reference genome sequences. "
+        "This allows outbreak records to be linked directly to the genomic reference "
+        "for the responsible serotype — a capability not available in other public "
+        "hantavirus trackers.",
+    ),
+    (
+        "How does HORIZON compare to HantaNet, HantaReg, or ArcGIS dashboards?",
+        "HORIZON is complementary to, not a replacement for, these specialised tools. "
+        "<strong>HantaNet</strong> is a genomic reference database; HORIZON ingests "
+        "HantaNet and links its sequences to epidemiological case records. "
+        "<strong>HantaReg</strong> is a clinical registry focused on patient outcomes; "
+        "HORIZON provides population-level surveillance rather than individual clinical "
+        "data. <strong>ArcGIS dashboards</strong> are visualisation layers over "
+        "existing data sources; HORIZON is the data layer itself, with 65+ ingestion "
+        "connectors, NATO Admiralty source qualification, and a public API. The key "
+        "differences: HORIZON aggregates 65+ sources (not one), provides individual-"
+        "level data from the Oxford Kraemer Lab CC0 line list, applies audit-grade "
+        "source qualification to every record, and exposes a fully open JSON/NDJSON "
+        "API under CC BY 4.0.",
+    ),
+    (
+        "Where can I download hantavirus data?",
+        "All HORIZON data is free and open under CC BY 4.0. "
+        "<a href=\"/api/v1/cases\">JSON API</a> — paginated case records with full "
+        "provenance. "
+        "<a href=\"/api/v1/cases/bulk/ndjson\">Bulk NDJSON</a> — streaming export, "
+        "no cursor limit. "
+        "<a href=\"/api/v1/sources\">Source registry</a> — all 65+ sources with NATO "
+        "ratings and telemetry. "
+        "<a href=\"/api/v1/incidents\">Incident ontology</a> — structured outbreak "
+        "entities. "
+        "<a href=\"/CITATION.cff\">CITATION.cff</a> — machine-readable citation for "
+        "academic use. No API key or registration required.",
     ),
 ]
 
