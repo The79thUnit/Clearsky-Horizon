@@ -41,23 +41,35 @@ function CaseCard({ c }: { c: CaseRecord }) {
           <span className="confidence-value">{(c.pipeline_confidence * 100).toFixed(0)}%</span>
         </div>
         <div className="confidence">
-          <span className="confidence-label">Analyst</span>
-          <div className="confidence-bar">
-            {c.analyst_confidence !== null && (
-              <div
-                className="confidence-fill"
-                style={{
-                  width: `${c.analyst_confidence * 100}%`,
-                  background: '#00e87a',
-                }}
-              />
-            )}
-          </div>
-          <span className="confidence-value">
-            {c.analyst_confidence !== null
-              ? `${(c.analyst_confidence * 100).toFixed(0)}%`
-              : 'unreviewed'}
-          </span>
+          {(() => {
+            const isAuto = c.analyst_id === 'HORIZON-AUTO-SCORER/1.0'
+            const isHuman = c.analyst_confidence !== null && !isAuto
+            return (
+              <>
+                <span className="confidence-label" title={isAuto ? 'Machine pre-qualification (NATO Admiralty band). Pending human review.' : isHuman ? 'Human analyst reviewed' : 'Awaiting analyst review'}>
+                  {isHuman ? 'Analyst' : isAuto ? 'Pre-qual' : 'Analyst'}
+                </span>
+                <div className="confidence-bar">
+                  {c.analyst_confidence !== null && (
+                    <div
+                      className="confidence-fill"
+                      style={{
+                        width: `${c.analyst_confidence * 100}%`,
+                        background: isHuman ? '#00e87a' : '#f59e0b',
+                      }}
+                    />
+                  )}
+                </div>
+                <span className="confidence-value" style={{ color: isHuman ? '#00e87a' : isAuto ? '#f59e0b' : undefined }}>
+                  {isHuman
+                    ? `${(c.analyst_confidence! * 100).toFixed(0)}%`
+                    : isAuto
+                    ? `${(c.analyst_confidence! * 100).toFixed(0)}% auto`
+                    : 'pending'}
+                </span>
+              </>
+            )
+          })()}
         </div>
       </div>
       <footer className="case-footer">

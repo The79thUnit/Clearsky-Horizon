@@ -34,6 +34,7 @@ class CaseRecord(BaseModel):
     pipeline_confidence: float
     pipeline_factors: dict = {}  # type: ignore[assignment]
     analyst_confidence: float | None = None
+    analyst_id: str | None = None  # 'HORIZON-AUTO-SCORER/1.0' = machine pre-fill; human ID = reviewed
     # Epidemiological classification (Pass 2 -- migration 054)
     case_classification: str = "unknown"
     lab_method: str = "unknown"

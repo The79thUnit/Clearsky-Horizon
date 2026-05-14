@@ -43,7 +43,8 @@ _SELECT_COLS = """
     qs.nato_credibility,
     qs.pipeline_confidence::double precision  AS pipeline_confidence,
     COALESCE(qs.pipeline_factors, '{}'::jsonb) AS pipeline_factors,
-    qs.analyst_confidence::double precision   AS analyst_confidence
+    qs.analyst_confidence::double precision   AS analyst_confidence,
+    qs.analyst_id                             AS analyst_id
     -- case_classification, lab_method, ihr_notified, travel_history,
     -- gadm_gid, ecological_flags are migration-053 columns not yet applied
     -- on production. Schema fields carry defaults; columns added when

@@ -27,7 +27,7 @@ export default function LiveIndicator() {
       {tick.connected ? (
         <>
           <span className="live-text">LIVE</span>
-          <span className="live-sub">updated {relativeAge(tick.ts, now)}</span>
+          <span className="live-sub">{tick.ts ? `updated ${relativeAge(tick.ts, now)}` : 'syncing...'}</span>
         </>
       ) : (
         <>

@@ -16,6 +16,7 @@ export interface CaseRecord {
   nato_credibility: number
   pipeline_confidence: number
   analyst_confidence: number | null
+  analyst_id: string | null  // 'HORIZON-AUTO-SCORER/1.0' = machine pre-fill; else human-reviewed
 }
 
 export interface CaseList {

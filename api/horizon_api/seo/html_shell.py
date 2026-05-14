@@ -72,59 +72,92 @@ class PageSpec:
 # Shared CSS — kept tiny so the SEO page is fast even on dial-up. Uses
 # system fonts and a black-on-cream palette that matches the main app.
 _CSS = """
-:root{--bg:#f1efe9;--ink:#111114;--muted:#5a5a60;--accent:#c2542a;--rule:#22221e;--card:#fff;--code:#1a1a1d}
+:root{
+  --bg:#0a0c12;--surface:rgba(6,8,14,0.88);--ink:#e2e8f0;--muted:#64748b;
+  --accent:#2d7ff9;--accent-dim:rgba(45,127,249,0.12);
+  --rule:rgba(255,255,255,0.07);--card:rgba(255,255,255,0.04);
+  --success:#00e87a;--warn:#f59e0b;--danger:#ef4444
+}
 *{box-sizing:border-box}
-html{font-size:17px;-webkit-text-size-adjust:100%}
-body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-feature-settings:'ss01','cv11'}
-header.site{border-bottom:1px solid var(--rule);background:var(--bg);position:sticky;top:0;z-index:10}
-header.site .wrap{max-width:1120px;margin:0 auto;padding:14px 22px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
-header.site .brand{font-weight:800;letter-spacing:-0.02em;font-size:18px;text-decoration:none;color:var(--ink)}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{margin:0;font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+     background:var(--bg);color:var(--ink);line-height:1.6}
+header.site{border-bottom:1px solid var(--rule);background:rgba(10,12,18,0.95);
+            backdrop-filter:blur(12px);position:sticky;top:0;z-index:10}
+header.site .wrap{max-width:1160px;margin:0 auto;padding:13px 24px;
+                  display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+header.site .brand{font-weight:700;letter-spacing:.04em;font-size:15px;text-decoration:none;
+                   color:var(--ink);text-transform:uppercase}
 header.site .brand b{color:var(--accent)}
-header.site nav{display:flex;gap:18px;flex-wrap:wrap;font-size:14.5px}
-header.site nav a{color:var(--ink);text-decoration:none;opacity:.78;font-weight:500}
-header.site nav a:hover{opacity:1;text-decoration:underline}
-main{max-width:1120px;margin:0 auto;padding:32px 22px 56px}
-nav.breadcrumb{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+header.site nav{display:flex;gap:20px;flex-wrap:wrap;font-size:12.5px}
+header.site nav a{color:var(--muted);text-decoration:none;letter-spacing:.05em;text-transform:uppercase;
+                  font-size:11.5px;font-weight:500;transition:color .15s}
+header.site nav a:hover{color:var(--ink)}
+main{max-width:1160px;margin:0 auto;padding:36px 24px 72px}
+nav.breadcrumb{font-size:12px;color:var(--muted);margin-bottom:18px;letter-spacing:.04em}
 nav.breadcrumb a{color:var(--muted);text-decoration:none}
-nav.breadcrumb a:hover{color:var(--ink);text-decoration:underline}
-nav.breadcrumb span.sep{margin:0 6px}
-h1{font-size:clamp(28px,4vw,42px);line-height:1.12;letter-spacing:-0.025em;margin:.3em 0 .35em;font-weight:800}
-h2{font-size:clamp(22px,2.4vw,30px);line-height:1.18;letter-spacing:-0.02em;margin:1.6em 0 .35em;font-weight:700;border-top:1px solid var(--rule);padding-top:1em}
-h3{font-size:clamp(18px,1.7vw,21px);margin:1.4em 0 .25em;font-weight:700;letter-spacing:-0.012em}
-p,ul,ol,blockquote,table{font-size:16.5px;color:#1d1d22}
-ul,ol{padding-left:1.5em}
-li{margin:.25em 0}
-a{color:var(--accent);text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1.5px}
-a:hover{color:var(--ink)}
-blockquote{margin:1.2em 0;padding:1em 1.2em;border-left:3px solid var(--accent);background:rgba(194,84,42,.05);font-style:normal;color:#1a1a1f}
-.lead{font-size:clamp(18px,1.4vw,21px);color:#26262b;line-height:1.5;max-width:64ch}
-.cta{display:inline-block;margin-top:1.2em;padding:.7em 1.2em;background:var(--ink);color:var(--bg);text-decoration:none;border-radius:2px;font-weight:600;font-size:15px}
-.cta:hover{background:var(--accent);color:#fff}
+nav.breadcrumb a:hover{color:var(--ink)}
+nav.breadcrumb span.sep{margin:0 8px;opacity:.4}
+h1{font-size:clamp(26px,4vw,40px);line-height:1.1;letter-spacing:-.01em;margin:.2em 0 .4em;
+   font-weight:700;color:var(--ink)}
+h2{font-size:clamp(18px,2.2vw,24px);line-height:1.2;margin:2em 0 .5em;font-weight:700;
+   color:var(--ink);border-top:1px solid var(--rule);padding-top:1.2em}
+h3{font-size:clamp(15px,1.5vw,18px);margin:1.5em 0 .3em;font-weight:600;color:var(--ink)}
+p,ul,ol,table{font-size:14.5px;color:#94a3b8;line-height:1.75}
+ul,ol{padding-left:1.6em}
+li{margin:.3em 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(45,127,249,.3);
+  transition:border-color .15s}
+a:hover{border-bottom-color:var(--accent)}
+blockquote{margin:1.4em 0;padding:1em 1.4em;border-left:3px solid var(--accent);
+           background:var(--accent-dim);font-style:normal;color:var(--ink);border-radius:0 4px 4px 0}
+.lead{font-size:clamp(15px,1.3vw,18px);color:#cbd5e1;line-height:1.65;max-width:68ch}
+.cta{display:inline-block;margin-top:1.2em;padding:.65em 1.4em;background:var(--accent);
+     color:#fff;text-decoration:none;border:none;border-radius:3px;font-weight:600;
+     font-size:13px;letter-spacing:.04em;text-transform:uppercase;transition:opacity .15s}
+.cta:hover{opacity:.85;border-bottom:none}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:1.5em 0}
-.card{background:var(--card);border:1px solid var(--rule);padding:18px 18px 16px;border-radius:3px}
-.card h3{margin-top:0}
-.card p{margin:.4em 0;font-size:15px;color:#3a3a40}
-.card a.more{display:inline-block;margin-top:.5em;font-size:13.5px;font-weight:600}
-table.facts{width:100%;border-collapse:collapse;margin:1.2em 0;font-size:15.5px}
-table.facts th,table.facts td{text-align:left;padding:.65em .9em;border-top:1px solid var(--rule);vertical-align:top}
-table.facts th{font-weight:600;width:30%;color:var(--muted);background:transparent}
-.kv{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;color:var(--muted)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:1.3em 0}
-.stat{background:#fff;border:1px solid var(--rule);padding:14px 16px;border-radius:3px}
-.stat .n{font-size:30px;font-weight:800;letter-spacing:-0.022em;color:var(--ink)}
-.stat .l{font-size:11.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:2px}
-.tag{display:inline-block;padding:.18em .5em;background:#e8e6df;color:#3a3a40;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;margin-right:.3em;border-radius:2px;font-weight:600}
-.tag.alert{background:var(--accent);color:#fff}
-footer.site{border-top:1px solid var(--rule);margin-top:48px;background:#ecebe5;color:#3a3a40;font-size:13.5px}
-footer.site .wrap{max-width:1120px;margin:0 auto;padding:24px 22px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px}
-footer.site nav{display:flex;gap:14px;flex-wrap:wrap}
-footer.site a{color:#3a3a40;text-decoration:none}
-footer.site a:hover{color:var(--ink);text-decoration:underline}
-.callout{padding:1em 1.2em;background:#fff;border:1px solid var(--rule);border-left:3px solid var(--ink);margin:1.4em 0;font-size:15.5px}
+.card{background:var(--card);border:1px solid var(--rule);padding:18px 20px 16px;border-radius:4px}
+.card h3{margin-top:0;color:var(--ink)}
+.card p{margin:.4em 0;font-size:13.5px;color:var(--muted)}
+.card a.more{display:inline-block;margin-top:.6em;font-size:12.5px;font-weight:600;
+             color:var(--accent);border-bottom:none}
+table.facts{width:100%;border-collapse:collapse;margin:1.4em 0;font-size:13.5px}
+table.facts th,table.facts td{text-align:left;padding:.7em 1em;
+                               border-top:1px solid var(--rule);vertical-align:top}
+table.facts th{font-weight:600;width:28%;color:var(--muted);text-transform:uppercase;
+               font-size:11px;letter-spacing:.08em}
+table.facts td{color:#94a3b8}
+.kv{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:1.4em 0}
+.stat{background:var(--card);border:1px solid var(--rule);padding:14px 16px;border-radius:4px}
+.stat .n{font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.stat .l{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:4px}
+.tag{display:inline-block;padding:.18em .55em;background:rgba(255,255,255,.07);color:#94a3b8;
+     font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-right:.3em;
+     border-radius:2px;font-weight:600;border:1px solid var(--rule)}
+.tag.alert{background:rgba(239,68,68,.15);color:#ef4444;border-color:rgba(239,68,68,.3)}
+.tag.success{background:rgba(0,232,122,.1);color:#00e87a;border-color:rgba(0,232,122,.25)}
+.tag.warn{background:rgba(245,158,11,.1);color:#f59e0b;border-color:rgba(245,158,11,.25)}
+footer.site{border-top:1px solid var(--rule);margin-top:56px;background:rgba(6,8,14,.6);
+            color:var(--muted);font-size:12.5px}
+footer.site .wrap{max-width:1160px;margin:0 auto;padding:24px 24px;
+                  display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px}
+footer.site nav{display:flex;gap:16px;flex-wrap:wrap}
+footer.site a{color:var(--muted);text-decoration:none;border:none;transition:color .15s}
+footer.site a:hover{color:var(--ink)}
+.callout{padding:1em 1.4em;background:var(--accent-dim);border:1px solid rgba(45,127,249,.25);
+         border-left:3px solid var(--accent);margin:1.6em 0;font-size:14px;border-radius:0 4px 4px 0;
+         color:var(--ink)}
 .muted{color:var(--muted)}
-.facts-row{display:flex;flex-wrap:wrap;gap:1em;margin:.5em 0 1em}
-.facts-row .fact{background:#fff;border:1px solid var(--rule);padding:.5em .9em;border-radius:2px;font-size:14px}
-@media (max-width:600px){header.site nav{display:none}h1{font-size:30px}main{padding:22px 16px 40px}}
+.facts-row{display:flex;flex-wrap:wrap;gap:1em;margin:.5em 0 1.2em}
+.facts-row .fact{background:var(--card);border:1px solid var(--rule);padding:.5em 1em;
+                 border-radius:3px;font-size:13px;color:#94a3b8}
+@media (max-width:640px){
+  header.site nav{display:none}
+  h1{font-size:26px}
+  main{padding:24px 16px 48px}
+}
 """
 
 
