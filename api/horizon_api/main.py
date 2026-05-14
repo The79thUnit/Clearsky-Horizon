@@ -35,7 +35,17 @@ app = FastAPI(
     description=(
         "HORIZON — hantavirus outbreak surveillance with audit-grade source qualification. "
         "Public read-only. UK GDPR Art 6 lawful basis: legitimate interests "
-        "(public health information). Not medical advice."
+        "(public health information). Not medical advice.\n\n"
+        "**MeSH descriptors:** "
+        "D006362 Hantavirus Infections | "
+        "D018353 Hantavirus Pulmonary Syndrome | "
+        "D006484 Hemorrhagic Fever with Renal Syndrome | "
+        "D004813 Epidemiologic Monitoring | "
+        "D016097 Virus Diseases — surveillance.\n\n"
+        "**ICD-10:** A98.5 Haemorrhagic fever with renal syndrome | "
+        "B33.4 Hantavirus (cardio-)pulmonary syndrome.\n\n"
+        "**License:** CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/\n\n"
+        "**Cite:** https://hantavirus.software/CITATION.cff"
     ),
     docs_url="/api/docs",
     redoc_url="/api/redoc",
@@ -66,10 +76,18 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 @app.middleware("http")
 async def security_headers(request: Request, call_next: ASGIApp) -> Response:
     response: Response = await call_next(request)  # type: ignore[misc, assignment]
+    # OWASP hardening
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Strict-Transport-Security"] = "max-age=63072000"
+    response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    # Open data attribution -- required by CC BY 4.0 and institutional
+    # data governance processes at WHO, CDC, and academic repositories.
+    response.headers["X-Data-License"] = "CC-BY-4.0"
+    response.headers["X-Data-License-URL"] = "https://creativecommons.org/licenses/by/4.0/"
+    response.headers["X-Attribution"] = "HORIZON Hantavirus Surveillance Platform, 79th Unit Limited"
+    response.headers["X-Attribution-URL"] = "https://hantavirus.software/"
     return response
 
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import date
 
 
 @dataclass(frozen=True, slots=True)
@@ -13,6 +14,10 @@ class Settings:
     cors_origins: tuple[str, ...]
     trusted_hosts: tuple[str, ...]
     testing: bool
+    # Earliest date included in the live events feed. Set to the start of
+    # the current active outbreak window. Update via EVENTS_WINDOW_START
+    # env var when a new outbreak begins rather than editing code.
+    events_window_start: date
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -25,6 +30,11 @@ class Settings:
             "TRUSTED_HOSTS",
             "localhost,127.0.0.1,0.0.0.0",
         )
+        window_raw = os.environ.get("EVENTS_WINDOW_START", "2026-03-01")
+        try:
+            window_start = date.fromisoformat(window_raw)
+        except ValueError:
+            window_start = date(2026, 3, 1)
         return cls(
             database_url=os.environ.get(
                 "DATABASE_URL",
@@ -34,6 +44,7 @@ class Settings:
             cors_origins=tuple(o.strip() for o in raw_origins.split(",") if o.strip()),
             trusted_hosts=tuple(h.strip() for h in raw_hosts.split(",") if h.strip()),
             testing=os.environ.get("HORIZON_TESTING", "").lower() in {"1", "true", "yes"},
+            events_window_start=window_start,
         )
 
 

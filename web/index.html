@@ -28,7 +28,7 @@
     <meta name="DC.description" content="Live hantavirus outbreak surveillance aggregating WHO, CDC, ECDC, PAHO, ProMED and peer-reviewed literature with audit-grade source provenance." />
     <meta name="DC.publisher" content="79th Unit Limited" />
     <meta name="DC.contributor" content="79th Unit Limited" />
-    <meta name="DC.date" content="2026-05-11" />
+    <meta name="DC.date" content="2026-05-14" />
     <meta name="DC.type" content="Dataset" />
     <meta name="DC.format" content="text/html" />
     <meta name="DC.identifier" content="https://hantavirus.software/" />
@@ -226,6 +226,12 @@
               "encodingFormat": "application/json",
               "contentUrl": "https://hantavirus.software/api/v1/meta/events",
               "name": "Chronology / event feed JSON"
+            },
+            {
+              "@type": "DataDownload",
+              "encodingFormat": "application/x-ndjson",
+              "contentUrl": "https://hantavirus.software/api/v1/cases/bulk/ndjson",
+              "name": "Bulk case export NDJSON (streaming, no cursor limit)"
             }
           ],
           "variableMeasured": [
@@ -235,8 +241,26 @@
             "serotype",
             "pipeline confidence",
             "analyst confidence",
-            "NATO Admiralty Scale rating"
-          ]
+            "NATO Admiralty Scale reliability rating",
+            "NATO Admiralty Scale credibility rating",
+            "ICD-10 code",
+            "Berkeley Protocol SHA-256 content hash"
+          ],
+          "datePublished": "2026-04-17",
+          "dateModified": "2026-05-14",
+          "measurementTechnique": [
+            "Automated ingestion and deduplication from primary public health authorities",
+            "NATO Admiralty Scale (STANAG 2511) dual-axis source qualification",
+            "Berkeley Protocol SHA-256 chain-of-custody hashing",
+            "ICD 206 Source Reference Citation methodology",
+            "Analysis of Competing Hypotheses (ACH) confidence scoring"
+          ],
+          "includedInDataCatalog": {
+            "@type": "DataCatalog",
+            "@id": "https://hantavirus.software/#catalog",
+            "name": "HORIZON Open Data Catalogue",
+            "url": "https://hantavirus.software/"
+          }
         },
         {
           "@type": "SpecialAnnouncement",
@@ -263,11 +287,6 @@
           "@id": "https://hantavirus.software/#mc-hantavirus",
           "name": "Hantavirus infection",
           "alternateName": ["Orthohantavirus infection", "Hantavirus disease"],
-          "code": {
-            "@type": "MedicalCode",
-            "codingSystem": "ICD-10",
-            "codeValue": "A98.5"
-          },
           "associatedAnatomy": [
             { "@type": "AnatomicalSystem", "name": "Respiratory system" },
             { "@type": "AnatomicalSystem", "name": "Renal system" },
@@ -294,11 +313,38 @@
             { "@type": "MedicalRiskFactor", "name": "Cleaning rodent-infested structures" },
             { "@type": "MedicalRiskFactor", "name": "Living in or visiting endemic areas (Andes, Four Corners, Scandinavia, East Asia)" }
           ],
-          "code": {
-            "@type": "MedicalCode",
-            "codingSystem": "ICD-10",
-            "codeValue": "A98.5"
-          },
+          "code": [
+            {
+              "@type": "MedicalCode",
+              "codingSystem": "ICD-10",
+              "codeValue": "A98.5",
+              "name": "Haemorrhagic fever with renal syndrome"
+            },
+            {
+              "@type": "MedicalCode",
+              "codingSystem": "ICD-10",
+              "codeValue": "B33.4",
+              "name": "Hantavirus (cardio-)pulmonary syndrome [HPS]"
+            },
+            {
+              "@type": "MedicalCode",
+              "codingSystem": "MeSH",
+              "codeValue": "D006362",
+              "name": "Hantavirus Infections"
+            },
+            {
+              "@type": "MedicalCode",
+              "codingSystem": "MeSH",
+              "codeValue": "D018353",
+              "name": "Hantavirus Pulmonary Syndrome"
+            },
+            {
+              "@type": "MedicalCode",
+              "codingSystem": "MeSH",
+              "codeValue": "D006484",
+              "name": "Hemorrhagic Fever with Renal Syndrome"
+            }
+          ],
           "sameAs": [
             "https://www.cdc.gov/hantavirus/",
             "https://www.who.int/news-room/fact-sheets/detail/hantavirus-disease",
@@ -416,7 +462,7 @@
           "about": { "@id": "https://hantavirus.software/#mc-hantavirus" },
           "primaryImageOfPage": "https://hantavirus.software/og-image.png",
           "datePublished": "2026-05-11",
-          "dateModified": "2026-05-11",
+          "dateModified": "2026-05-14",
           "inLanguage": "en-GB",
           "speakable": {
             "@type": "SpeakableSpecification",

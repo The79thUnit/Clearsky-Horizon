@@ -23,11 +23,20 @@ def medical_condition_hantavirus() -> dict[str, Any]:
             "Orthohantavirus infection",
             "Hantavirus disease",
         ],
-        "code": {
-            "@type": "MedicalCode",
-            "codingSystem": "ICD-10",
-            "codeValue": "A98.5",
-        },
+        "code": [
+            {
+                "@type": "MedicalCode",
+                "codingSystem": "ICD-10",
+                "codeValue": "A98.5",
+                "name": "Hantavirus disease with renal manifestations (HFRS)",
+            },
+            {
+                "@type": "MedicalCode",
+                "codingSystem": "ICD-10",
+                "codeValue": "B33.4",
+                "name": "Hantavirus (cardio-)pulmonary syndrome (HPS)",
+            },
+        ],
         "associatedAnatomy": [
             {"@type": "AnatomicalSystem", "name": "Respiratory system"},
             {"@type": "AnatomicalSystem", "name": "Renal system"},
@@ -255,11 +264,7 @@ def event_incident(
         "spatialCoverage": [
             {"@type": "Country", "name": country_name(c)} for c in countries
         ],
-        "code": {
-            "@type": "MedicalCode",
-            "codingSystem": "ICD-10",
-            "codeValue": "A98.5",
-        },
+        "about": {"@id": f"{BASE_URL}/hantavirus#condition"},
         "additionalProperty": [
             {"@type": "PropertyValue", "name": "Confirmed cases", "value": int(confirmed)},
             {"@type": "PropertyValue", "name": "Deaths", "value": int(deaths)},

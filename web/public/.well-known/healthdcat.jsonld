@@ -1,0 +1,158 @@
+{
+  "@context": {
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "hdcatap": "http://healthdcat-ap.eu/vocab/",
+    "adms": "http://www.w3.org/ns/adms#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "vcard": "http://www.w3.org/2006/vcard/ns#",
+    "owl": "http://www.w3.org/2002/07/owl#"
+  },
+  "@type": "dcat:Dataset",
+  "@id": "https://hantavirus.software/dataset",
+  "dcterms:identifier": "https://hantavirus.software/dataset",
+  "dcterms:title": {
+    "@language": "en",
+    "@value": "HORIZON Hantavirus Surveillance Dataset"
+  },
+  "dcterms:description": {
+    "@language": "en",
+    "@value": "Open dataset of hantavirus outbreak case reports aggregated from WHO, CDC, ECDC, PAHO, ProMED, THL Finland, national health ministries, wire services (Reuters, AP, AFP, BBC, EFE, Mercopress), and peer-reviewed literature repositories (Europe PMC, bioRxiv, medRxiv, Crossref, arXiv). Each record carries NATO Admiralty Scale (STANAG 2511) source qualification, Berkeley Protocol SHA-256 chain-of-custody hash, dual-confidence model, and Analysis of Competing Hypotheses (ACH) scoring. Ecological leading indicators include NOAA MEI.v2 ENSO and NASA MODIS MOD13A3 NDVI anomaly for five hantavirus-endemic regions. Covers all major Orthohantavirus serotypes (ANDV, SNV, PUUV, HTNV, SEOV, DOBV) globally from 1993 to present."
+  },
+  "dcterms:publisher": {
+    "@type": "foaf:Organization",
+    "foaf:name": "79th Unit Limited",
+    "foaf:homepage": { "@id": "https://79thunit.co.uk" },
+    "dcterms:identifier": "17133814"
+  },
+  "dcterms:creator": {
+    "@type": "foaf:Organization",
+    "foaf:name": "79th Unit Limited",
+    "foaf:homepage": { "@id": "https://79thunit.co.uk" }
+  },
+  "dcterms:license": { "@id": "https://creativecommons.org/licenses/by/4.0/" },
+  "dcterms:rights": { "@id": "https://creativecommons.org/licenses/by/4.0/" },
+  "dcterms:accessRights": {
+    "@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC"
+  },
+  "dcat:theme": [
+    { "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL" },
+    { "@id": "http://publications.europa.eu/resource/authority/data-theme/SOCI" },
+    { "@id": "http://publications.europa.eu/resource/authority/data-theme/TECH" }
+  ],
+  "dcterms:temporal": {
+    "@type": "dcterms:PeriodOfTime",
+    "dcat:startDate": { "@type": "xsd:date", "@value": "1993-01-01" }
+  },
+  "dcterms:spatial": {
+    "@id": "http://publications.europa.eu/resource/authority/continent/WORLD"
+  },
+  "dcat:keyword": [
+    "hantavirus",
+    "Orthohantavirus",
+    "Andes virus",
+    "Sin Nombre virus",
+    "Puumala virus",
+    "Hantaan virus",
+    "Seoul virus",
+    "Dobrava-Belgrade virus",
+    "hantavirus pulmonary syndrome",
+    "HPS",
+    "haemorrhagic fever with renal syndrome",
+    "HFRS",
+    "outbreak surveillance",
+    "zoonosis",
+    "rodent-borne virus",
+    "public health",
+    "open data",
+    "epidemiology",
+    "MeSH:D006362",
+    "MeSH:D018353",
+    "MeSH:D006484"
+  ],
+  "dcterms:language": {
+    "@id": "http://publications.europa.eu/resource/authority/language/ENG"
+  },
+  "dcat:contactPoint": {
+    "@type": "vcard:Organization",
+    "vcard:fn": "79th Unit Limited",
+    "vcard:hasURL": { "@id": "https://hantavirus.software/methodology" }
+  },
+  "hdcatap:personalData": "false",
+  "hdcatap:populationCoverage": {
+    "@language": "en",
+    "@value": "Global — all countries where hantavirus cases have been reported (Americas, Europe, Asia, Africa)"
+  },
+  "hdcatap:studyType": {
+    "@id": "http://healthdcat-ap.eu/vocab/studyType/surveillance"
+  },
+  "hdcatap:healthCategory": {
+    "@id": "http://healthdcat-ap.eu/vocab/healthCategory/infectiousDisease"
+  },
+  "hdcatap:pathogen": "Orthohantavirus (family Hantaviridae)",
+  "hdcatap:icd10Code": ["A98.5", "B33.4"],
+  "hdcatap:meshDescriptor": ["D006362", "D018353", "D006484"],
+  "dcat:distribution": [
+    {
+      "@type": "dcat:Distribution",
+      "dcterms:title": "Case reports JSON API",
+      "dcat:accessURL": { "@id": "https://hantavirus.software/api/v1/cases" },
+      "dcat:mediaType": {
+        "@id": "https://www.iana.org/assignments/media-types/application/json"
+      },
+      "dcterms:format": {
+        "@id": "http://publications.europa.eu/resource/authority/file-type/JSON"
+      },
+      "dcterms:license": { "@id": "https://creativecommons.org/licenses/by/4.0/" }
+    },
+    {
+      "@type": "dcat:Distribution",
+      "dcterms:title": "Bulk case export NDJSON",
+      "dcat:accessURL": {
+        "@id": "https://hantavirus.software/api/v1/cases/bulk/ndjson"
+      },
+      "dcat:mediaType": {
+        "@id": "https://www.iana.org/assignments/media-types/application/x-ndjson"
+      },
+      "dcterms:format": {
+        "@id": "http://publications.europa.eu/resource/authority/file-type/JSON"
+      },
+      "dcterms:license": { "@id": "https://creativecommons.org/licenses/by/4.0/" }
+    },
+    {
+      "@type": "dcat:Distribution",
+      "dcterms:title": "Source registry JSON",
+      "dcat:accessURL": { "@id": "https://hantavirus.software/api/v1/sources" },
+      "dcat:mediaType": {
+        "@id": "https://www.iana.org/assignments/media-types/application/json"
+      },
+      "dcterms:license": { "@id": "https://creativecommons.org/licenses/by/4.0/" }
+    }
+  ],
+  "dcat:landingPage": { "@id": "https://hantavirus.software/" },
+  "dcterms:issued": { "@type": "xsd:date", "@value": "2026-04-17" },
+  "dcterms:modified": { "@type": "xsd:date", "@value": "2026-05-14" },
+  "adms:versionNotes": {
+    "@language": "en",
+    "@value": "v0.3.0 — Ecological leading indicators added (NOAA MEI.v2 ENSO, NASA MODIS NDVI); Berkeley Protocol chain-of-custody extended (HTTP headers hash); cursor-based keyset pagination; ACH hypothesis scoring in pipeline_factors; THL Finland connector."
+  },
+  "prov:wasGeneratedBy": {
+    "@type": "prov:Activity",
+    "prov:used": [
+      { "@id": "https://www.who.int/emergencies/disease-outbreak-news/" },
+      { "@id": "https://www.cdc.gov/han/" },
+      { "@id": "https://www.ecdc.europa.eu/" },
+      { "@id": "https://www.paho.org/" },
+      { "@id": "https://promedmail.org/" },
+      { "@id": "https://thl.fi/en/web/infectious-diseases-and-vaccinations" },
+      { "@id": "https://europepmc.org/" },
+      { "@id": "https://psl.noaa.gov/enso/mei/" },
+      { "@id": "https://modis.ornl.gov/rst/api/v1/MOD13A3/statistics" }
+    ]
+  },
+  "owl:versionInfo": "0.3.0"
+}

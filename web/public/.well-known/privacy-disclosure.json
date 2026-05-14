@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-05-14",
+  "owner": {
+    "name": "79th Unit Limited",
+    "companyNumber": "17133814",
+    "jurisdiction": "England and Wales",
+    "website": "https://79thunit.co.uk",
+    "contact": "director@79thunit.co.uk"
+  },
+  "platform": "HORIZON Hantavirus Surveillance Platform",
+  "platformUrl": "https://hantavirus.software/",
+  "legalBasis": [
+    "UK GDPR Article 6(1)(f) — Legitimate interests: public health information provision",
+    "UK GDPR Article 9(2)(j) — Scientific or research purposes in the public interest (where applicable)"
+  ],
+  "dataTypes": [
+    "Aggregate outbreak case reports from official public health authorities",
+    "Bibliographic metadata from peer-reviewed literature repositories",
+    "Wire service and news articles relating to hantavirus outbreaks",
+    "Ecological leading indicators (NOAA ENSO index, NASA MODIS NDVI)"
+  ],
+  "personalData": false,
+  "personalDataDetail": "HORIZON does not collect, store, or process personal data. All case reports contain aggregate epidemiological counts from public health authorities. No individual-level patient data is ingested or stored.",
+  "dataSources": [
+    "WHO Disease Outbreak News",
+    "US CDC Health Advisory Network (HAN)",
+    "ECDC Communicable Disease Threats Report (CDTR)",
+    "PAHO Epidemiological Alerts",
+    "ProMED-mail",
+    "THL Finland (National Institute for Health and Welfare)",
+    "Argentina Ministerio de Salud",
+    "Chile Ministerio de Salud",
+    "Brazil Ministerio da Saude",
+    "Europe PMC, bioRxiv, medRxiv, Crossref, arXiv",
+    "Reuters, AP, AFP, BBC, EFE, Mercopress",
+    "NOAA Physical Sciences Laboratory (MEI.v2 ENSO index)",
+    "NASA MODIS MOD13A3 via ORNL Web Service (NDVI)"
+  ],
+  "dataRetention": "Indefinite open archive under CC BY 4.0",
+  "openData": {
+    "license": "Creative Commons Attribution 4.0 International",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "apiUrl": "https://hantavirus.software/api/v1/",
+    "bulkExportUrl": "https://hantavirus.software/api/v1/cases/bulk/ndjson"
+  },
+  "robots": "https://hantavirus.software/robots.txt",
+  "methodology": "https://hantavirus.software/methodology",
+  "citation": "https://hantavirus.software/CITATION.cff",
+  "sourceQualification": {
+    "scale": "NATO Admiralty Scale (STANAG 2511)",
+    "dualConfidenceModel": true,
+    "chainOfCustody": "Berkeley Protocol SHA-256",
+    "methodologyReference": "ICD 206 Source Reference Citation"
+  }
+}

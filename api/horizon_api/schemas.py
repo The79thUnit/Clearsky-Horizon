@@ -32,7 +32,15 @@ class CaseRecord(BaseModel):
     nato_reliability: str
     nato_credibility: int
     pipeline_confidence: float
+    pipeline_factors: dict = {}  # type: ignore[assignment]
     analyst_confidence: float | None = None
+    # Epidemiological classification (Pass 2 -- migration 054)
+    case_classification: str = "unknown"
+    lab_method: str = "unknown"
+    ihr_notified: bool = False
+    travel_history: bool | None = None
+    gadm_gid: str | None = None
+    ecological_flags: dict = {}  # type: ignore[assignment]
 
 
 class CaseList(BaseModel):
@@ -40,6 +48,10 @@ class CaseList(BaseModel):
     total: int
     limit: int
     offset: int
+    # Cursor for the next page (cursor-based pagination, preferred over offset).
+    # Pass as ?cursor=<value> to retrieve the next page.
+    # None when the result set is exhausted.
+    next_cursor: str | None = None
 
 
 class SourceRecord(BaseModel):

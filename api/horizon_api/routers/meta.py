@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Query
 
 from .. import __version__
+from ..config import settings
 from ..db import acquire
 from ..schemas import (
     BreakdownEntry,
@@ -143,13 +144,12 @@ WITH ranked AS (
     FROM case_reports cr
     JOIN sources src ON src.id = cr.source_id
     WHERE
-      -- Drop reports outside the active-outbreak window. Anything reported
-      -- before 2026-03-01 is historical archive material, not an event in
-      -- the MV Hondius cluster. Items with NULL reported_date are only
-      -- accepted if ingested within the outbreak window.
+      -- Drop reports outside the active-outbreak window. The window start
+      -- is controlled by EVENTS_WINDOW_START env var (default 2026-03-01)
+      -- so it can be updated for future outbreaks without code changes.
       (
-        cr.reported_date >= DATE '2026-03-01'
-        OR (cr.reported_date IS NULL AND cr.ingested_at >= TIMESTAMPTZ '2026-04-01')
+        cr.reported_date >= $2::date
+        OR (cr.reported_date IS NULL AND cr.ingested_at >= ($2::date - INTERVAL '1 day')::timestamptz)
       )
       -- Drop SEO explainer pieces.
       AND NOT (LOWER(cr.title) ~ '(what is hantavirus|how worried|should i be worried|what comes next|symptoms you need|how it differs|everything you need to know|tell us:|inside the laboratory|hantavirus[: ]+the silent|hantavirus[: ]+the .* virus|hantavirus[: ]+how|hantavirus[: ]+what|jersey hantavirus risk|rapid reaction)')
@@ -189,6 +189,98 @@ LIMIT $1
 """
 
 
+_VOCABULARY: dict = {
+    "mesh": [
+        {"id": "D006362", "name": "Hantavirus Infections",
+         "url": "https://meshb.nlm.nih.gov/record/ui?ui=D006362"},
+        {"id": "D018353", "name": "Hantavirus Pulmonary Syndrome",
+         "url": "https://meshb.nlm.nih.gov/record/ui?ui=D018353"},
+        {"id": "D006484", "name": "Hemorrhagic Fever with Renal Syndrome",
+         "url": "https://meshb.nlm.nih.gov/record/ui?ui=D006484"},
+        {"id": "D004813", "name": "Epidemiologic Monitoring",
+         "url": "https://meshb.nlm.nih.gov/record/ui?ui=D004813"},
+        {"id": "D016097", "name": "Virus Diseases",
+         "url": "https://meshb.nlm.nih.gov/record/ui?ui=D016097"},
+    ],
+    "icd10": [
+        {"code": "A98.5",
+         "name": "Haemorrhagic fever with renal syndrome",
+         "syndromes": ["HFRS"],
+         "serotypes": ["PUUV", "HTNV", "SEOV", "DOBV", "TULV", "SAAV"]},
+        {"code": "B33.4",
+         "name": "Hantavirus (cardio-)pulmonary syndrome",
+         "syndromes": ["HPS"],
+         "serotypes": ["ANDV", "SNV", "BAYV", "BCCV", "LANV", "CHOV"]},
+    ],
+    "source_qualification": {
+        "reliability_scale": "NATO Admiralty Scale — STANAG 2511 (A–F)",
+        "credibility_scale": "NATO Admiralty Scale — STANAG 2511 (1–6)",
+        "independence_principle": (
+            "Reliability and credibility are assessed independently. "
+            "A source rated A (completely reliable) may still yield a 6 "
+            "(truth cannot be judged) item if the content is unverifiable."
+        ),
+        "chain_of_custody": "Berkeley Protocol SHA-256 content hash",
+        "methodology": "ICD 206 Source Reference Citation",
+    },
+    "serotypes": [
+        {"code": "ANDV", "name": "Andes virus",
+         "icd10": "B33.4", "syndrome": "HPS",
+         "reservoir": "Oligoryzomys longicaudatus", "region": "South America"},
+        {"code": "SNV", "name": "Sin Nombre virus",
+         "icd10": "B33.4", "syndrome": "HPS",
+         "reservoir": "Peromyscus maniculatus", "region": "North America"},
+        {"code": "PUUV", "name": "Puumala virus",
+         "icd10": "A98.5", "syndrome": "HFRS (NE)",
+         "reservoir": "Myodes glareolus", "region": "Europe"},
+        {"code": "HTNV", "name": "Hantaan virus",
+         "icd10": "A98.5", "syndrome": "HFRS",
+         "reservoir": "Apodemus agrarius", "region": "East Asia"},
+        {"code": "SEOV", "name": "Seoul virus",
+         "icd10": "A98.5", "syndrome": "HFRS (mild)",
+         "reservoir": "Rattus norvegicus", "region": "Global"},
+        {"code": "DOBV", "name": "Dobrava-Belgrade virus",
+         "icd10": "A98.5", "syndrome": "HFRS",
+         "reservoir": "Apodemus flavicollis", "region": "Balkans / Europe"},
+        {"code": "BAYV", "name": "Bayou virus",
+         "icd10": "B33.4", "syndrome": "HPS",
+         "reservoir": "Oryzomys palustris", "region": "Southern USA"},
+        {"code": "BCCV", "name": "Black Creek Canal virus",
+         "icd10": "B33.4", "syndrome": "HPS",
+         "reservoir": "Sigmodon hispidus", "region": "Florida, USA"},
+        {"code": "LANV", "name": "Laguna Negra virus",
+         "icd10": "B33.4", "syndrome": "HPS",
+         "reservoir": "Calomys laucha", "region": "Paraguay, Bolivia"},
+        {"code": "CHOV", "name": "Choclo virus",
+         "icd10": "B33.4", "syndrome": "HPS",
+         "reservoir": "Oligoryzomys fulvescens", "region": "Panama"},
+        {"code": "SAAV", "name": "Saaremaa virus",
+         "icd10": "A98.5", "syndrome": "HFRS (mild)",
+         "reservoir": "Apodemus agrarius", "region": "Northern Europe"},
+        {"code": "TULV", "name": "Tula virus",
+         "icd10": "A98.5", "syndrome": "HFRS (mild / subclinical)",
+         "reservoir": "Microtus arvalis", "region": "Central Europe"},
+    ],
+}
+
+
+@router.get(
+    "/api/v1/meta/vocabulary",
+    summary="Controlled vocabulary: MeSH descriptors, ICD-10 codes, serotype registry",
+    tags=["meta"],
+    response_model=None,
+)
+async def vocabulary() -> dict:
+    """Machine-readable controlled vocabulary for academic search engine indexing.
+
+    Returns MeSH descriptors, ICD-10 codes, source-qualification methodology
+    references, and the full serotype registry with reservoir and geographic
+    context. Suitable for integration with ECDC TESSy, WHO EIOS pipelines,
+    HealthDCAT-AP catalogues, and bibliographic systems (PubMed, Europe PMC).
+    """
+    return _VOCABULARY
+
+
 @router.get(
     "/api/v1/meta/events",
     response_model=EventList,
@@ -198,6 +290,6 @@ async def events(
     limit: int = Query(50, ge=1, le=200, description="Max events to return"),
 ) -> EventList:
     async with acquire() as conn:
-        rows = await conn.fetch(_QUERY_EVENTS, limit)
+        rows = await conn.fetch(_QUERY_EVENTS, limit, settings.events_window_start)
     items = [EventRecord.model_validate(dict(r)) for r in rows]
     return EventList(items=items, total=len(items))

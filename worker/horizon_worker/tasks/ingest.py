@@ -69,6 +69,9 @@ from ..connectors.rki import RKIConnector
 from ..connectors.science_news import ScienceNewsConnector
 from ..connectors.spf_france import SPFFranceConnector
 from ..connectors.sweden_fhm import SwedenFHMConnector
+from ..connectors.thl_finland import THLFinlandConnector
+from ..connectors.noaa_enso import NOAAENSOConnector
+from ..connectors.nasa_ndvi import NASANDVIConnector
 from ..connectors.text_utils import topic_hash
 from ..connectors.ukhsa import UKHSAConnector
 from ..connectors.venezuela_mpps import VenezuelaMPPSConnector
@@ -204,6 +207,13 @@ CONNECTORS: dict[str, type[BaseConnector]] = {
     #   virus monitoring for imported rodents.
     SPFFranceConnector.SOURCE_CODE: SPFFranceConnector,
     SwedenFHMConnector.SOURCE_CODE: SwedenFHMConnector,
+    # THL Finland (migration 055) — highest hantavirus notification rate in
+    # Europe (14.5/100,000, ECDC 2023 AER). Puumala virus dominant.
+    THLFinlandConnector.SOURCE_CODE: THLFinlandConnector,
+    # Ecological lead indicators (migration 056) — predict rodent population
+    # surges 6-18 months before case counts rise.
+    NOAAENSOConnector.SOURCE_CODE: NOAAENSOConnector,
+    NASANDVIConnector.SOURCE_CODE: NASANDVIConnector,
     NorwayFHIConnector.SOURCE_CODE: NorwayFHIConnector,
     # ECDC sub-feed expansion (13 May 2026, migration 052): Rapid Risk
     # Assessments + Epidemiological Updates. Complement ecdc-cdtr

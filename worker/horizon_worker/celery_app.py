@@ -344,6 +344,29 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute=14),
         "args": ["sweden-fhm"],
     },
+    # THL Finland (migration 055) — National Institute for Health and Welfare.
+    # Highest hantavirus notification rate in Europe: 14.5/100,000 (ECDC 2023 AER).
+    # Puumala virus (bank vole), peak July-August following mast-year cycles.
+    # English-language infectious disease news. NATO A1. Tier 1.
+    "fetch-thl-finland": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute=16),
+        "args": ["thl-finland"],
+    },
+    # Ecological lead indicators (migration 056) -- monthly cadence.
+    # NOAA MEI.v2: El Nino/La Nina strength. Predicts ANDV/SNV risk uplift
+    # in Latin America 12-24 months ahead. NASA NDVI: vegetation anomaly
+    # in 5 key endemic regions. Both are proactive risk signals, not case reports.
+    "fetch-noaa-enso": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute=3, hour=6),  # 06:03 UTC daily (NOAA updates monthly)
+        "args": ["noaa-enso"],
+    },
+    "fetch-nasa-ndvi": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute=23, hour=6),  # 06:23 UTC daily (MODIS updates monthly)
+        "args": ["nasa-ndvi"],
+    },
     # who-wpro re-enabled 2026-05-13 (migration 047): connector now uses the
     # global WHO RSS (rss-feeds/news-english.xml). Minute=19 preserved.
     "fetch-who-wpro": {
