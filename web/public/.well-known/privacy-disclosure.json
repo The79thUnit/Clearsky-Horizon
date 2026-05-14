@@ -18,10 +18,12 @@
     "Aggregate outbreak case reports from official public health authorities",
     "Bibliographic metadata from peer-reviewed literature repositories",
     "Wire service and news articles relating to hantavirus outbreaks",
-    "Ecological leading indicators (NOAA ENSO index, NASA MODIS NDVI)"
+    "Ecological leading indicators (NOAA ENSO index, NASA MODIS NDVI)",
+    "Individual-level epidemiological line list data (Oxford Kraemer Lab CC0 dataset — de-identified, no names, no direct identifiers beyond nationality/age/sex)",
+    "Genomic reference sequence metadata (NCBI RefSeq accession records — no raw sequence data stored)"
   ],
   "personalData": false,
-  "personalDataDetail": "HORIZON does not collect, store, or process personal data. All case reports contain aggregate epidemiological counts from public health authorities. No individual-level patient data is ingested or stored.",
+  "personalDataDetail": "HORIZON does not collect, store, or process personal data about end users. The Oxford Kraemer Lab MV Hondius line list contains anonymised individual-level epidemiological records (no names, no addresses, no direct identifiers) published under CC0 by Oxford University researchers. All other case reports contain aggregate epidemiological counts. No patient-identifiable data is ingested or stored.",
   "dataSources": [
     "WHO Disease Outbreak News",
     "US CDC Health Advisory Network (HAN)",
@@ -35,7 +37,9 @@
     "Europe PMC, bioRxiv, medRxiv, Crossref, arXiv",
     "Reuters, AP, AFP, BBC, EFE, Mercopress",
     "NOAA Physical Sciences Laboratory (MEI.v2 ENSO index)",
-    "NASA MODIS MOD13A3 via ORNL Web Service (NDVI)"
+    "NASA MODIS MOD13A3 via ORNL Web Service (NDVI)",
+    "Oxford Kraemer Lab — MV Hondius ANDV individual line list (github.com/kraemer-lab/Hondius_hantavirus_h2026, CC0, Dr Moritz Kraemer / Oxford, Sam Scarpino, Andrew Rambaut / Edinburgh-Nextstrain)",
+    "NCBI RefSeq — Orthohantavirus reference genome set (HantaNet, CDC Molecular Epidemiology and Bioinformatics Team, PMC10675615)"
   ],
   "dataRetention": "Indefinite open archive under CC BY 4.0",
   "openData": {

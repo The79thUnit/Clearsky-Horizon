@@ -21,7 +21,7 @@
   },
   "dcterms:description": {
     "@language": "en",
-    "@value": "Open dataset of hantavirus outbreak case reports aggregated from WHO, CDC, ECDC, PAHO, ProMED, THL Finland, national health ministries, wire services (Reuters, AP, AFP, BBC, EFE, Mercopress), and peer-reviewed literature repositories (Europe PMC, bioRxiv, medRxiv, Crossref, arXiv). Each record carries NATO Admiralty Scale (STANAG 2511) source qualification, Berkeley Protocol SHA-256 chain-of-custody hash, dual-confidence model, and Analysis of Competing Hypotheses (ACH) scoring. Ecological leading indicators include NOAA MEI.v2 ENSO and NASA MODIS MOD13A3 NDVI anomaly for five hantavirus-endemic regions. Covers all major Orthohantavirus serotypes (ANDV, SNV, PUUV, HTNV, SEOV, DOBV) globally from 1993 to present."
+    "@value": "Open dataset of hantavirus outbreak case reports aggregated from 65+ authoritative sources: WHO, CDC, ECDC, PAHO, ProMED, THL Finland, national health ministries, wire services (Reuters, AP, AFP, BBC, EFE, Mercopress), peer-reviewed literature repositories (Europe PMC, bioRxiv, medRxiv, Crossref, arXiv), the Oxford Kraemer Lab individual-level MV Hondius ANDV line list (CC0, Dr Moritz Kraemer / Oxford, Sam Scarpino, Andrew Rambaut / Edinburgh-Nextstrain — 28-column per-person resolution, highest epidemiological granularity available for the 2026 outbreak), and the full Orthohantavirus NCBI RefSeq reference genome set (HantaNet, CDC Molecular Epidemiology and Bioinformatics Team, PMC10675615). Each record carries NATO Admiralty Scale (STANAG 2511) source qualification, Berkeley Protocol SHA-256 chain-of-custody hash, dual-confidence model, and Analysis of Competing Hypotheses (ACH) scoring. Ecological leading indicators include NOAA MEI.v2 ENSO and NASA MODIS MOD13A3 NDVI anomaly for five hantavirus-endemic regions. Covers all major Orthohantavirus serotypes (ANDV, SNV, PUUV, HTNV, SEOV, DOBV) globally from 1993 to present."
   },
   "dcterms:publisher": {
     "@type": "foaf:Organization",
@@ -72,7 +72,16 @@
     "epidemiology",
     "MeSH:D006362",
     "MeSH:D018353",
-    "MeSH:D006484"
+    "MeSH:D006484",
+    "research-linelist",
+    "individual line list",
+    "genomic reference",
+    "HantaNet",
+    "NCBI RefSeq",
+    "Oxford Kraemer Lab",
+    "Andrew Rambaut",
+    "Nextstrain",
+    "MV Hondius"
   ],
   "dcterms:language": {
     "@id": "http://publications.europa.eu/resource/authority/language/ENG"
@@ -138,7 +147,7 @@
   "dcterms:modified": { "@type": "xsd:date", "@value": "2026-05-14" },
   "adms:versionNotes": {
     "@language": "en",
-    "@value": "v0.3.0 — Ecological leading indicators added (NOAA MEI.v2 ENSO, NASA MODIS NDVI); Berkeley Protocol chain-of-custody extended (HTTP headers hash); cursor-based keyset pagination; ACH hypothesis scoring in pipeline_factors; THL Finland connector."
+    "@value": "v0.4.0 — Oxford Kraemer Lab MV Hondius individual-level ANDV line list ingested (CC0, kraemer-lab/Hondius_hantavirus_h2026, Dr Moritz Kraemer / Oxford, Sam Scarpino, Andrew Rambaut / Edinburgh-Nextstrain); full Orthohantavirus NCBI RefSeq reference genome set (HantaNet, CDC Molecular Epidemiology, PMC10675615); research-linelist provenance type added; HealthDCAT-AP catalogue, schema.org Dataset JSON-LD, CITATION.cff (type: dataset), MeSH headings in API, .well-known/privacy-disclosure.json. v0.3.0: Ecological leading indicators (NOAA MEI.v2 ENSO, NASA MODIS NDVI); Berkeley Protocol CoC extension; cursor-based keyset pagination; ACH hypothesis scoring; THL Finland."
   },
   "prov:wasGeneratedBy": {
     "@type": "prov:Activity",
@@ -151,8 +160,10 @@
       { "@id": "https://thl.fi/en/web/infectious-diseases-and-vaccinations" },
       { "@id": "https://europepmc.org/" },
       { "@id": "https://psl.noaa.gov/enso/mei/" },
-      { "@id": "https://modis.ornl.gov/rst/api/v1/MOD13A3/statistics" }
+      { "@id": "https://modis.ornl.gov/rst/api/v1/MOD13A3/statistics" },
+      { "@id": "https://github.com/kraemer-lab/Hondius_hantavirus_h2026" },
+      { "@id": "https://www.ncbi.nlm.nih.gov/nuccore/?term=Orthohantavirus%5BOrganism%5D+AND+refseq%5Bfilter%5D" }
     ]
   },
-  "owl:versionInfo": "0.3.0"
+  "owl:versionInfo": "0.4.0"
 }

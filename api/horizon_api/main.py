@@ -34,8 +34,16 @@ app = FastAPI(
     version=__version__,
     description=(
         "HORIZON — hantavirus outbreak surveillance with audit-grade source qualification. "
-        "Public read-only. UK GDPR Art 6 lawful basis: legitimate interests "
+        "65+ sources. Public read-only. UK GDPR Art 6 lawful basis: legitimate interests "
         "(public health information). Not medical advice.\n\n"
+        "**Unique data:** Oxford Kraemer Lab individual-level MV Hondius ANDV line list "
+        "(Dr Moritz Kraemer / Oxford, Sam Scarpino, Andrew Rambaut / Edinburgh-Nextstrain). "
+        "28-column per-person resolution — symptom onset, outcome, nationality, treatment, "
+        "Pathoplexus accession IDs. CC0. Cross-referenced WHO DON600 + national health "
+        "authority press releases for every row. "
+        "Also: full Orthohantavirus NCBI RefSeq reference genome set "
+        "(HantaNet, CDC Molecular Epidemiology, PMC10675615) — S/M/L segments, all major "
+        "serotypes, permanent genomic annotation layer.\n\n"
         "**MeSH descriptors:** "
         "D006362 Hantavirus Infections | "
         "D018353 Hantavirus Pulmonary Syndrome | "

@@ -2,24 +2,34 @@
 
 [![Live Platform](https://img.shields.io/badge/Live%20Platform-hantavirus.software-2d7ff9?style=flat-square)](https://hantavirus.software)
 [![MIT Licence](https://img.shields.io/badge/Licence-MIT-00e87a?style=flat-square)](LICENSE)
-[![Sources](https://img.shields.io/badge/Sources-53%2B%20authoritative-f59e0b?style=flat-square)](https://hantavirus.software)
+[![Sources](https://img.shields.io/badge/Sources-65%2B%20authoritative-f59e0b?style=flat-square)](https://hantavirus.software)
 
 Real-time outbreak surveillance for hantavirus pulmonary syndrome (HPS) and haemorrhagic fever
-with renal syndrome (HFRS). HORIZON aggregates intelligence from 53+ authoritative sources,
+with renal syndrome (HFRS). HORIZON aggregates intelligence from 65+ authoritative sources,
 qualifies every record with NATO Admiralty dual-confidence scoring, and presents live case
 counts, serotype tracking, and geographic spread at [hantavirus.software](https://hantavirus.software).
 Built during the 2026 MV Hondius Andes virus cluster — the first documented large-scale
-hantavirus exposure on a cruise vessel.
+hantavirus exposure on a cruise vessel. Includes the Oxford Kraemer Lab individual-level ANDV
+line list (Dr Moritz Kraemer, Sam Scarpino, Andrew Rambaut / Nextstrain) — the highest
+epidemiological resolution available for the MV Hondius outbreak.
 
 ---
 
 ## What is HORIZON?
 
 HORIZON is an open-source, real-time hantavirus surveillance platform that aggregates and
-qualifies intelligence from 53+ authoritative sources across Tier 1-3: WHO Disease Outbreak
+qualifies intelligence from 65+ authoritative sources across Tier 1-3: WHO Disease Outbreak
 News, CDC Health Alert Network, ECDC epidemiological updates, PAHO, RKI, RIVM, national
-health ministries, peer-reviewed literature, genomic repositories, and open-source signals.
-Every ingested record is attributed, timestamped, and scored before it reaches the dashboard.
+health ministries, peer-reviewed literature, genomic repositories, individual-level research
+line lists, and open-source signals. Every ingested record is attributed, timestamped, and
+scored before it reaches the dashboard.
+
+HORIZON is the only public surveillance platform ingesting the Oxford Kraemer Lab
+individual-level ANDV line list — a CC0 living dataset maintained by Dr Moritz Kraemer
+(University of Oxford, Dept of Biology), Sam Scarpino, and Andrew Rambaut (University of
+Edinburgh / Nextstrain) with 28-column per-person resolution covering symptom onset, outcome,
+nationality, treatment, and Pathoplexus/GenBank accession IDs for every tracked case. This is
+cross-referenced against WHO DON600 and national health authority press releases for every row.
 
 Source qualification uses the NATO Admiralty dual-confidence model — the same framework
 applied in intelligence analysis. Each record carries a pipeline_confidence score (automated,
@@ -99,7 +109,9 @@ Reliability score: C or D.
 | Google News (serotype-specific queries) | JSON |
 | GBIF (rodent host species occurrence) | API |
 | iNaturalist (rodent host observations) | API |
-| NCBI GenBank (orthohantavirus sequences) | API |
+| NCBI GenBank — recent orthohantavirus sequences (reldate 14 days) | API |
+| NCBI RefSeq — full Orthohantavirus reference genome set (HantaNet, CDC, PMC10675615) | API |
+| Oxford Kraemer Lab — MV Hondius individual-level ANDV line list (CC0, Kraemer/Scarpino/Rambaut) | CSV |
 | ProMED-mail | RSS |
 
 ### Tier 3 — Contextual and OSINT (signal amplification)
@@ -145,7 +157,7 @@ This model is documented formally in `docs/adr/0002-source-qualification-model.m
 | Frontend | React 18 + TypeScript + Vite |
 | UI framework | Custom design system (IBM Plex Mono/Sans) |
 | Infrastructure | Docker Compose, nginx, Let's Encrypt TLS |
-| Data connectors | 53+ RSS / JSON / HTML / API scrapers |
+| Data connectors | 65+ RSS / JSON / HTML / API / CSV scrapers |
 | Vessel tracking | AIS integration (MV Hondius cluster) |
 | Source qualification | NATO Admiralty scale, Berkeley Protocol CoC hashes |
 | Quality gates | ruff, mypy --strict, bandit, pytest (60% coverage gate) |
@@ -231,4 +243,4 @@ MIT. See [LICENSE](LICENSE).
 
 ---
 
-*Built by the 79th Unit. Keywords: hantavirus, Andes virus, ANDV, hantavirus pulmonary syndrome, HPS, haemorrhagic fever with renal syndrome, HFRS, Puumala, Hantaan, Seoul virus, Sin Nombre, outbreak surveillance, real-time epidemiology, MV Hondius 2026, cruise ship hantavirus, open-source surveillance platform.*
+*Built by the 79th Unit. Keywords: hantavirus, Andes virus, ANDV, hantavirus pulmonary syndrome, HPS, haemorrhagic fever with renal syndrome, HFRS, Puumala, Hantaan, Seoul virus, Sin Nombre, outbreak surveillance, real-time epidemiology, MV Hondius 2026, cruise ship hantavirus, open-source surveillance platform, Oxford Kraemer Lab, individual line list, research linelist, HantaNet, NCBI RefSeq, genomic reference, Andrew Rambaut, Nextstrain, Moritz Kraemer.*
