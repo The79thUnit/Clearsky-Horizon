@@ -25,12 +25,23 @@ repository-code: "https://github.com/The79thUnit/Clearsky-Horizon"
 url: "https://hantavirus.software"
 abstract: >-
   HORIZON is an open dataset of hantavirus outbreak case reports aggregated
-  from 60+ authoritative sources: WHO Disease Outbreak News, US CDC Health
+  from 65+ authoritative sources: WHO Disease Outbreak News, US CDC Health
   Advisory Network (HAN), ECDC Communicable Disease Threats Report, PAHO
   Epidemiological Alerts, ProMED-mail, THL Finland, national health
   ministries (Argentina, Chile, Brazil), major wire services (Reuters, AP,
   AFP, BBC, EFE, Mercopress), and peer-reviewed literature repositories
   (Europe PMC, bioRxiv, medRxiv, Crossref, arXiv).
+
+  HORIZON includes two unique datasets: (1) the Oxford Kraemer Lab
+  individual-level MV Hondius ANDV line list (CC0, Dr Moritz Kraemer /
+  University of Oxford, Sam Scarpino, Andrew Rambaut / University of
+  Edinburgh / Nextstrain), providing 28-column per-person resolution
+  including symptom onset, clinical outcome, nationality, treatment, and
+  Pathoplexus genomic accession IDs for every tracked case in the 2026
+  MV Hondius cruise ship cluster; and (2) the full NCBI RefSeq
+  Orthohantavirus reference genome set (HantaNet, CDC Molecular
+  Epidemiology and Bioinformatics Team, PMC10675615), covering S/M/L
+  segments for all major serotypes.
 
   Every record carries audit-grade source provenance: ICD 206 Source
   Reference Citation methodology, NATO Admiralty Scale reliability and
@@ -79,6 +90,19 @@ keywords:
   - MeSH:D006362
   - MeSH:D018353
   - MeSH:D006484
+  - MV Hondius
+  - MV Hondius 2026
+  - individual line list
+  - research linelist
+  - Oxford Kraemer Lab
+  - HantaNet
+  - NCBI RefSeq
+  - genomic reference
+  - Andrew Rambaut
+  - Nextstrain
+  - Pathoplexus
+  - Berkeley Protocol
+  - dual confidence
 license: CC-BY-4.0
-version: "0.3.0"
+version: "0.4.0"
 date-released: "2026-05-14"
