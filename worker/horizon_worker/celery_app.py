@@ -63,6 +63,40 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="*/30"),
         "args": ["reddit"],
     },
+    # Wire services + major broadcaster (migration 053, 2026-05-14).
+    # Every 30 min: wire desks publish continuously; 30-min cadence captures
+    # breaking stories within one cycle without hammering Google News.
+    # Mercopress hourly: lower volume, regional Southern Cone wire.
+    "fetch-bbc-health": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute="7,37"),
+        "args": ["bbc-health"],
+    },
+    "fetch-reuters-health": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute="11,41"),
+        "args": ["reuters-health"],
+    },
+    "fetch-ap-news": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute="17,47"),
+        "args": ["ap-news"],
+    },
+    "fetch-afp-wire": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute="22,52"),
+        "args": ["afp-wire"],
+    },
+    "fetch-efe-wire": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute="26,56"),
+        "args": ["efe-wire"],
+    },
+    "fetch-mercopress": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute=44),
+        "args": ["mercopress"],
+    },
     "fetch-who-don": {
         "task": "horizon_worker.tasks.ingest.fetch_source",
         "schedule": crontab(minute=5),
