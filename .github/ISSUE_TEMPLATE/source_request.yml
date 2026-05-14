@@ -1,0 +1,72 @@
+name: Source Request
+description: Suggest a new data source for HORIZON to monitor
+title: "[SOURCE] "
+labels: ["source-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        HORIZON adds sources that meet a minimum quality threshold. Please
+        provide enough detail for us to assess and implement the source.
+
+  - type: input
+    id: name
+    attributes:
+      label: Source name
+      placeholder: e.g. Finnish Institute for Health and Welfare (THL)
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Source URL
+      placeholder: e.g. https://thl.fi/en/web/infectious-diseases-and-vaccinations
+    validations:
+      required: true
+
+  - type: input
+    id: feed
+    attributes:
+      label: RSS / API feed URL (if known)
+      placeholder: e.g. https://thl.fi/rss/news.rss
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Source type
+      options:
+        - Government health agency (Tier 1)
+        - Academic journal or preprint server (Tier 2)
+        - Regional news / wire service (Tier 2-3)
+        - Community / social / forum (Tier 3)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: relevance
+    attributes:
+      label: Why is this source relevant to hantavirus surveillance?
+      description: Which serotypes or regions does it cover? Does it publish data not available elsewhere?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Primary language
+      options:
+        - English
+        - Spanish
+        - French
+        - German
+        - Portuguese
+        - Finnish
+        - Swedish
+        - Norwegian
+        - Chinese
+        - Japanese
+        - Other
+    validations:
+      required: true

@@ -1,0 +1,51 @@
+name: Data Correction
+description: Report an inaccurate case count, wrong source attribution, or incorrect confidence score
+title: "[DATA] "
+labels: ["data-quality"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        HORIZON is committed to data accuracy. If you have identified an error in
+        case data, source attribution, or qualification scores, please provide
+        as much detail as possible so we can investigate and correct it.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of error
+      options:
+        - Incorrect case count
+        - Incorrect death count
+        - Wrong country / region
+        - Wrong serotype
+        - Incorrect source attribution
+        - Confidence score appears wrong
+        - Duplicate record
+        - Outdated record (superseded by official update)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: record
+    attributes:
+      label: Record identifier or URL
+      description: The case ID, API URL, or link to the specific record
+      placeholder: e.g. https://hantavirus.software/api/v1/cases/123
+
+  - type: textarea
+    id: correction
+    attributes:
+      label: What is incorrect and what should it be?
+      description: Please cite your source for the correct information
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Source for correct data
+      description: URL to the authoritative source (WHO DON, CDC HAN, ECDC bulletin, etc.)
+    validations:
+      required: true

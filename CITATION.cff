@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+title: "HORIZON: Real-Time Hantavirus Outbreak Surveillance"
+message: >-
+  If you use HORIZON data or software in your research, please cite it
+  using the metadata in this file.
+type: software
+authors:
+  - name: "79th Unit Limited"
+    city: United Kingdom
+    country: GB
+    website: "https://79thunit.co.uk"
+repository-code: "https://github.com/The79thUnit/Clearsky-Horizon"
+url: "https://hantavirus.software"
+abstract: >-
+  HORIZON is an open-source platform for real-time global hantavirus
+  outbreak surveillance. It ingests from 60+ sources including WHO Disease
+  Outbreak News, CDC HAN, ECDC, PAHO, and major wire services, applying
+  a dual-confidence qualification model based on the NATO Admiralty
+  Reliability and Credibility Scale (STANAG 2511) and ICD 206 Source
+  Reference Citation. Every record carries a Berkeley Protocol
+  SHA-256 chain-of-custody hash for forensic reproducibility. Data is
+  freely available under CC BY 4.0 via a public read-only API.
+keywords:
+  - hantavirus
+  - Andes virus
+  - ANDV
+  - hantavirus pulmonary syndrome
+  - HPS
+  - haemorrhagic fever with renal syndrome
+  - HFRS
+  - outbreak surveillance
+  - epidemiology
+  - public health
+  - NATO Admiralty Scale
+  - source qualification
+  - infectious disease
+  - open data
+  - real-time surveillance
+license: MIT
+version: "0.3.0"
+date-released: "2026-04-17"
