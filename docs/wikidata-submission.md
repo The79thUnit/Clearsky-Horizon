@@ -36,7 +36,7 @@ LAST	P31	Q1335754	/* instance of: web application */
 LAST	P31	Q4671277	/* instance of: surveillance system */
 LAST	P856	"https://hantavirus.software/"	/* official website */
 LAST	P953	"https://hantavirus.software/api/openapi.json"	/* full work available at URL */
-LAST	P1324	"https://github.com/79thunit/horizon"	/* source code repository */
+LAST	P1324	"https://github.com/The-79th-Unit/Clearsky-Horizon"	/* source code repository */
 LAST	P275	Q20007257	/* copyright licence: CC BY 4.0 */
 LAST	P407	Q1860	/* language of work: English */
 LAST	P407	Q1321	/* language of work: Spanish */
