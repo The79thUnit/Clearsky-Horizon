@@ -123,6 +123,7 @@ def render_main_sitemap(now: datetime) -> str:
         ("/compare/hantavirus-vs-covid", "monthly", 0.7),
         ("/compare/hps-vs-hfrs", "monthly", 0.7),
         ("/compare/hantavirus-live-trackers", "monthly", 0.8),
+        ("/timeline", "daily", 0.85),
         ("/data", "daily", 0.8),
         ("/sources", "daily", 0.75),
         ("/methodology", "monthly", 0.7),

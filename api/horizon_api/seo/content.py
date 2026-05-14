@@ -1414,9 +1414,10 @@ TRACKER_COMPARE_BODY = """
 How does HORIZON compare to other live hantavirus trackers?
 This page gives a factual, source-cited comparison of every publicly accessible
 hantavirus surveillance site as of May 2026 &#x2014;
-<strong>hantavirus.live</strong>, <strong>hanta-live.com</strong>, and
-<strong>hantaviruslive.com</strong> &#x2014; against HORIZON on the criteria that
-matter for public-health, clinical, and research use.
+<strong>hantavirus.live</strong>, <strong>hanta-live.com</strong>,
+<strong>hantaviruslive.com</strong>, <strong>hantaviruslivemap.com</strong>,
+and <strong>hantavirustracker.io</strong> &#x2014; against HORIZON on the
+criteria that matter for public-health, clinical, and research use.
 </p>
 
 <h2>Summary</h2>
@@ -1432,23 +1433,53 @@ Case counts are drawn exclusively from <em>authoritative confirmed-case publicat
 not from media volume.
 </p>
 <p>
-The three competing sites are:
+The five competing sites:
 </p>
 <ul>
+  <li>
+    <strong>hantavirustracker.io</strong> &#x2014; a live map and news timeline site targeting
+    "2026 Hantavirus Outbreak Tracker" keyword cluster. Aggregates WHO/CDC data and public
+    news. No published methodology, no source registry, no open data licence, no API.
+  </li>
+  <li>
+    <strong>hantaviruslivemap.com</strong> &#x2014; an interactive map site using ArcGIS
+    and the public ANDV dataset (the same Oxford Kraemer Lab data HORIZON ingests).
+    Adds AIS ship tracking for MV Hondius. Counts include a large "monitoring" category
+    (88% of total) that is not the same as confirmed cases.
+  </li>
   <li>
     <strong>hantavirus.live</strong> &#x2014; a Czech-operated aggregator (hantaflow.com) that
     tracks media reporting frequency. Coverage is based on open news feeds.
   </li>
   <li>
-    <strong>hanta-live.com</strong> &#x2014; a news-signal aggregator that explicitly states on
-    its site that displayed counts "reflect media reporting volume, not laboratory-confirmed
-    case counts."
+    <strong>hanta-live.com</strong> &#x2014; a news-signal aggregator. Explicitly states on
+    its site that displayed counts reflect media reporting volume, not laboratory-confirmed
+    case counts. Updates every 5 minutes from public news feeds.
   </li>
   <li>
     <strong>hantaviruslive.com</strong> &#x2014; a self-described independent educational site
     that draws from WHO situation reports and Oceanwide Expeditions communications.
-    It explicitly states it is "for educational purposes only" and is not a surveillance
-    platform.
+    Explicitly "for educational purposes only."
+  </li>
+</ul>
+
+<h2>Key facts before reading the table</h2>
+<ul>
+  <li>
+    <strong>hantaviruslivemap.com "173 total cases"</strong> includes 152 in a "monitoring"
+    category (88%). These are not confirmed or suspected cases. Confirmed and suspected
+    combined are 15 (8%). HORIZON tracks only confirmed/suspected from WHO DON 600 and
+    national authority publications.
+  </li>
+  <li>
+    <strong>hanta-live.com country counts</strong> reflect how many news articles mention
+    a country, not how many laboratory-confirmed cases have been reported there.
+    A single news story about one case can increment 20+ country counts.
+  </li>
+  <li>
+    <strong>hantavirustracker.io</strong> draws from WHO/CDC/ECDC/PAHO but does not publish
+    a source registry, methodology, data licence, or API. Case numbers are not independently
+    verifiable.
   </li>
 </ul>
 
@@ -1635,8 +1666,239 @@ cited as such.
   <li><a href="/methodology">HORIZON methodology and source qualification</a></li>
   <li><a href="/data">Download HORIZON open data (CC BY 4.0)</a></li>
   <li><a href="/sources">Full source registry with NATO Admiralty ratings</a></li>
+  <li><a href="/timeline">Hantavirus 2026 outbreak timeline</a></li>
   <li><a href="/compare/andes-vs-sin-nombre">Andes virus vs Sin Nombre virus</a></li>
   <li><a href="/compare/hps-vs-hfrs">HPS vs HFRS</a></li>
+</ul>
+
+{_CTA_LIVE_MAP}
+"""
+
+
+# ---------------------------------------------------------------------------
+# /timeline  — chronological outbreak timeline (2026)
+# Keyword targets: "hantavirus timeline 2026", "hantavirus news timeline",
+#   "hantavirus outbreak timeline", "hantavirus 2026 timeline",
+#   "MV Hondius timeline", "hantavirus cruise ship timeline"
+# Competes directly with hantavirustracker.io's "news timeline" title claim.
+# ---------------------------------------------------------------------------
+
+
+TIMELINE_BODY = """
+<p class="lead">
+A chronological record of every major hantavirus event in 2026, sourced exclusively
+from authoritative publications: WHO Disease Outbreak News, CDC Health Alert Network,
+ECDC Communicable Disease Threats Report, PAHO Epidemiological Alerts, national health
+ministries, and peer-reviewed literature. Every date carries a source citation. This
+timeline covers the <strong>MV Hondius Andes virus cluster</strong> and ongoing
+endemic hantavirus activity worldwide.
+</p>
+
+{_NOT_MEDICAL_ADVICE}
+
+<h2>2026 MV Hondius outbreak timeline</h2>
+
+<p>
+The 2026 MV Hondius cluster is the defining hantavirus event of 2026: the first
+documented large-scale Andes virus (ANDV) exposure in a closed-vessel environment.
+The following events are sourced from WHO DON 600, PAHO Alert 2026-03-25,
+ECDC, CDC, RIVM, UKHSA, and the Oxford Kraemer Lab individual-level line list (CC0).
+</p>
+
+<ol class="timeline-list">
+
+<li>
+<time datetime="2026-02">February 2026 (approximate)</time>
+<p>
+MV Hondius departs on an Antarctic expedition cruise via Ushuaia,
+Tierra del Fuego, Argentina. Passengers participate in wildlife excursions
+on or near the Argentine steppe, the primary ANDV-endemic zone of Patagonia.
+The exposure window for the index cohort is assessed to fall in this period.
+ANDV is endemic in the rodent <em>Oligoryzomys longicaudatus</em> (long-tailed
+pygmy rice rat) throughout southern Argentina and Chile.
+</p>
+<p><em>Source: PAHO Epidemiological Alert 2026-03-25; WHO DON 600; ECDC CDTR.</em></p>
+</li>
+
+<li>
+<time datetime="2026-03-25">25 March 2026</time>
+<p>
+<strong>PAHO Epidemiological Alert 2026-03-25</strong> issued. PAHO alerts member
+states to an emerging Andes virus cluster linked to MV Hondius passengers. Argentina
+Ministerio de Salud confirms the first laboratory-confirmed case. Index case with PCR
+confirmation. Argentina activates national surveillance protocols.
+</p>
+<p><em>Source: PAHO Epidemiological Alert 2026-03-25 (A1/1 NATO — PAHO is the highest-tier
+regional authority for the Americas).</em></p>
+</li>
+
+<li>
+<time datetime="2026-04">April 2026</time>
+<p>
+MV Hondius voyage concludes. Passengers repatriate to countries of origin across
+Europe, North America, and Australasia. Symptom onset documented across the cohort:
+the Oxford Kraemer Lab individual-level line list records onset dates from
+<strong>6 April to 7 May 2026</strong>, consistent with ANDV's 1&#x2013;8 week
+incubation after aerosolised exposure.
+</p>
+<p>
+National health authorities in the Netherlands (RIVM), France (SPF France), Spain,
+and the United Kingdom (UKHSA) activate case-finding among MV Hondius passengers.
+WHO Regional Offices (EURO, AMRO) notified. Multi-country coordination initiated.
+</p>
+<p><em>Sources: Oxford Kraemer Lab MV Hondius ANDV line list (CC0, updated in real time);
+RIVM (NATO A2); SPF France (NATO A2); UKHSA (NATO A2).</em></p>
+</li>
+
+<li>
+<time datetime="2026-05-02">2 May 2026 (approximate)</time>
+<p>
+<strong>WHO Disease Outbreak News 2026-DON600</strong> published. WHO formally notifies
+the international community of the multi-country Andes virus cluster.
+</p>
+<ul>
+  <li><strong>Confirmed cases:</strong> 28 (at initial DON600 publication)</li>
+  <li><strong>Countries with confirmed/suspected cases:</strong> 11</li>
+  <li><strong>Serotype:</strong> Andes virus (ANDV), confirmed by PCR</li>
+  <li><strong>Exposure window:</strong> Ushuaia, Tierra del Fuego, Argentina</li>
+  <li><strong>Transmission:</strong> Environmental (rodent excreta) during land excursions.
+    Person-to-person transmission not ruled out for some cases (ANDV is the only
+    orthohantavirus with documented P2P capability).</li>
+</ul>
+<p><em>Source: WHO DON 600 (NATO A1 — WHO Disease Outbreak News is the gold standard
+for confirmed multi-country outbreak notifications).</em></p>
+</li>
+
+<li>
+<time datetime="2026-05-11">11 May 2026</time>
+<p>
+CDC confirms US passengers among those exposed. CDC Health Alert Network (HAN) guidance
+issued for US clinicians. US repatriation flights coordinated from disembarkation ports.
+UKHSA confirms British nationals among monitored contacts.
+</p>
+<p>
+Oxford Kraemer Lab individual-level line list updated: nationality breakdown includes
+Spain, Netherlands, France, UK, Canada, US, Ireland, South Africa, Germany, and others.
+</p>
+<p><em>Sources: CDC HAN (NATO A1); UKHSA (NATO A2); Oxford Kraemer Lab line list (CC0).</em></p>
+</li>
+
+<li>
+<time datetime="2026-05-12">12 May 2026</time>
+<p>
+<strong>UKHSA blog post</strong> published: "What you need to know about the hantavirus
+outbreak linked to the Dutch cruise ship." UKHSA confirms the MV Hondius is a
+Netherlands-flagged vessel; clarifies that the passenger exposure was environmental, not
+onboard transmission, and provides clinical guidance for UK clinicians seeing returning
+travellers with compatible symptoms.
+</p>
+<p><em>Source: UKHSA blog (NATO A2).</em></p>
+</li>
+
+<li>
+<time datetime="2026-05-14">14 May 2026 (ongoing)</time>
+<p>
+<strong>Active surveillance continuing.</strong> All repatriated passengers and crew
+within the incubation window remain under active monitoring by national health
+authorities. WHO, ECDC, PAHO, and national ministries are co-ordinating.
+</p>
+<p>
+HORIZON is ingesting case updates every 15 minutes from 65+ authoritative sources.
+Authoritative case counts: see the live dashboard and the
+<a href="/outbreaks/mv-hondius-2026">MV Hondius incident page</a>.
+</p>
+<p><em>Source: HORIZON live ingest pipeline (WHO, ECDC, PAHO, RIVM, SPF France,
+UKHSA, Argentina MSAL, Oxford Kraemer Lab).</em></p>
+</li>
+
+</ol>
+
+<h2>2026 endemic hantavirus activity (non-MV Hondius)</h2>
+
+<p>
+The MV Hondius cluster is unusual but not indicative of a global hantavirus surge.
+Endemic activity in 2026 is consistent with historical patterns.
+</p>
+
+<h3>Puumala virus (PUUV) — Europe</h3>
+<p>
+Finland has the highest hantavirus notification rate in Europe: 14.5 per 100,000
+population per year (ECDC Annual Epidemiological Report 2023). 2026 activity is
+monitored by THL (National Institute for Health and Welfare, NATO A1). Peak season
+is July&#x2013;August following mast years in the bank vole (<em>Myodes glareolus</em>)
+population. Sweden (FHM, sorkfeber in Norrland and Ångermanland), Norway (FHI,
+Innlandet region), Germany, France (Ardennes, Champagne-Ardenne), and Belgium
+report seasonal PUUV cases. ECDC CDTR covers all EU activity weekly.
+</p>
+<p>
+Data: <a href="/hantavirus/puumala-virus">Puumala virus serotype page</a>,
+<a href="/countries/fi">Finland country page</a>,
+<a href="/countries/se">Sweden country page</a>.
+</p>
+
+<h3>Andes virus (ANDV) — South America (endemic)</h3>
+<p>
+Argentina is the global ANDV epicentre outside the MV Hondius cluster. The
+Argentine Ministerio de Salud publishes the Boletín Epidemiológico Nacional (BEN),
+ingested by HORIZON weekly (NATO B2). Endemic provinces: Patagonia (Río Negro,
+Neuquén, Chubut, Santa Cruz), Buenos Aires province (pampas), and Tierra del Fuego.
+Chile, Bolivia (Beni, Pando), Brazil (Juquitiba and Araraquara genotypes in
+São Paulo), and Paraguay also report regular ANDV cases.
+</p>
+<p>
+Data: <a href="/countries/ar">Argentina country page</a>,
+<a href="/countries/cl">Chile country page</a>,
+<a href="/countries/br">Brazil country page</a>.
+</p>
+
+<h3>Hantaan virus (HTNV) and Seoul virus (SEOV) — East Asia</h3>
+<p>
+China, South Korea, and Japan continue to report Hantaan virus (HFRS, high CFR)
+and Seoul virus (HFRS, lower CFR) cases. Seoul virus circulates globally via
+<em>Rattus norvegicus</em> and <em>Rattus rattus</em> wherever rat populations exist.
+HORIZON ingests reports from China CDC (when accessible), Japan NIID,
+NCBI GenBank (new HTNV/SEOV sequences with reldate=14), and WHO WPRO.
+</p>
+
+<h2>Understanding the timeline: confirmed vs monitored</h2>
+<p>
+A word on case counts that appear in other trackers. For the MV Hondius cluster,
+some sites show totals of 100&#x2013;170+ "cases." These typically include large
+"monitoring" categories of passengers who were on the ship but have not developed
+symptoms. HORIZON follows WHO DON 600 terminology:
+</p>
+<ul>
+  <li><strong>Confirmed:</strong> laboratory-confirmed ANDV infection (PCR or serology)</li>
+  <li><strong>Suspected:</strong> clinically compatible illness with epidemiological link</li>
+  <li><strong>Monitoring:</strong> exposed persons under surveillance — these are
+    <em>not cases</em> and HORIZON does not count them as confirmed cases</li>
+</ul>
+<p>
+This is why HORIZON's confirmed case count differs from the 170+ figures seen on
+mapping sites: we count confirmed and suspected cases per WHO DON 600, not the
+full monitoring cohort of all passengers.
+</p>
+
+<h2>Live chronology and event feed</h2>
+<p>
+HORIZON's machine-readable event feed is updated every 15 minutes:
+</p>
+<ul>
+  <li><a href="/rss.xml">RSS feed</a> &#x2014; subscribe in your feed reader</li>
+  <li><a href="/atom.xml">Atom feed</a> &#x2014; RFC 4287 compliant</li>
+  <li><a href="/feed.json">JSON Feed</a> &#x2014; machine-readable for developer integrations</li>
+  <li><a href="/chronology">Interactive chronology</a> &#x2014; explore the full event timeline</li>
+  <li><a href="/outbreaks/mv-hondius-2026">MV Hondius incident page</a> &#x2014; authoritative case counts, history, source citations</li>
+</ul>
+
+<h2>Related pages</h2>
+<ul>
+  <li><a href="/hantavirus/2026">Full 2026 hantavirus outbreak tracker</a></li>
+  <li><a href="/outbreaks/mv-hondius-2026">MV Hondius cluster &#x2014; authoritative count and history</a></li>
+  <li><a href="/hantavirus/andes-virus">Andes virus serotype reference</a></li>
+  <li><a href="/hantavirus/transmission">Hantavirus transmission &#x2014; aerosol, P2P, routes</a></li>
+  <li><a href="/data">Download HORIZON open data (CC BY 4.0)</a></li>
+  <li><a href="/compare/hantavirus-live-trackers">Compare HORIZON to other live hantavirus trackers</a></li>
 </ul>
 
 {_CTA_LIVE_MAP}

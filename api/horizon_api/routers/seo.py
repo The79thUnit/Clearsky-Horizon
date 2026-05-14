@@ -14,6 +14,7 @@ Serves:
   * /atom.xml                 — Atom 1.0
   * /feed.json                — JSON Feed 1.1
 
+  * /timeline                 — 2026 outbreak timeline (HTML, SEO counter to hantavirustracker.io)
   * /hantavirus               — overview hub page (HTML)
   * /hantavirus/symptoms      — symptoms page (HTML)
   * /hantavirus/transmission  — transmission page (HTML)
@@ -387,6 +388,58 @@ async def json_feed() -> Response:
 
 def _home_crumb() -> Breadcrumb:
     return Breadcrumb(name="HORIZON", url=f"{BASE_URL}/")
+
+
+@router.get("/timeline", response_class=HTMLResponse)
+async def page_timeline() -> Response:
+    """Chronological 2026 hantavirus outbreak timeline — competes with hantavirustracker.io 'news timeline'."""
+    spec = PageSpec(
+        path="/timeline",
+        title="Hantavirus 2026 Outbreak Timeline — MV Hondius Events, WHO/CDC/ECDC Data | HORIZON",
+        description=(
+            "Chronological timeline of the 2026 hantavirus outbreak: MV Hondius Andes virus cluster "
+            "(WHO DON 600, PAHO Alert 2026-03-25, ECDC, UKHSA), symptom onset dates, case counts, "
+            "repatriation events, and endemic PUUV/ANDV activity. Every date cites its authoritative source."
+        ),
+        h1="Hantavirus 2026 Outbreak Timeline",
+        body_html=seo_content.TIMELINE_BODY,
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Timeline", url=f"{BASE_URL}/timeline"),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            {
+                "@type": "Article",
+                "@id": f"{BASE_URL}/timeline#article",
+                "headline": "Hantavirus 2026 Outbreak Timeline — MV Hondius and Endemic Activity",
+                "description": (
+                    "Authoritative chronological timeline of the 2026 MV Hondius Andes virus cluster "
+                    "and endemic hantavirus activity. Sources: WHO DON 600, PAHO, ECDC, CDC, RIVM, UKHSA, "
+                    "Oxford Kraemer Lab individual-level line list."
+                ),
+                "publisher": {"@id": f"{BASE_URL}/#org"},
+                "datePublished": "2026-05-14",
+                "dateModified": "2026-05-14",
+                "inLanguage": "en-GB",
+                "about": {
+                    "@type": "InfectiousDisease",
+                    "name": "Hantavirus Pulmonary Syndrome",
+                    "code": {"@type": "MedicalCode", "codingSystem": "ICD-10", "codeValue": "B33.4"},
+                },
+            },
+        ],
+        keywords=(
+            "hantavirus timeline 2026, hantavirus outbreak timeline, hantavirus news timeline, "
+            "MV Hondius timeline, hantavirus 2026 timeline, hantavirus chronology 2026, "
+            "hantavirus cruise ship timeline, Andes virus 2026 events, WHO DON 600 timeline, "
+            "hantavirus events by date, PAHO hantavirus alert timeline"
+        ),
+        news_keywords="hantavirus timeline, MV Hondius, 2026 outbreak, Andes virus, WHO DON 600",
+        og_type="article",
+        article_section="Public Health",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
 
 
 @router.get("/hantavirus", response_class=HTMLResponse)

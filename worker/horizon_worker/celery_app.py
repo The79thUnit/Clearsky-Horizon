@@ -16,6 +16,7 @@ app = Celery(
         "horizon_worker.tasks.ais",
         "horizon_worker.tasks.extraction",
         "horizon_worker.tasks.indexnow",
+        "horizon_worker.tasks.auto_qualify",
     ],
 )
 
@@ -58,10 +59,22 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="*/30"),
         "args": ["healthmap"],
     },
-    "fetch-reddit": {
-        "task": "horizon_worker.tasks.ingest.fetch_source",
-        "schedule": crontab(minute="*/30"),
-        "args": ["reddit"],
+    # NOTE: reddit disabled 2026-05-14 (migration 059). NATO E/4 social-rumour
+    # source; content quality review found some records unsuitable for public
+    # display. Mastodon feeds (C/3) and wire services (B/2-3) replace this.
+    # Existing case_reports retained in DB but excluded from public API unless
+    # analyst_confidence is explicitly set by a human reviewer.
+    # "fetch-reddit": {
+    #     "task": "horizon_worker.tasks.ingest.fetch_source",
+    #     "schedule": crontab(minute="*/30"),
+    #     "args": ["reddit"],
+    # },
+    # Auto-qualifier: pre-fill analyst_confidence for new ingested records.
+    # Runs hourly; applies NATO-band scoring to any record with NULL
+    # analyst_confidence (excluding Reddit). Safe to run even when empty.
+    "auto-qualify": {
+        "task": "horizon_worker.tasks.auto_qualify.run_auto_qualifier_task",
+        "schedule": crontab(minute=58),
     },
     # Wire services + major broadcaster (migration 053, 2026-05-14).
     # Every 30 min: wire desks publish continuously; 30-min cadence captures

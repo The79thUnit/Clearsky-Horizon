@@ -54,35 +54,50 @@ JOIN qualification_scores qs ON qs.case_report_id = cr.id
 LEFT JOIN serotypes st     ON st.id = cr.serotype_id
 """
 
+# Reddit quality gate: Reddit records (NATO E/4, disabled 2026-05-14 per
+# migration 059) are hidden from the public JSON API unless a human analyst
+# has explicitly set analyst_confidence. They remain accessible via the
+# bulk NDJSON export (/api/v1/cases/bulk/ndjson) for research transparency.
+# The filter is: show the record if the source is NOT reddit, OR if
+# analyst_confidence is explicitly set (human-reviewed and approved).
+_REDDIT_GATE = (
+    "  AND (s.code != 'reddit' OR qs.analyst_confidence IS NOT NULL)\n"
+)
+
 # Cursor-based (keyset) pagination -- stable under continuous ingest.
 _QUERY_CURSOR = (
     "SELECT " + _SELECT_COLS
-    + """
-WHERE (cr.ingested_at, cr.id) < ($2::timestamptz, $3::uuid)
-ORDER BY cr.ingested_at DESC, cr.id DESC
-LIMIT $1
-"""
+    + "WHERE (cr.ingested_at, cr.id) < ($2::timestamptz, $3::uuid)\n"
+    + _REDDIT_GATE
+    + "ORDER BY cr.ingested_at DESC, cr.id DESC\n"
+    + "LIMIT $1\n"
 )
 
 # First page (no cursor) -- just order and limit.
 _QUERY_FIRST = (
     "SELECT " + _SELECT_COLS
-    + """
-ORDER BY cr.ingested_at DESC, cr.id DESC
-LIMIT $1
-"""
+    + "WHERE TRUE\n"
+    + _REDDIT_GATE
+    + "ORDER BY cr.ingested_at DESC, cr.id DESC\n"
+    + "LIMIT $1\n"
 )
 
 # Offset-based (legacy) -- non-deterministic with live data.
 _QUERY_OFFSET = (
     "SELECT " + _SELECT_COLS
-    + """
-ORDER BY cr.ingested_at DESC
-LIMIT $1 OFFSET $2
-"""
+    + "WHERE TRUE\n"
+    + _REDDIT_GATE
+    + "ORDER BY cr.ingested_at DESC\n"
+    + "LIMIT $1 OFFSET $2\n"
 )
 
-_QUERY_COUNT = "SELECT COUNT(*)::int AS c FROM case_reports"
+_QUERY_COUNT = (
+    "SELECT COUNT(*)::int AS c\n"
+    "FROM case_reports cr\n"
+    "JOIN sources s ON s.id = cr.source_id\n"
+    "LEFT JOIN qualification_scores qs ON qs.case_report_id = cr.id\n"
+    "WHERE (s.code != 'reddit' OR qs.analyst_confidence IS NOT NULL)\n"
+)
 
 # NDJSON bulk export (all columns, no filtering).
 _QUERY_BULK = (
