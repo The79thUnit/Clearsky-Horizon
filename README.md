@@ -2,7 +2,9 @@
 
 [![Live Platform](https://img.shields.io/badge/Live%20Platform-hantavirus.software-2d7ff9?style=flat-square)](https://hantavirus.software)
 [![MIT Licence](https://img.shields.io/badge/Licence-MIT-00e87a?style=flat-square)](LICENSE)
-[![Sources](https://img.shields.io/badge/Sources-65%2B%20authoritative-f59e0b?style=flat-square)](https://hantavirus.software)
+[![Data Licence](https://img.shields.io/badge/Data-CC%20BY%204.0-00e87a?style=flat-square)](https://creativecommons.org/licenses/by/4.0/)
+[![Live cases](https://hantavirus.software/api/v1/meta/badge/cases)](https://hantavirus.software)
+[![Sources](https://hantavirus.software/api/v1/meta/badge/sources)](https://hantavirus.software/sources)
 
 Real-time outbreak surveillance for hantavirus pulmonary syndrome (HPS) and haemorrhagic fever
 with renal syndrome (HFRS). HORIZON aggregates intelligence from 65+ authoritative sources,
@@ -68,7 +70,7 @@ The live platform shows:
 
 ## Data Sources
 
-HORIZON ingests from 53+ sources across three qualification tiers.
+HORIZON ingests from 65+ sources across three qualification tiers.
 
 ### Tier 1 — Official Authority (highest reliability)
 
@@ -229,6 +231,47 @@ Architecture decisions are documented in `docs/adr/`. Key ADRs:
 
 ---
 
+## Public API
+
+The API is free, public, and requires no registration or API key.
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/v1/cases` | Paginated case reports with NATO Admiralty qualification scores |
+| `GET /api/v1/cases/bulk/ndjson` | Streaming NDJSON export — full dataset, no cursor limit |
+| `GET /api/v1/incidents` | Outbreak incidents with authoritative case counts |
+| `GET /api/v1/sources` | Source registry — all 65+ sources with NATO ratings and telemetry |
+| `GET /api/v1/meta/stats` | Global counters (total cases, incidents, sources) |
+| `GET /api/v1/meta/dcat` | DCAT-AP 3.0 JSON-LD — for EU/OpenAIRE dataset harvesters |
+| `GET /api/v1/meta/citation` | CSL-JSON — one-click import for Zotero / Mendeley / Paperpile |
+| `GET /.well-known/dataset` | RFC 8615 well-known dataset discovery |
+
+Interactive docs at [hantavirus.software/api/docs](https://hantavirus.software/api/docs).
+OpenAPI schema at [/api/openapi.json](https://hantavirus.software/api/openapi.json).
+Cite via [CITATION.cff](CITATION.cff) or the [CSL-JSON endpoint](https://hantavirus.software/api/v1/meta/citation).
+
+Data licence: **CC BY 4.0**. Attribution to 79th Unit Limited required.
+
+---
+
+## HORIZON vs other hantavirus live trackers
+
+HORIZON is the most comprehensive live hantavirus tracker available.
+Full feature comparison at [hantavirus.software/compare/hantavirus-live-trackers](https://hantavirus.software/compare/hantavirus-live-trackers).
+
+| Feature | HORIZON | hantavirus.live | hanta-live.com | hantaviruslive.com |
+|---------|---------|----------------|----------------|-------------------|
+| Data type | **Confirmed cases** (WHO/CDC/ECDC) | Media volume | Media volume (stated) | Educational summary |
+| Sources | **65+** | ~1-3 | ~1-3 | ~1-2 |
+| Free API | **Yes** (JSON + NDJSON) | No | No | No |
+| Oxford Kraemer Lab line list | **Yes** (28-col, CC0) | No | No | No |
+| HantaNet genomics | **Yes** (NCBI RefSeq) | No | No | No |
+| Open data licence | **CC BY 4.0** | Not stated | Not stated | Not stated |
+| Methodology published | **Yes** | No | No | No |
+| Research-citable | **Yes** | No | No | No |
+
+---
+
 ## Not medical advice
 
 HORIZON is an informational surveillance tool only. It is not a diagnostic system and does not
@@ -239,8 +282,9 @@ HORIZON is not affiliated with WHO, CDC, ECDC, PAHO, or any national health auth
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+Code: MIT. See [LICENSE](LICENSE).
+Data: CC BY 4.0. See [hantavirus.software/data](https://hantavirus.software/data).
 
 ---
 
-*Built by the 79th Unit. Keywords: hantavirus, Andes virus, ANDV, hantavirus pulmonary syndrome, HPS, haemorrhagic fever with renal syndrome, HFRS, Puumala, Hantaan, Seoul virus, Sin Nombre, outbreak surveillance, real-time epidemiology, MV Hondius 2026, cruise ship hantavirus, open-source surveillance platform, Oxford Kraemer Lab, individual line list, research linelist, HantaNet, NCBI RefSeq, genomic reference, Andrew Rambaut, Nextstrain, Moritz Kraemer.*
+*Built by the 79th Unit. Keywords: hantavirus, hantavirus live tracker, live hantavirus map, best hantavirus tracker 2026, Andes virus, ANDV, hantavirus pulmonary syndrome, HPS, haemorrhagic fever with renal syndrome, HFRS, Puumala, Hantaan, Seoul virus, Sin Nombre, outbreak surveillance, real-time epidemiology, MV Hondius 2026, cruise ship hantavirus, open-source surveillance platform, Oxford Kraemer Lab, individual line list, research linelist, HantaNet, NCBI RefSeq, genomic reference, Andrew Rambaut, Nextstrain, Moritz Kraemer, hantavirus confirmed cases, hantavirus open data, hantavirus API.*

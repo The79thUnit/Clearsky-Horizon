@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>HORIZON Hantavirus</ShortName>
+  <Description>Search live hantavirus outbreak reports, serotypes, and countries on HORIZON — the open hantavirus surveillance platform by 79th Unit Limited.</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Language>en-GB</Language>
+  <Contact>info@79thunit.co.uk</Contact>
+  <LongName>HORIZON Hantavirus Outbreak Surveillance</LongName>
+  <Tags>hantavirus outbreak surveillance epidemiology open-data</Tags>
+  <Developer>79th Unit Limited</Developer>
+  <Attribution>Data aggregated from WHO, CDC, ECDC, PAHO, ProMED, Oxford Kraemer Lab, NCBI RefSeq under CC BY 4.0. Source: 79th Unit Limited / hantavirus.software</Attribution>
+  <SyndicationRight>open</SyndicationRight>
+  <AdultContent>false</AdultContent>
+  <Language>en-GB</Language>
+  <Url type="text/html"
+       method="get"
+       template="https://hantavirus.software/?q={searchTerms}"/>
+  <Url type="application/json"
+       method="get"
+       template="https://hantavirus.software/api/v1/cases?q={searchTerms}"/>
+  <Url type="application/opensearchdescription+xml"
+       rel="self"
+       template="https://hantavirus.software/opensearch.xml"/>
+  <Query role="example" searchTerms="Andes virus outbreak 2026"/>
+  <Query role="example" searchTerms="hantavirus Argentina"/>
+  <Query role="example" searchTerms="MV Hondius hantavirus"/>
+  <Image width="16" height="16" type="image/png">https://hantavirus.software/favicon-32.png</Image>
+  <Image width="32" height="32" type="image/png">https://hantavirus.software/favicon-32.png</Image>
+</OpenSearchDescription>

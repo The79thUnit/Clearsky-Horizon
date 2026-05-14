@@ -121,6 +121,8 @@ def render_main_sitemap(now: datetime) -> str:
         ("/compare/hantavirus-vs-influenza", "monthly", 0.7),
         ("/compare/hantavirus-vs-covid", "monthly", 0.7),
         ("/compare/hps-vs-hfrs", "monthly", 0.7),
+        ("/compare/hantavirus-live-trackers", "monthly", 0.8),
+        ("/data", "daily", 0.8),
         ("/sources", "daily", 0.75),
         ("/methodology", "monthly", 0.7),
         ("/glossary", "weekly", 0.7),
@@ -147,6 +149,21 @@ def render_main_sitemap(now: datetime) -> str:
         ("/es/hantavirus/dobrava-belgrado", "weekly", 0.75),
         ("/es/preguntas-frecuentes", "weekly", 0.7),
         ("/es/brotes/mv-hondius-2026", "hourly", 0.9),
+        # Portuguese (pt-BR) surface — Brazil has endemic hantavirus
+        # (Juquitiba, Araraquara) and the highest search volume for
+        # "hantavirose" in Latin America.
+        ("/pt-br", "hourly", 0.95),
+        ("/pt-br/hantavirus", "weekly", 0.85),
+        ("/pt-br/hantavirus/sintomas", "weekly", 0.8),
+        ("/pt-br/hantavirus/transmissao", "weekly", 0.8),
+        ("/pt-br/hantavirus/prevencao", "weekly", 0.8),
+        ("/pt-br/hantavirus/andv", "weekly", 0.8),
+        ("/pt-br/hantavirus/snv", "weekly", 0.75),
+        ("/pt-br/hantavirus/puuv", "weekly", 0.75),
+        ("/pt-br/perguntas-frequentes", "weekly", 0.7),
+        ("/pt-br/surtos/mv-hondius-2026", "hourly", 0.9),
+        # English MV Hondius outbreak detail page (high-traffic event)
+        ("/outbreaks/mv-hondius-2026", "hourly", 0.9),
     ]
     parts = [_HEAD_URLSET]
     for path, freq, pri in static_urls:

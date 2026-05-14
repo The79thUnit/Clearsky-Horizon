@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#f1efe9" />
     <meta name="color-scheme" content="light" />
 
-    <title>HORIZON - Live Hantavirus Outbreak Tracker | Audit-Grade Source Provenance</title>
+    <title>HORIZON — Live Hantavirus Tracker | 65+ Sources, Open Data, Free API</title>
 
-    <meta name="description" content="Live hantavirus outbreak tracker covering all major Orthohantavirus serotypes (Andes, Sin Nombre, Puumala, Hantaan, Seoul, Dobrava). Aggregates 65+ sources: WHO, CDC, ECDC, PAHO, ProMED, national health ministries. Unique: Oxford Kraemer Lab individual-level MV Hondius ANDV line list (28-column, CC0) and full NCBI RefSeq Orthohantavirus genome set (HantaNet/CDC). NATO Admiralty dual-confidence model, Berkeley Protocol chain-of-custody. Open data CC BY 4.0." />
-    <meta name="keywords" content="hantavirus, hantavirus tracker, hantavirus outbreak 2026, hantavirus surveillance, hantavirus map, live hantavirus cases, hantavirus live tracker, hantavirus open data, hantavirus API, hantavirus JSON, Andes virus, ANDV, Andes virus 2026, Sin Nombre virus, SNV, Puumala virus, PUUV, Hantaan virus, Seoul virus, Dobrava virus, hantavirus pulmonary syndrome, HPS, haemorrhagic fever with renal syndrome, HFRS, MV Hondius, MV Hondius 2026, MV Hondius hantavirus, cruise ship outbreak, Antarctic cruise hantavirus, Ushuaia hantavirus, Oxford Kraemer Lab hantavirus, Moritz Kraemer hantavirus, hantavirus individual line list, hantavirus research linelist, HantaNet reference genome, NCBI RefSeq hantavirus, Orthohantavirus genomics, Andrew Rambaut hantavirus, Nextstrain hantavirus, WHO DON, CDC HAN, ProMED, PAHO, ECDC, NATO Admiralty source qualification, Berkeley Protocol provenance, dual confidence model, outbreak surveillance platform, real-time outbreak monitoring, OSINT, 79th Unit, hantavirus cases by country, hantavirus case count" />
+    <meta name="description" content="The most comprehensive live hantavirus tracker — 65+ sources vs 1-2 on competing sites. Real-time WHO/CDC/ECDC/PAHO data, not just news aggregation. Oxford Kraemer Lab 28-column MV Hondius individual line list (CC0). Full NCBI RefSeq Orthohantavirus genomes (HantaNet). NATO Admiralty dual-confidence model, free JSON API, open data CC BY 4.0. Covers all serotypes: Andes, Sin Nombre, Puumala, Hantaan, Seoul, Dobrava." />
+    <meta name="keywords" content="hantavirus live, hantavirus live tracker, live hantavirus map, hantavirus tracker, hantavirus outbreak 2026, hantavirus surveillance, hantavirus map, live hantavirus cases, hantavirus open data, hantavirus API, hantavirus JSON, hantavirus real time, hantaviruslive, hantavirus.live, hanta-live, Andes virus, ANDV, Andes virus 2026, Sin Nombre virus, SNV, Puumala virus, PUUV, Hantaan virus, Seoul virus, Dobrava virus, hantavirus pulmonary syndrome, HPS, haemorrhagic fever with renal syndrome, HFRS, MV Hondius, MV Hondius 2026, MV Hondius hantavirus, cruise ship outbreak, Antarctic cruise hantavirus, Ushuaia hantavirus, Oxford Kraemer Lab hantavirus, Moritz Kraemer hantavirus, hantavirus individual line list, hantavirus research linelist, HantaNet reference genome, NCBI RefSeq hantavirus, Orthohantavirus genomics, Andrew Rambaut hantavirus, Nextstrain hantavirus, WHO DON, CDC HAN, ProMED, PAHO, ECDC, NATO Admiralty source qualification, Berkeley Protocol provenance, dual confidence model, outbreak surveillance platform, real-time outbreak monitoring, OSINT, 79th Unit, hantavirus cases by country, hantavirus case count, hantavirus confirmed cases 2026, hantavirus deaths 2026" />
     <meta name="author" content="79th Unit Limited" />
     <meta name="publisher" content="79th Unit Limited" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -85,6 +85,19 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- OpenSearch: browsers (Firefox, Kagi, DuckDuckGo etc.) discover this and let users add HORIZON as a search engine -->
+    <link rel="search" type="application/opensearchdescription+xml" title="HORIZON Hantavirus" href="/opensearch.xml" />
+    <!-- Machine-readable licence signal (Bing, Google, CC crawlers) -->
+    <link rel="license" href="https://creativecommons.org/licenses/by/4.0/" />
+    <!-- Citation metadata endpoints: read by Zotero Connector, Mendeley Importer,
+         Europe PMC ID mapper, and academic browser extensions. -->
+    <link rel="describedby" href="/api/v1/meta/dcat" type="application/ld+json" />
+    <link rel="describedby" href="/api/v1/meta/citation" type="application/vnd.citationstyles.csl+json" />
+    <link rel="describedby" href="/CITATION.cff" type="text/yaml" />
+    <!-- Publisher identity (helps Google resolve entity across domains) -->
+    <link rel="me" href="https://79thunit.co.uk" />
+    <link rel="me" href="https://github.com/The-79th-Unit" />
+
     <!-- Feed auto-discovery (Google News, Feedly, Inoreader, JSON Feed apps) -->
     <link rel="alternate" type="application/rss+xml"  title="HORIZON updates (RSS)"  href="/rss.xml" />
     <link rel="alternate" type="application/atom+xml" title="HORIZON updates (Atom)" href="/atom.xml" />
@@ -152,7 +165,7 @@
           "sameAs": [
             "https://79thunit.co.uk",
             "https://hantavirus.software",
-            "https://github.com/The79thUnit/Clearsky-Horizon"
+            "https://github.com/The-79th-Unit/Clearsky-Horizon"
           ]
         },
         {
@@ -188,7 +201,7 @@
           "about": { "@id": "https://hantavirus.software/#mv-hondius" }
         },
         {
-          "@type": "Dataset",
+          "@type": ["Dataset", "DataFeed"],
           "@id": "https://hantavirus.software/#dataset",
           "name": "HORIZON Hantavirus Surveillance Dataset",
           "alternateName": ["Hantavirus outbreak tracker", "Andes virus surveillance", "Sin Nombre virus tracker"],
@@ -276,7 +289,61 @@
             "@id": "https://hantavirus.software/#catalog",
             "name": "HORIZON Open Data Catalogue",
             "url": "https://hantavirus.software/"
-          }
+          },
+          "potentialAction": [
+            {
+              "@type": "DownloadAction",
+              "target": "https://hantavirus.software/api/v1/cases/bulk/ndjson",
+              "name": "Download bulk NDJSON (streaming, no cursor limit)"
+            },
+            {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://hantavirus.software/api/v1/cases?country={country_iso2}&serotype={serotype}"
+              },
+              "query-input": "optional name=country_iso2 optional name=serotype",
+              "name": "Query case reports by country and serotype"
+            }
+          ],
+          "conformsTo": "https://bioschemas.org/profiles/Dataset/1.1-RELEASE",
+          "checkFrequency": "PT15M",
+          "hasPart": [
+            {
+              "@type": "Dataset",
+              "@id": "https://hantavirus.software/#dataset-linelist",
+              "name": "Oxford Kraemer Lab MV Hondius ANDV Individual Line List",
+              "description": "28-column per-person line list for the 2026 MV Hondius Andes virus cluster. CC0. Maintained by Dr Moritz Kraemer (University of Oxford), Sam Scarpino, and Andrew Rambaut (University of Edinburgh / Nextstrain).",
+              "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "url": "https://github.com/kraemer-lab/Hondius_hantavirus_h2026",
+              "creator": [
+                { "@type": "Person", "name": "Moritz Kraemer", "affiliation": { "@type": "Organization", "name": "University of Oxford" } },
+                { "@type": "Person", "name": "Sam Scarpino" },
+                { "@type": "Person", "name": "Andrew Rambaut", "affiliation": { "@type": "Organization", "name": "University of Edinburgh / Nextstrain" } }
+              ]
+            },
+            {
+              "@type": "Dataset",
+              "@id": "https://hantavirus.software/#dataset-refseq",
+              "name": "NCBI RefSeq Orthohantavirus Reference Genome Set (HantaNet)",
+              "description": "Full Orthohantavirus reference genome set — S/M/L segments for all major serotypes. Curated by the CDC Molecular Epidemiology and Bioinformatics Team. Described in PMC10675615.",
+              "url": "https://www.ncbi.nlm.nih.gov/genomes/VirusVariation/Database/nph-select.cgi?taxid=1980521",
+              "creator": { "@type": "Organization", "name": "CDC Molecular Epidemiology and Bioinformatics Team" },
+              "citation": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10675615/"
+            }
+          ],
+          "isBasedOn": [
+            { "@type": "CreativeWork", "name": "WHO Disease Outbreak News",         "url": "https://www.who.int/emergencies/disease-outbreak-news",                                   "publisher": { "@type": "Organization", "name": "World Health Organization" } },
+            { "@type": "CreativeWork", "name": "US CDC Health Alert Network (HAN)",  "url": "https://emergency.cdc.gov/han/",                                                           "publisher": { "@type": "Organization", "name": "US Centers for Disease Control and Prevention" } },
+            { "@type": "CreativeWork", "name": "ECDC Communicable Disease Threats Report", "url": "https://www.ecdc.europa.eu/en/threats-and-outbreaks/reports-and-data",             "publisher": { "@type": "Organization", "name": "European Centre for Disease Prevention and Control" } },
+            { "@type": "CreativeWork", "name": "PAHO Epidemiological Alerts",        "url": "https://www.paho.org/en/epidemiological-alerts-and-updates",                             "publisher": { "@type": "Organization", "name": "Pan American Health Organization" } },
+            { "@type": "CreativeWork", "name": "ProMED-mail",                        "url": "https://promedmail.org/",                                                                  "publisher": { "@type": "Organization", "name": "International Society for Infectious Diseases" } },
+            { "@type": "Dataset",      "name": "Oxford Kraemer Lab MV Hondius ANDV line list", "@id": "https://hantavirus.software/#dataset-linelist",                               "url": "https://github.com/kraemer-lab/Hondius_hantavirus_h2026" },
+            { "@type": "Dataset",      "name": "NCBI RefSeq Orthohantavirus Reference Genome Set (HantaNet)", "@id": "https://hantavirus.software/#dataset-refseq",                  "url": "https://www.ncbi.nlm.nih.gov/genomes/VirusVariation/Database/nph-select.cgi?taxid=1980521" },
+            { "@type": "CreativeWork", "name": "Europe PMC",                         "url": "https://europepmc.org/",                                                                   "publisher": { "@type": "Organization", "name": "European Bioinformatics Institute" } },
+            { "@type": "CreativeWork", "name": "NOAA Multivariate ENSO Index (MEI.v2)", "url": "https://psl.noaa.gov/enso/mei/",                                                      "publisher": { "@type": "Organization", "name": "NOAA Physical Sciences Laboratory" } },
+            { "@type": "CreativeWork", "name": "NASA MODIS MOD13A3 NDVI",            "url": "https://lpdaac.usgs.gov/products/mod13a3v061/",                                           "publisher": { "@type": "Organization", "name": "NASA Land Processes DAAC" } }
+          ]
         },
         {
           "@type": "SpecialAnnouncement",
@@ -528,7 +595,7 @@
             "MV Hondius 2026 cruise ship cluster tracking"
           ],
           "sameAs": [
-            "https://github.com/The79thUnit/Clearsky-Horizon"
+            "https://github.com/The-79th-Unit/Clearsky-Horizon"
           ]
         },
         {

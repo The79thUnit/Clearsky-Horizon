@@ -1,0 +1,61 @@
+/* HUMANS.TXT                                          */
+/* https://humanstxt.org/                             */
+/* The humans behind HORIZON Hantavirus Surveillance  */
+
+/* TEAM */
+  Operator: 79th Unit Limited
+  Location: United Kingdom
+  CRN: 17133814
+  Contact: info [at] 79thunit.co.uk
+  Twitter: @79thunit
+
+/* PLATFORM */
+  URL: https://hantavirus.software/
+  Stack: FastAPI + React + PostgreSQL + Celery
+  Deployment: OVHcloud Roubaix (EU jurisdiction)
+  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+
+/* DATA SOURCES — PRIMARY */
+  WHO Disease Outbreak News: https://www.who.int/emergencies/disease-outbreak-news
+  US CDC Health Alert Network: https://emergency.cdc.gov/han/
+  ECDC Communicable Disease Threats Report: https://www.ecdc.europa.eu/
+  PAHO Epidemiological Alerts: https://www.paho.org/en/epidemiological-alerts-and-updates
+  ProMED-mail: https://promedmail.org/
+  Argentina Ministerio de Salud: https://www.argentina.gob.ar/salud
+  Chile Ministerio de Salud: https://www.minsal.cl/
+  Brazil Ministerio da Saude: https://www.gov.br/saude/
+
+/* DATA SOURCES — LITERATURE */
+  Europe PMC: https://europepmc.org/
+  PubMed: https://pubmed.ncbi.nlm.nih.gov/
+  bioRxiv, medRxiv: https://biorxiv.org/ / https://medrxiv.org/
+  Crossref, arXiv: https://crossref.org/ / https://arxiv.org/
+
+/* UNIQUE DATASETS */
+  Oxford Kraemer Lab MV Hondius line list (CC0):
+    Dr Moritz Kraemer, University of Oxford
+    Sam Scarpino
+    Andrew Rambaut, University of Edinburgh / Nextstrain
+    https://github.com/kraemer-lab/Hondius_hantavirus_h2026
+
+  HantaNet NCBI RefSeq Orthohantavirus genomes:
+    CDC Molecular Epidemiology and Bioinformatics Team
+    https://www.ncbi.nlm.nih.gov/genomes/VirusVariation/Database/nph-select.cgi?taxid=1980521
+    Reference: PMC10675615
+
+/* STANDARDS + METHODOLOGY */
+  Source qualification: NATO Admiralty Scale (STANAG 2511)
+  Chain-of-custody: Berkeley Protocol SHA-256 content hash
+  Citation: ICD 206 Source Reference Citation methodology
+  Confidence: Dual model (automated pipeline + human analyst)
+  Data quality: Analysis of Competing Hypotheses (ACH)
+
+/* CITATION */
+  CITATION.cff: https://hantavirus.software/CITATION.cff
+  OpenAPI: https://hantavirus.software/api/openapi.json
+  Bulk NDJSON: https://hantavirus.software/api/v1/cases/bulk/ndjson
+
+/* BUILT WITH */
+  Python, FastAPI, SQLAlchemy, Celery, Redis, PostgreSQL, PostGIS
+  React, Vite, TypeScript, Leaflet
+  Docker, nginx, Let's Encrypt

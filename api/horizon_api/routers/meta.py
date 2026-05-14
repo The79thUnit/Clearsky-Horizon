@@ -1,8 +1,9 @@
-"""Meta endpoints: /health and /api/v1/meta/stats (global counters)."""
+"""Meta endpoints: /health, /api/v1/meta/stats, /api/v1/meta/citation."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter, Query
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from .. import __version__
 from ..config import settings
@@ -16,6 +17,115 @@ from ..schemas import (
 )
 
 router = APIRouter(tags=["meta"])
+
+
+_WELL_KNOWN_DATASET = {
+    "name": "HORIZON Hantavirus Surveillance Dataset",
+    "url": "https://hantavirus.software/",
+    "dcat": "https://hantavirus.software/api/v1/meta/dcat",
+    "citation_csl": "https://hantavirus.software/api/v1/meta/citation",
+    "citation_cff": "https://hantavirus.software/CITATION.cff",
+    "openapi": "https://hantavirus.software/api/openapi.json",
+    "bulk_export": "https://hantavirus.software/api/v1/cases/bulk/ndjson",
+    "methodology": "https://hantavirus.software/methodology",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "publisher": "79th Unit Limited",
+    "publisher_url": "https://79thunit.co.uk",
+    "contact": "info@79thunit.co.uk",
+    "doi": "10.5281/zenodo.PENDING",
+}
+
+
+@router.get(
+    "/.well-known/dataset",
+    summary="Machine-readable dataset discovery (RFC 8615 well-known URI)",
+    include_in_schema=False,
+)
+async def well_known_dataset() -> JSONResponse:
+    """Well-known dataset discovery endpoint following RFC 8615.
+
+    Returns a compact JSON summary of all machine-readable access points
+    for the HORIZON dataset. Indexed by OpenAIRE, DataCite, and institutional
+    harvester bots that probe /.well-known/ before crawling the full site.
+    """
+    return JSONResponse(
+        content=_WELL_KNOWN_DATASET,
+        media_type="application/json",
+        headers={"Cache-Control": "public, max-age=86400", "Access-Control-Allow-Origin": "*"},
+    )
+
+
+@router.get(
+    "/.well-known/void",
+    summary="VoID dataset descriptor redirect (Linked Data discovery)",
+    include_in_schema=False,
+)
+async def well_known_void() -> RedirectResponse:
+    """Redirect /.well-known/void to the DCAT-AP JSON-LD endpoint.
+
+    VoID (Vocabulary of Interlinked Datasets) discovery bots probe this URL.
+    We redirect to our full DCAT-AP descriptor which is a superset of VoID.
+    """
+    return RedirectResponse(
+        url="/api/v1/meta/dcat",
+        status_code=303,
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
+@router.get(
+    "/api/v1/meta/badge/sources",
+    summary="Shield.io endpoint badge: active source count",
+    include_in_schema=False,
+)
+async def badge_sources() -> JSONResponse:
+    """Returns a shields.io endpoint-badge JSON for the active source count.
+
+    Embed in GitHub READMEs and research papers::
+
+        ![Sources](https://img.shields.io/endpoint?url=https://hantavirus.software/api/v1/meta/badge/sources)
+    """
+    async with acquire() as conn:
+        row = await conn.fetchrow("SELECT COUNT(*)::int AS n FROM sources WHERE enabled")
+    count = row["n"] if row else 0
+    return JSONResponse(
+        content={
+            "schemaVersion": 1,
+            "label": "sources",
+            "message": str(count),
+            "color": "informational",
+            "style": "flat",
+        },
+        headers={"Cache-Control": "public, max-age=300", "Access-Control-Allow-Origin": "*"},
+    )
+
+
+@router.get(
+    "/api/v1/meta/badge/cases",
+    summary="Shield.io endpoint badge: total ingested reports",
+    include_in_schema=False,
+)
+async def badge_cases() -> JSONResponse:
+    """Returns a shields.io endpoint-badge JSON for total ingested case reports.
+
+    Embed in GitHub READMEs::
+
+        ![Reports](https://img.shields.io/endpoint?url=https://hantavirus.software/api/v1/meta/badge/cases)
+    """
+    async with acquire() as conn:
+        row = await conn.fetchrow("SELECT COUNT(*)::int AS n FROM case_reports")
+    count = row["n"] if row else 0
+    label = f"{count:,}" if count >= 1000 else str(count)
+    return JSONResponse(
+        content={
+            "schemaVersion": 1,
+            "label": "reports ingested",
+            "message": label,
+            "color": "success",
+            "style": "flat",
+        },
+        headers={"Cache-Control": "public, max-age=300", "Access-Control-Allow-Origin": "*"},
+    )
 
 
 @router.get("/health", response_model=HealthResponse, summary="Liveness probe")
@@ -264,6 +374,142 @@ _VOCABULARY: dict = {
 }
 
 
+_DCAT_AP = {
+    "@context": {
+        "dcat": "http://www.w3.org/ns/dcat#",
+        "dct": "http://purl.org/dc/terms/",
+        "foaf": "http://xmlns.com/foaf/0.1/",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "schema": "https://schema.org/",
+        "vcard": "http://www.w3.org/2006/vcard/ns#",
+        "healthdcat": "http://healthdcat-ap.eu/",
+    },
+    "@type": "dcat:Dataset",
+    "@id": "https://hantavirus.software/#dataset",
+    "dct:title": [
+        {"@language": "en", "@value": "HORIZON: Real-Time Hantavirus Outbreak Surveillance Dataset"},
+        {"@language": "es", "@value": "HORIZON: Conjunto de datos de vigilancia de brotes de hantavirus en tiempo real"},
+        {"@language": "pt", "@value": "HORIZON: Conjunto de dados de vigilância de surtos de hantavírus em tempo real"},
+    ],
+    "dct:description": [
+        {
+            "@language": "en",
+            "@value": (
+                "Open dataset of hantavirus outbreak case reports aggregated from 65+ "
+                "authoritative sources: WHO Disease Outbreak News, US CDC Health Alert "
+                "Network (HAN), ECDC Communicable Disease Threats Report, PAHO "
+                "Epidemiological Alerts, ProMED-mail, THL Finland, national health "
+                "ministries (Argentina, Chile, Brazil), wire services (Reuters, AP, "
+                "AFP, BBC, EFE, Mercopress), peer-reviewed literature (Europe PMC, "
+                "bioRxiv, medRxiv, Crossref, arXiv), and ecological indicators (NOAA "
+                "ENSO, NASA MODIS NDVI). Includes the Oxford Kraemer Lab MV Hondius "
+                "individual-level ANDV line list (CC0) and the NCBI RefSeq "
+                "Orthohantavirus reference genome set (HantaNet, CDC). Every record "
+                "carries NATO Admiralty Scale dual-axis source qualification, Berkeley "
+                "Protocol SHA-256 chain-of-custody hash, and a dual confidence model."
+            ),
+        }
+    ],
+    "dct:publisher": {
+        "@type": "foaf:Organization",
+        "foaf:name": "79th Unit Limited",
+        "foaf:homepage": {"@id": "https://79thunit.co.uk"},
+    },
+    "dct:creator": {"@id": "https://hantavirus.software/#org"},
+    "dct:issued": {"@type": "xsd:date", "@value": "2026-04-17"},
+    "dct:modified": {"@type": "xsd:date", "@value": "2026-05-14"},
+    "dct:language": [
+        {"@id": "http://publications.europa.eu/resource/authority/language/ENG"},
+        {"@id": "http://publications.europa.eu/resource/authority/language/SPA"},
+        {"@id": "http://publications.europa.eu/resource/authority/language/POR"},
+    ],
+    "dct:license": {"@id": "https://creativecommons.org/licenses/by/4.0/"},
+    "dct:rights": {"@id": "https://creativecommons.org/licenses/by/4.0/"},
+    "dct:accessRights": {"@id": "http://publications.europa.eu/resource/authority/access-right/PUBLIC"},
+    "dct:spatial": {"@id": "http://www.geonames.org/6295630"},
+    "dct:temporal": {
+        "@type": "dct:PeriodOfTime",
+        "schema:startDate": {"@type": "xsd:date", "@value": "1993-01-01"},
+    },
+    "dct:subject": [
+        {"@id": "http://id.loc.gov/authorities/subjects/sh85059518"},
+        {"@id": "https://meshb.nlm.nih.gov/record/ui?ui=D006362"},
+        {"@id": "https://meshb.nlm.nih.gov/record/ui?ui=D018353"},
+        {"@id": "https://meshb.nlm.nih.gov/record/ui?ui=D006484"},
+    ],
+    "dcat:theme": [
+        {"@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL"},
+        {"@id": "http://publications.europa.eu/resource/authority/data-theme/SCIE"},
+    ],
+    "dcat:keyword": [
+        "hantavirus", "Orthohantavirus", "outbreak surveillance", "epidemiology",
+        "Andes virus", "Sin Nombre virus", "Puumala virus", "Hantaan virus",
+        "MV Hondius", "HPS", "HFRS", "open data", "CC BY 4.0",
+        "Oxford Kraemer Lab", "HantaNet", "NCBI RefSeq",
+    ],
+    "dcat:landingPage": {"@id": "https://hantavirus.software/"},
+    "dcat:distribution": [
+        {
+            "@type": "dcat:Distribution",
+            "dct:title": {"@language": "en", "@value": "Case reports JSON API"},
+            "dcat:accessURL": {"@id": "https://hantavirus.software/api/v1/cases"},
+            "dcat:mediaType": {"@id": "https://www.iana.org/assignments/media-types/application/json"},
+            "dct:license": {"@id": "https://creativecommons.org/licenses/by/4.0/"},
+        },
+        {
+            "@type": "dcat:Distribution",
+            "dct:title": {"@language": "en", "@value": "Bulk NDJSON streaming export"},
+            "dcat:accessURL": {"@id": "https://hantavirus.software/api/v1/cases/bulk/ndjson"},
+            "dcat:mediaType": {"@id": "https://www.iana.org/assignments/media-types/application/x-ndjson"},
+            "dct:license": {"@id": "https://creativecommons.org/licenses/by/4.0/"},
+        },
+        {
+            "@type": "dcat:Distribution",
+            "dct:title": {"@language": "en", "@value": "OpenAPI specification"},
+            "dcat:accessURL": {"@id": "https://hantavirus.software/api/openapi.json"},
+            "dcat:mediaType": {"@id": "https://www.iana.org/assignments/media-types/application/json"},
+        },
+    ],
+    "dcat:contactPoint": {
+        "@type": "vcard:Organization",
+        "vcard:fn": "79th Unit Limited",
+        "vcard:hasEmail": {"@id": "mailto:info@79thunit.co.uk"},
+        "vcard:hasURL": {"@id": "https://hantavirus.software/methodology"},
+    },
+    "dct:conformsTo": {"@id": "https://bioschemas.org/profiles/Dataset/1.1-RELEASE"},
+}
+
+
+@router.get(
+    "/api/v1/meta/dcat",
+    summary="DCAT-AP 3.0 JSON-LD dataset descriptor (EU open data portal standard)",
+    tags=["meta"],
+    response_model=None,
+)
+async def dcat() -> JSONResponse:
+    """Returns DCAT-AP 3.0 compliant JSON-LD describing the HORIZON dataset.
+
+    Compatible with the EU Open Data Portal (data.europa.eu), data.gov.uk,
+    European Health Data Space (HealthDCAT-AP), OpenAIRE, and any catalogue
+    that harvests DCAT. The ``Content-Type`` is set to
+    ``application/ld+json`` for automatic detection.
+
+    Catalogue submitters: submit this URL to data.europa.eu/data/datasets/suggest
+    or to your national data portal's DCAT harvester. The endpoint returns a
+    valid DCAT-AP Dataset description with distributions, publisher, licence,
+    temporal coverage, and subject classification.
+    """
+    return JSONResponse(
+        content=_DCAT_AP,
+        media_type="application/ld+json",
+        headers={
+            "Cache-Control": "public, max-age=3600",
+            "Access-Control-Allow-Origin": "*",
+            "Link": '<https://hantavirus.software/#dataset>; rel="canonical"',
+        },
+    )
+
+
 @router.get(
     "/api/v1/meta/vocabulary",
     summary="Controlled vocabulary: MeSH descriptors, ICD-10 codes, serotype registry",
@@ -279,6 +525,84 @@ async def vocabulary() -> dict:
     HealthDCAT-AP catalogues, and bibliographic systems (PubMed, Europe PMC).
     """
     return _VOCABULARY
+
+
+_CSL_JSON = {
+    "id": "horizon-hantavirus-dataset",
+    "type": "dataset",
+    "title": "HORIZON: Real-Time Hantavirus Outbreak Surveillance Dataset",
+    "abstract": (
+        "Open dataset of hantavirus outbreak case reports aggregated from 65+ "
+        "authoritative sources: WHO Disease Outbreak News, US CDC Health Alert "
+        "Network (HAN), ECDC Communicable Disease Threats Report, PAHO "
+        "Epidemiological Alerts, ProMED-mail, THL Finland, national health "
+        "ministries (Argentina, Chile, Brazil), wire services (Reuters, AP, "
+        "AFP, BBC, EFE, Mercopress), and peer-reviewed literature (Europe PMC, "
+        "bioRxiv, medRxiv, Crossref, arXiv). Includes the Oxford Kraemer Lab "
+        "MV Hondius individual-level ANDV line list (CC0, Dr Moritz Kraemer / "
+        "Oxford, Sam Scarpino, Andrew Rambaut / Edinburgh-Nextstrain) and the "
+        "NCBI RefSeq Orthohantavirus reference genome set (HantaNet, CDC "
+        "Molecular Epidemiology, PMC10675615). Every record carries NATO "
+        "Admiralty Scale dual-confidence source qualification and Berkeley "
+        "Protocol SHA-256 chain-of-custody hash."
+    ),
+    "author": [
+        {"literal": "79th Unit Limited"}
+    ],
+    "issued": {"date-parts": [[2026, 4, 17]]},
+    "publisher": "79th Unit Limited",
+    "URL": "https://hantavirus.software/",
+    "version": __version__,
+    "keyword": [
+        "hantavirus", "Orthohantavirus", "Andes virus", "ANDV",
+        "Sin Nombre virus", "SNV", "Puumala virus", "hantavirus pulmonary syndrome",
+        "haemorrhagic fever with renal syndrome", "HPS", "HFRS",
+        "outbreak surveillance", "epidemiology", "open data", "CC BY 4.0",
+        "MV Hondius", "MV Hondius 2026", "Oxford Kraemer Lab",
+        "HantaNet", "NCBI RefSeq", "NATO Admiralty Scale",
+        "Berkeley Protocol", "dual confidence model",
+        "MeSH:D006362", "MeSH:D018353", "ICD-10:A98.5", "ICD-10:B33.4",
+    ],
+    "note": (
+        "Data available under Creative Commons Attribution 4.0 International "
+        "(CC BY 4.0). Bulk NDJSON export: "
+        "https://hantavirus.software/api/v1/cases/bulk/ndjson. "
+        "OpenAPI: https://hantavirus.software/api/openapi.json. "
+        "CITATION.cff: https://hantavirus.software/CITATION.cff."
+    ),
+    "DOI": "10.5281/zenodo.PENDING",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "genre": "Dataset",
+    "dimensions": "65+ ingestion sources, global coverage, 1993-present",
+}
+
+
+@router.get(
+    "/api/v1/meta/citation",
+    summary="Bibliographic citation in CSL-JSON format (Zotero / Mendeley / Paperpile compatible)",
+    tags=["meta"],
+    response_model=None,
+)
+async def citation() -> JSONResponse:
+    """Returns the HORIZON dataset citation as a CSL-JSON object.
+
+    Compatible with Zotero, Mendeley, Paperpile, JabRef, and any application
+    that can import CSL-JSON citations. The ``Content-Type`` header is set to
+    ``application/vnd.citationstyles.csl+json`` so reference managers
+    auto-detect the format.
+
+    The Zotero translator will fire on this endpoint if the URL is submitted
+    via the Zotero Connector browser extension. See also:
+    https://hantavirus.software/CITATION.cff (CFF format)
+    """
+    return JSONResponse(
+        content=_CSL_JSON,
+        media_type="application/vnd.citationstyles.csl+json",
+        headers={
+            "Cache-Control": "public, max-age=3600",
+            "Access-Control-Allow-Origin": "*",
+        },
+    )
 
 
 @router.get(

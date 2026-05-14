@@ -43,13 +43,11 @@ _SELECT_COLS = """
     qs.nato_credibility,
     qs.pipeline_confidence::double precision  AS pipeline_confidence,
     COALESCE(qs.pipeline_factors, '{}'::jsonb) AS pipeline_factors,
-    qs.analyst_confidence::double precision   AS analyst_confidence,
-    cr.case_classification,
-    cr.lab_method,
-    cr.ihr_notified,
-    cr.travel_history,
-    cr.gadm_gid,
-    cr.ecological_flags
+    qs.analyst_confidence::double precision   AS analyst_confidence
+    -- case_classification, lab_method, ihr_notified, travel_history,
+    -- gadm_gid, ecological_flags are migration-053 columns not yet applied
+    -- on production. Schema fields carry defaults; columns added when
+    -- migration 054 runs. Remove this comment block when migrated.
 FROM case_reports cr
 JOIN sources s             ON s.id = cr.source_id
 JOIN qualification_scores qs ON qs.case_report_id = cr.id

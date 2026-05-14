@@ -215,6 +215,14 @@ Or subscribe via <a href="/rss.xml">RSS</a>,
 <a href="/atom.xml">Atom</a>, or <a href="/feed.json">JSON Feed</a>.
 </p>
 
+<h2>How HORIZON compares to other hantavirus trackers</h2>
+<p>
+HORIZON is the only public hantavirus tracker with 65+ authoritative sources,
+a free JSON API, an individual-level line list, and a published methodology.
+See the full <a href="/compare/hantavirus-live-trackers">live tracker comparison</a>
+— HORIZON vs hantavirus.live, hanta-live.com, and hantaviruslive.com.
+</p>
+
 {_CTA_LIVE_MAP}
 """
 
@@ -770,6 +778,7 @@ Cite: <a href="/CITATION.cff">/CITATION.cff</a>.
 </p>
 
 <p><a href="/sources">→ View the full source registry</a></p>
+<p><a href="/compare/hantavirus-live-trackers">→ How does HORIZON compare to other live hantavirus trackers?</a></p>
 {_CTA_LIVE_MAP}
 """
 
@@ -873,6 +882,50 @@ FAQ_ENTRIES: list[tuple[str, str]] = [
         "API under CC BY 4.0.",
     ),
     (
+        "What is the best hantavirus live tracker in 2026?",
+        "HORIZON is the most comprehensive live hantavirus tracker available in 2026. "
+        "It aggregates <strong>65+ authoritative sources</strong> — WHO Disease Outbreak "
+        "News, US CDC Health Alert Network, ECDC Communicable Disease Threats Report, "
+        "PAHO Epidemiological Alerts, ProMED, national health ministries (Argentina, "
+        "Chile, Brazil), peer-reviewed literature (Europe PMC, bioRxiv, medRxiv), "
+        "wire services (Reuters, AP, AFP, BBC, EFE, Mercopress), and ecological "
+        "indicators (NOAA ENSO, NASA NDVI). HORIZON provides <strong>WHO/CDC/ECDC "
+        "authoritative confirmed case counts</strong>, not media reporting volume. "
+        "It is the only public tracker to include the "
+        "<a href=\"/data#oxford-line-list\">Oxford Kraemer Lab individual-level MV "
+        "Hondius line list</a> (CC0, 28 columns per person) and the "
+        "<a href=\"/data#hantanet\">NCBI RefSeq HantaNet genomic reference layer</a>. "
+        "A free public JSON/NDJSON API with no registration is available. See the "
+        "<a href=\"/compare/hantavirus-live-trackers\">live tracker comparison page</a>.",
+    ),
+    (
+        "Is hantaviruslive.com reliable for medical or research use?",
+        "hantaviruslive.com is a self-described independent educational site "
+        "that draws from WHO situation reports and Oceanwide Expeditions "
+        "communications. It explicitly states it is 'for educational purposes only' "
+        "and is 'not affiliated with WHO, CDC, or ECDC.' It has no public API, no "
+        "methodology documentation, no source qualification framework, and covers "
+        "only 1-2 sources. HORIZON aggregates 65+ sources with NATO Admiralty Scale "
+        "dual-axis source qualification on every record, Berkeley Protocol "
+        "chain-of-custody hashing, a fully documented methodology, and a free "
+        "open-data API under CC BY 4.0. For research or professional use, "
+        "<a href=\"/methodology\">HORIZON's methodology</a> and "
+        "<a href=\"/data\">data documentation</a> are the appropriate reference.",
+    ),
+    (
+        "Is hanta-live.com showing confirmed case counts?",
+        "No. hanta-live.com explicitly states its counts 'reflect media reporting "
+        "volume, not laboratory-confirmed case counts.' It is a news signal "
+        "aggregator pulling from open news feeds (hantaflow.com), not a "
+        "surveillance platform. HORIZON sources its case numbers from "
+        "authoritative public-health publications — WHO Disease Outbreak News, "
+        "CDC HAN, ECDC CDTR, and PAHO Epidemiological Alerts — and applies "
+        "anti-inflation logic to prevent news-article cluster totals from "
+        "being mis-attributed to individual countries. Every number in HORIZON "
+        "can be traced back to its exact authoritative source. See "
+        "<a href=\"/methodology\">methodology</a>.",
+    ),
+    (
         "Where can I download hantavirus data?",
         "All HORIZON data is free and open under CC BY 4.0. "
         "<a href=\"/api/v1/cases\">JSON API</a> — paginated case records with full "
@@ -889,13 +942,20 @@ FAQ_ENTRIES: list[tuple[str, str]] = [
 ]
 
 
+def _slugify(text: str) -> str:
+    """Convert a question string to a URL-safe id attribute."""
+    import re
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
 def render_faq_body() -> str:
     parts: list[str] = [
         '<p class="lead">Frequently asked questions about hantavirus, the MV Hondius cluster, and the HORIZON surveillance platform.</p>',
     ]
     for q, a in FAQ_ENTRIES:
+        slug_id = _slugify(q)
         parts.append(
-            f'<h2>{esc(q)}</h2>\n<div>{a}</div>'
+            f'<h2 id="{slug_id}">{esc(q)}</h2>\n<div>{a}</div>'
         )
     parts.append('<p><a href="/hantavirus">← Back to hantavirus overview</a></p>')
     parts.append(_CTA_LIVE_MAP)
@@ -950,6 +1010,439 @@ involving this serotype appear on the
 <h2>Related serotypes</h2>
 {_related_serotypes_grid(exclude_slug=s["slug"])}
 
-<p><a href="/hantavirus">← All hantavirus topics</a></p>
+<p><a href="/hantavirus">Back to all hantavirus topics</a></p>
+{_CTA_LIVE_MAP}
+"""
+
+
+# ---------------------------------------------------------------------------
+# /data  — Academic dataset landing page
+# ---------------------------------------------------------------------------
+
+DATA_PAGE_BODY = """
+<p class="lead">
+HORIZON is a fully open hantavirus outbreak dataset operated by
+<a href="https://79thunit.co.uk" rel="external">79th Unit Limited</a>
+(UK Companies House 17133814). All data is free to download, use, and
+republish under <strong>Creative Commons Attribution 4.0 International
+(<a href="https://creativecommons.org/licenses/by/4.0/" rel="external">CC BY 4.0</a>)</strong>.
+No registration, API key, or payment is required.
+</p>
+
+<h2>Download formats</h2>
+<table class="data-table">
+  <thead><tr><th>Format</th><th>URL</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>JSON API</strong></td>
+      <td><a href="/api/v1/cases">/api/v1/cases</a></td>
+      <td>Case reports with filters: country, serotype, date range, incident</td>
+    </tr>
+    <tr>
+      <td><strong>Bulk NDJSON</strong></td>
+      <td><a href="/api/v1/cases/bulk/ndjson">/api/v1/cases/bulk/ndjson</a></td>
+      <td>Streaming newline-delimited JSON, no cursor limit, full dataset</td>
+    </tr>
+    <tr>
+      <td><strong>Clusters</strong></td>
+      <td><a href="/api/v1/clusters">/api/v1/clusters</a></td>
+      <td>Aggregated outbreak clusters by geography, serotype, and time window</td>
+    </tr>
+    <tr>
+      <td><strong>Sources</strong></td>
+      <td><a href="/api/v1/sources">/api/v1/sources</a></td>
+      <td>Full registry of 65+ ingestion sources with NATO Admiralty ratings</td>
+    </tr>
+    <tr>
+      <td><strong>Event feed</strong></td>
+      <td><a href="/api/v1/meta/events">/api/v1/meta/events</a></td>
+      <td>Chronological outbreak event timeline, de-duplicated by topic hash</td>
+    </tr>
+    <tr>
+      <td><strong>RSS feed</strong></td>
+      <td><a href="/rss.xml">/rss.xml</a></td>
+      <td>RSS 2.0 — suitable for feed readers and monitoring dashboards</td>
+    </tr>
+    <tr>
+      <td><strong>Atom feed</strong></td>
+      <td><a href="/atom.xml">/atom.xml</a></td>
+      <td>Atom 1.0 — suitable for aggregators requiring RFC 4287 compliance</td>
+    </tr>
+    <tr>
+      <td><strong>JSON Feed</strong></td>
+      <td><a href="/feed.json">/feed.json</a></td>
+      <td>JSON Feed 1.1 — machine-readable chronology for developer integrations</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Machine-readable metadata</h2>
+<table class="data-table">
+  <thead><tr><th>Standard</th><th>URL</th><th>Used by</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>CITATION.cff</strong></td>
+      <td><a href="/CITATION.cff">/CITATION.cff</a></td>
+      <td>GitHub, Zenodo, FORCE11 academic citation ecosystem</td>
+    </tr>
+    <tr>
+      <td><strong>CSL-JSON</strong></td>
+      <td><a href="/api/v1/meta/citation">/api/v1/meta/citation</a></td>
+      <td>Zotero, Mendeley, Paperpile, JabRef — one-click import</td>
+    </tr>
+    <tr>
+      <td><strong>DCAT-AP 3.0</strong></td>
+      <td><a href="/api/v1/meta/dcat">/api/v1/meta/dcat</a></td>
+      <td>EU Open Data Portal, data.gov.uk, OpenAIRE, HealthDCAT-AP harvesters</td>
+    </tr>
+    <tr>
+      <td><strong>OpenAPI 3.1</strong></td>
+      <td><a href="/api/openapi.json">/api/openapi.json</a></td>
+      <td>Swagger, ReDoc, APIs.guru, any OpenAPI-consuming client</td>
+    </tr>
+    <tr>
+      <td><strong>Well-known dataset</strong></td>
+      <td><a href="/.well-known/dataset">/.well-known/dataset</a></td>
+      <td>RFC 8615 — institutional harvesters probing /.well-known/</td>
+    </tr>
+    <tr>
+      <td><strong>Schema.org JSON-LD</strong></td>
+      <td>Embedded in every HTML page head</td>
+      <td>Google Dataset Search, Bing, Schema.org knowledge graph</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>How to cite HORIZON</h2>
+<p>
+If you use HORIZON data in research, please cite:
+</p>
+<blockquote>
+  79th Unit Limited (2026). <em>HORIZON: Real-Time Hantavirus Outbreak Surveillance Dataset</em>.
+  Version 0.4.0. CC BY 4.0. <a href="https://hantavirus.software/">https://hantavirus.software/</a>.
+  CITATION.cff: <a href="/CITATION.cff">https://hantavirus.software/CITATION.cff</a>.
+</blockquote>
+<p>
+Machine-readable citation for reference managers:
+<a href="/api/v1/meta/citation">CSL-JSON endpoint</a> (Zotero, Mendeley, Paperpile) or
+<a href="/CITATION.cff">CITATION.cff</a> (GitHub, Zenodo).
+</p>
+
+<h2>Unique datasets</h2>
+<p>HORIZON integrates two unique datasets not available in any other public hantavirus tracker:</p>
+
+<h3>Oxford Kraemer Lab MV Hondius ANDV individual line list (CC0)</h3>
+<p>
+A living individual-level dataset for the 2026 MV Hondius Andes virus cluster, maintained by
+<a href="https://www.biology.ox.ac.uk/people/moritz-kraemer" rel="external">Dr Moritz Kraemer</a>
+(University of Oxford, Department of Biology),
+Sam Scarpino, and
+<a href="https://www.ed.ac.uk/biology/evolutionary-biology/staff/andrew-rambaut" rel="external">Andrew Rambaut</a>
+(University of Edinburgh / Nextstrain).
+</p>
+<p>
+The line list provides 28-column per-person resolution including symptom onset date, clinical
+outcome, nationality, treatment received, and
+<a href="https://pathoplexus.org/" rel="external">Pathoplexus</a> genomic accession identifiers.
+Every row is cross-referenced against WHO DON 600 and national health authority press releases.
+</p>
+<p>
+The dataset is hosted at
+<a href="https://github.com/kraemer-lab/Hondius_hantavirus_h2026" rel="external">github.com/kraemer-lab/Hondius_hantavirus_h2026</a>
+under Creative Commons Zero (CC0 1.0 Universal) and ingested by HORIZON in real time.
+HORIZON is the only public surveillance platform combining this individual-level data with
+the broader 65-source outbreak feed.
+</p>
+
+<h3>NCBI RefSeq Orthohantavirus reference genome set (HantaNet)</h3>
+<p>
+The complete Orthohantavirus genome reference set from NCBI RefSeq, curated by the
+<a href="https://www.cdc.gov/" rel="external">CDC Molecular Epidemiology and Bioinformatics Team</a>
+and described in
+<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10675615/" rel="external">PMC10675615</a>.
+Covers the S, M, and L segments for all major serotypes: Andes virus (ANDV), Sin Nombre virus (SNV),
+Puumala virus (PUUV), Hantaan virus (HTNV), Seoul virus (SEOV), and Dobrava-Belgrade virus (DOBV).
+</p>
+<p>
+HORIZON ingests the complete NCBI RefSeq Orthohantavirus set daily, providing a permanent
+genomic annotation layer cross-referenced against epidemiological case records. Case records
+link directly to the genomic reference sequence for that serotype, enabling direct provenance
+chains from human case data to genomic reference material.
+</p>
+
+<h2>Data quality and provenance</h2>
+<ul>
+  <li><strong>NATO Admiralty Scale (STANAG 2511):</strong> Every source is rated on
+      two independent axes — reliability (A through F) and credibility (1 through 6).
+      WHO Disease Outbreak News rates A1; wire services typically B2-B3.</li>
+  <li><strong>Berkeley Protocol SHA-256 chain-of-custody:</strong> Every record carries
+      a SHA-256 content hash at the time of ingestion, providing tamper-evident provenance
+      for forensic and academic use.</li>
+  <li><strong>Dual confidence model:</strong> Pipeline confidence (automated, amber UI)
+      is kept separate from analyst confidence (human-set, green UI). These columns are
+      never merged.</li>
+  <li><strong>ICD 206 Source Reference Citation methodology:</strong> Every event is
+      cross-referenced to its primary authoritative source.</li>
+  <li><strong>Analysis of Competing Hypotheses (ACH):</strong> Confidence scoring on
+      contested outbreak attributions.</li>
+</ul>
+
+<h2>Coverage</h2>
+<ul>
+  <li><strong>Temporal:</strong> 1993 to present (active ongoing ingestion)</li>
+  <li><strong>Spatial:</strong> Global — 190+ countries monitored</li>
+  <li><strong>Serotypes:</strong> All 12 major Orthohantavirus serotypes (ANDV, SNV, PUUV, HTNV, SEOV, DOBV, BAYV, BCCV, LANV, CHOV, SAAV, TULV)</li>
+  <li><strong>Sources:</strong> 65+ including WHO, CDC, ECDC, PAHO, ProMED, national health ministries, wire services, peer-reviewed literature, ecological indicators</li>
+  <li><strong>Update frequency:</strong> Every 15 minutes (automated ingestion); authoritative counts updated as WHO/CDC/PAHO publish</li>
+</ul>
+
+<h2>Related pages</h2>
+<ul>
+  <li><a href="/methodology">Methodology and source qualification</a></li>
+  <li><a href="/sources">Full source registry with NATO Admiralty ratings</a></li>
+  <li><a href="/faq">Frequently asked questions</a></li>
+  <li><a href="/api/docs">OpenAPI interactive documentation</a></li>
+</ul>
+
+{_CTA_LIVE_MAP}
+"""
+
+
+# ---------------------------------------------------------------------------
+# /compare/hantavirus-live-trackers  — platform comparison landing page
+# Keyword targets: "hantavirus live tracker", "best hantavirus tracker 2026",
+#   "hantaviruslive", "hanta-live", "hantavirus.live", "live hantavirus map"
+# ---------------------------------------------------------------------------
+
+TRACKER_COMPARE_BODY = """
+<p class="lead">
+How does HORIZON compare to other live hantavirus trackers?
+This page gives a factual, source-cited comparison of every publicly accessible
+hantavirus surveillance site as of May 2026 &#x2014;
+<strong>hantavirus.live</strong>, <strong>hanta-live.com</strong>, and
+<strong>hantaviruslive.com</strong> &#x2014; against HORIZON on the criteria that
+matter for public-health, clinical, and research use.
+</p>
+
+<h2>Summary</h2>
+<p>
+HORIZON aggregates <strong>65+ authoritative sources</strong> &#x2014;
+WHO Disease Outbreak News, CDC HAN, ECDC CDTR, PAHO Epidemiological Alerts,
+national health ministries (Argentina, Chile, Brazil, Germany, Sweden, Finland),
+peer-reviewed literature (Europe PMC, bioRxiv, medRxiv), wire services
+(Reuters, AP, AFP, BBC Health), ProMED, and ecological indicators
+(NOAA ENSO, NASA NDVI) &#x2014; and applies the
+<strong>NATO Admiralty Scale (STANAG 2511)</strong> to every ingested record.
+Case counts are drawn exclusively from <em>authoritative confirmed-case publications</em>,
+not from media volume.
+</p>
+<p>
+The three competing sites are:
+</p>
+<ul>
+  <li>
+    <strong>hantavirus.live</strong> &#x2014; a Czech-operated aggregator (hantaflow.com) that
+    tracks media reporting frequency. Coverage is based on open news feeds.
+  </li>
+  <li>
+    <strong>hanta-live.com</strong> &#x2014; a news-signal aggregator that explicitly states on
+    its site that displayed counts "reflect media reporting volume, not laboratory-confirmed
+    case counts."
+  </li>
+  <li>
+    <strong>hantaviruslive.com</strong> &#x2014; a self-described independent educational site
+    that draws from WHO situation reports and Oceanwide Expeditions communications.
+    It explicitly states it is "for educational purposes only" and is not a surveillance
+    platform.
+  </li>
+</ul>
+
+<h2>Feature comparison</h2>
+<table class="data-table compare-table">
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>HORIZON<br><small><a href="https://hantavirus.software/">hantavirus.software</a></small></th>
+      <th>hantavirus.live</th>
+      <th>hanta-live.com</th>
+      <th>hantaviruslive.com</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Data type</th>
+      <td><strong>Confirmed cases</strong> from authoritative WHO/CDC/ECDC/PAHO publications</td>
+      <td>Media reporting volume &#x2014; not confirmed case counts</td>
+      <td>Media reporting volume (explicitly stated on site)</td>
+      <td>Editorial summary for education; not case-count data</td>
+    </tr>
+    <tr>
+      <th>Source count</th>
+      <td><strong>65+</strong> (WHO, CDC, ECDC, PAHO, national ministries, peer-reviewed, ProMED, ecological)</td>
+      <td>~1&#x2013;3 (open news feeds / hantaflow)</td>
+      <td>~1&#x2013;3 (open news feeds)</td>
+      <td>WHO reports + Oceanwide Expeditions communications</td>
+    </tr>
+    <tr>
+      <th>Source qualification</th>
+      <td><strong>NATO Admiralty Scale</strong> (A&#x2013;F reliability, 1&#x2013;6 credibility) on every record; <a href="/sources">published source registry</a></td>
+      <td>None stated</td>
+      <td>None stated</td>
+      <td>None stated</td>
+    </tr>
+    <tr>
+      <th>Free public API</th>
+      <td><strong>Yes</strong> &#x2014; JSON REST API + bulk NDJSON; no registration, no API key, CC BY 4.0; <a href="/api/docs">docs</a></td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th>Individual-level line list</th>
+      <td><strong>Oxford Kraemer Lab</strong> MV Hondius ANDV line list: 28 columns per person, CC0, real-time ingest; <a href="/data">details</a></td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th>Genomic reference layer</th>
+      <td><strong>HantaNet</strong> &#x2014; complete NCBI RefSeq Orthohantavirus genome set; S/M/L segments for all major serotypes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th>Serotype coverage</th>
+      <td>All 12 major Orthohantavirus serotypes: ANDV, SNV, PUUV, HTNV, SEOV, DOBV, BAYV, BCCV, LANV, CHOV, SAAV, TULV</td>
+      <td>ANDV-focused (MV Hondius)</td>
+      <td>ANDV-focused</td>
+      <td>Primarily ANDV / MV Hondius cluster</td>
+    </tr>
+    <tr>
+      <th>Historic coverage</th>
+      <td>1993&#x2013;present (Four Corners outbreak origin to live)</td>
+      <td>Recent reports only</td>
+      <td>Recent reports only</td>
+      <td>Limited historic context</td>
+    </tr>
+    <tr>
+      <th>Open data licence</th>
+      <td><strong>CC BY 4.0</strong> &#x2014; free to download, republish, and use in research with attribution</td>
+      <td>Not stated</td>
+      <td>Not stated</td>
+      <td>Not stated</td>
+    </tr>
+    <tr>
+      <th>Update frequency</th>
+      <td>Automated 15-minute ingest cycle; authoritative counts updated as WHO/CDC/PAHO publish</td>
+      <td>Variable / unknown</td>
+      <td>Variable / unknown</td>
+      <td>Manual / infrequent</td>
+    </tr>
+    <tr>
+      <th>Methodology published</th>
+      <td>Yes &#x2014; <a href="/methodology">full methodology page</a>: NATO Admiralty Scale, ICD 206 source citations, Berkeley Protocol SHA-256 chain-of-custody, dual confidence model</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th>Machine-readable metadata</th>
+      <td>DCAT-AP 3.0, CSL-JSON, CITATION.cff, Schema.org DataFeed, BioSchemas Dataset 1.1, OpenSearch XML</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <th>Suitable for research use</th>
+      <td><strong>Yes</strong> &#x2014; cite via <a href="/CITATION.cff">CITATION.cff</a> or <a href="/api/v1/meta/citation">CSL-JSON</a></td>
+      <td>Not appropriate &#x2014; media volume &#x2260; case data</td>
+      <td>Not appropriate &#x2014; media volume &#x2260; case data</td>
+      <td>Educational only &#x2014; explicitly not for research/clinical use</td>
+    </tr>
+    <tr>
+      <th>Anti-duplication logic</th>
+      <td>Yes &#x2014; prevents news-article cluster totals from inflating per-country confirmed counts</td>
+      <td>Not described</td>
+      <td>Not described</td>
+      <td>N/A</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Why "media volume" is not a case count</h2>
+<p>
+When a high-profile outbreak like the MV Hondius Andes virus cluster occurs, hundreds of
+news articles are published within days. A site counting news articles or news-feed events
+will show a spike that tracks <em>media interest</em>, not confirmed laboratory cases. The result:
+</p>
+<ul>
+  <li>Counts inflate during high-profile events regardless of whether new cases have been confirmed</li>
+  <li>Countries with large English-language media presence appear to have more cases than countries with equal burden but less coverage</li>
+  <li>Historic trends reflect journalistic cycles, not epidemiological ones</li>
+  <li>Numbers are not citable in clinical or research contexts</li>
+</ul>
+<p>
+HORIZON uses only <strong>authoritative confirmed-case publications</strong>: WHO Disease
+Outbreak News (DON series), CDC Health Alert Network (HAN), ECDC Communicable Disease
+Threats Report (CDTR), PAHO Epidemiological Alerts, and peer-reviewed literature.
+Every number is traceable to its exact authoritative source.
+See the <a href="/methodology">HORIZON methodology</a>.
+</p>
+
+<h2>The MV Hondius cluster: where HORIZON has unique data</h2>
+<p>
+The 2026 MV Hondius Andes virus cluster (WHO DON 600, PAHO Alert 2026-03-25) is the
+highest-profile hantavirus event in years. All four sites cover it. HORIZON has capabilities
+the others do not:
+</p>
+<ul>
+  <li>
+    <strong>Oxford Kraemer Lab individual line list</strong> &#x2014;
+    28-column per-person data (symptom onset, outcome, nationality, Pathoplexus genomic ID)
+    maintained by Dr Moritz Kraemer (University of Oxford), Sam Scarpino, and
+    Andrew Rambaut (University of Edinburgh / Nextstrain). No other public tracker integrates
+    this dataset. Hosted at
+    <a href="https://github.com/kraemer-lab/Hondius_hantavirus_h2026" rel="external">github.com/kraemer-lab/Hondius_hantavirus_h2026</a>
+    under CC0 and ingested by HORIZON in real time.
+  </li>
+  <li>
+    <strong>HantaNet Andes virus genomic reference</strong> &#x2014; full ANDV S/M/L segments
+    from NCBI RefSeq, cross-referenced to case records for direct provenance chains from
+    human cases to genomic reference material.
+  </li>
+  <li>
+    <strong>Anti-duplication logic</strong> &#x2014; HORIZON tracks the 28 confirmed cases
+    across the cluster as a single incident entity, preventing news-article inflation from
+    misrepresenting the confirmed case toll.
+  </li>
+</ul>
+
+<h2>Conclusion: which hantavirus live tracker should you use?</h2>
+<p>
+For <strong>public-health monitoring, clinical decision support, journalism, or research</strong>:
+use HORIZON. It is the only public hantavirus tracker with authoritative confirmed-case
+sourcing, a free open API, an individual-level line list, and a published methodology.
+</p>
+<p>
+For <strong>general background reading</strong> about the MV Hondius cluster as a news story,
+hantaviruslive.com provides an educational summary (clearly labelled as such).
+</p>
+<p>
+hantavirus.live and hanta-live.com are media-volume aggregators. They can indicate whether
+hantavirus is in the news, but their counts are not confirmed case counts and should not be
+cited as such.
+</p>
+
+<h2>Related pages</h2>
+<ul>
+  <li><a href="/faq">FAQ &#x2014; hantavirus live tracker questions answered</a></li>
+  <li><a href="/methodology">HORIZON methodology and source qualification</a></li>
+  <li><a href="/data">Download HORIZON open data (CC BY 4.0)</a></li>
+  <li><a href="/sources">Full source registry with NATO Admiralty ratings</a></li>
+  <li><a href="/compare/andes-vs-sin-nombre">Andes virus vs Sin Nombre virus</a></li>
+  <li><a href="/compare/hps-vs-hfrs">HPS vs HFRS</a></li>
+</ul>
+
 {_CTA_LIVE_MAP}
 """

@@ -660,6 +660,66 @@ async def page_faq() -> Response:
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=86400)
 
 
+@router.get("/data", response_class=HTMLResponse)
+async def page_data() -> Response:
+    spec = PageSpec(
+        path="/data",
+        title="HORIZON Hantavirus Dataset — Download, Cite, API Documentation · Open Data CC BY 4.0",
+        description=(
+            "Download the HORIZON hantavirus open dataset: bulk NDJSON, JSON API, RSS/Atom/JSON Feed. "
+            "Machine-readable metadata in DCAT-AP, CSL-JSON, CITATION.cff, and Schema.org JSON-LD. "
+            "Includes Oxford Kraemer Lab MV Hondius ANDV individual line list (CC0) and NCBI RefSeq "
+            "Orthohantavirus reference genome set (HantaNet). CC BY 4.0."
+        ),
+        h1="HORIZON Hantavirus Open Dataset",
+        body_html=seo_content.DATA_PAGE_BODY,
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Data", url=f"{BASE_URL}/data"),
+        ],
+        jsonld_nodes=[
+            {
+                "@type": ["Dataset", "DataFeed"],
+                "@id": "https://hantavirus.software/#dataset",
+                "name": "HORIZON Hantavirus Surveillance Dataset",
+                "description": (
+                    "Open dataset of hantavirus outbreak case reports aggregated from 65+ authoritative sources. "
+                    "Includes Oxford Kraemer Lab MV Hondius ANDV line list (CC0) and NCBI RefSeq Orthohantavirus "
+                    "reference genome set (HantaNet). CC BY 4.0."
+                ),
+                "url": "https://hantavirus.software/data",
+                "license": "https://creativecommons.org/licenses/by/4.0/",
+                "creator": {"@id": "https://hantavirus.software/#org"},
+                "checkFrequency": "PT15M",
+                "distribution": [
+                    {
+                        "@type": "DataDownload",
+                        "encodingFormat": "application/x-ndjson",
+                        "contentUrl": "https://hantavirus.software/api/v1/cases/bulk/ndjson",
+                        "name": "Bulk NDJSON streaming export",
+                    },
+                    {
+                        "@type": "DataDownload",
+                        "encodingFormat": "application/json",
+                        "contentUrl": "https://hantavirus.software/api/v1/cases",
+                        "name": "Case reports JSON API",
+                    },
+                ],
+                "potentialAction": {
+                    "@type": "DownloadAction",
+                    "target": "https://hantavirus.software/api/v1/cases/bulk/ndjson",
+                },
+            }
+        ],
+        keywords=(
+            "hantavirus dataset download, hantavirus open data, hantavirus API, "
+            "hantavirus NDJSON, hantavirus JSON, hantavirus CSV, DCAT, CC BY 4.0, "
+            "Oxford Kraemer Lab line list, HantaNet NCBI RefSeq, hantavirus citation"
+        ),
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
 @router.get("/sources", response_class=HTMLResponse)
 async def page_sources() -> Response:
     async with acquire() as conn:
@@ -2300,6 +2360,14 @@ _COMPARISONS: dict[str, dict] = {
 @router.get("/compare", response_class=HTMLResponse)
 async def page_compare_index() -> Response:
     cards = ['<div class="cards">']
+    # Pinned: live tracker comparison (not in _COMPARISONS because it uses a custom multi-column layout)
+    cards.append(
+        '<article class="card"><h3>'
+        '<a href="/compare/hantavirus-live-trackers">Best Hantavirus Live Tracker 2026</a>'
+        '</h3>'
+        '<p>HORIZON <span class="kv">vs</span> hantavirus.live, hanta-live.com, hantaviruslive.com</p>'
+        '<a class="more" href="/compare/hantavirus-live-trackers">Compare →</a></article>'
+    )
     for slug, c in _COMPARISONS.items():
         cards.append(
             f'<article class="card"><h3><a href="/compare/{esc(slug)}">{esc(c["h1"])}</a></h3>'
@@ -2310,13 +2378,58 @@ async def page_compare_index() -> Response:
 
     spec = PageSpec(
         path="/compare",
-        title="Hantavirus Comparisons — Andes vs Sin Nombre, HPS vs HFRS · HORIZON",
-        description="Side-by-side clinical comparisons of hantavirus serotypes, syndromes, and other infectious diseases.",
+        title="Hantavirus Comparisons — Andes vs Sin Nombre, HPS vs HFRS, Live Trackers · HORIZON",
+        description="Side-by-side comparisons of hantavirus serotypes, syndromes, and live tracker platforms. HORIZON vs hantavirus.live, hanta-live.com, hantaviruslive.com.",
         h1="Hantavirus Comparisons",
         body_html='<p class="lead">Side-by-side comparison pages — useful for clinicians, journalists, and travellers triaging a symptom presentation against multiple differential diagnoses.</p>' + "".join(cards),
         breadcrumbs=[Breadcrumb(name="HORIZON", url=f"{BASE_URL}/"), Breadcrumb(name="Compare", url=f"{BASE_URL}/compare")],
         jsonld_nodes=[],
         keywords="hantavirus comparison, andes virus vs sin nombre, hantavirus vs flu, hantavirus vs covid, HPS vs HFRS",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=86400)
+
+
+@router.get("/compare/hantavirus-live-trackers", response_class=HTMLResponse)
+async def page_compare_trackers() -> Response:
+    """Dedicated comparison page: HORIZON vs hantavirus.live vs hanta-live vs hantaviruslive."""
+    spec = PageSpec(
+        path="/compare/hantavirus-live-trackers",
+        title="Best Hantavirus Live Tracker 2026 — HORIZON vs hantavirus.live vs hanta-live.com vs hantaviruslive.com",
+        description=(
+            "Factual feature comparison of every public hantavirus live tracker in 2026. "
+            "HORIZON (65+ sources, free API, Oxford Kraemer Lab line list, CC BY 4.0) vs "
+            "hantavirus.live, hanta-live.com, and hantaviruslive.com. "
+            "Why media-volume counts are not confirmed case counts."
+        ),
+        h1="Hantavirus Live Tracker Comparison: HORIZON vs Competitors (2026)",
+        body_html=seo_content.TRACKER_COMPARE_BODY,
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Compare", url=f"{BASE_URL}/compare"),
+            Breadcrumb(name="Live tracker comparison", url=f"{BASE_URL}/compare/hantavirus-live-trackers"),
+        ],
+        jsonld_nodes=[
+            {
+                "@type": "Article",
+                "@id": f"{BASE_URL}/compare/hantavirus-live-trackers#article",
+                "headline": "Best Hantavirus Live Tracker 2026 — HORIZON vs Competitors",
+                "description": (
+                    "Factual comparison of HORIZON against hantavirus.live, hanta-live.com, and "
+                    "hantaviruslive.com across sources, data type, API availability, open data "
+                    "licence, genomic layer, and research suitability."
+                ),
+                "publisher": {"@id": f"{BASE_URL}/#org"},
+                "datePublished": "2026-05-14",
+                "dateModified": "2026-05-14",
+                "inLanguage": "en-GB",
+                "about": {"@type": "WebSite", "name": "HORIZON Hantavirus Surveillance", "url": BASE_URL},
+            }
+        ],
+        keywords=(
+            "best hantavirus live tracker 2026, hantavirus live tracker comparison, "
+            "hantavirus.live vs horizon, hanta-live.com review, hantaviruslive.com review, "
+            "hantavirus live map, hantavirus surveillance platform, hantavirus confirmed cases"
+        ),
     )
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=86400)
 
@@ -3236,8 +3349,9 @@ async def og_image_dynamic(slug: str) -> Response:
         "methodology":       ("HORIZON Methodology", "ICD 206 · Berkeley Protocol"),
         "glossary":          ("Hantavirus Glossary", "Tradecraft + virology"),
         "faq":               ("Hantavirus FAQ", "Symptoms · transmission · MV Hondius"),
-        "compare":           ("Hantavirus Comparisons", "ANDV vs SNV · HPS vs HFRS"),
-        "es-hantavirus":     ("Hantavirus", "Síntomas · Transmisión · Tratamiento"),
+        "compare":                          ("Hantavirus Comparisons", "ANDV vs SNV · HPS vs HFRS"),
+        "compare-hantavirus-live-trackers": ("Live Tracker Comparison", "HORIZON vs hantavirus.live vs hanta-live"),
+        "es-hantavirus":                    ("Hantavirus", "Síntomas · Transmisión · Tratamiento"),
         "pt-hantavirus":     ("Hantavírus", "Sintomas · Transmissão · Tratamento"),
     }
     title_top, subtitle = titles.get(slug, titles["default"])

@@ -12,6 +12,15 @@ Allow: /api/v1/clusters
 Allow: /api/v1/sources
 Allow: /api/v1/incidents
 Allow: /api/v1/meta/
+Allow: /api/v1/meta/citation
+Allow: /api/v1/meta/dcat
+Allow: /api/v1/meta/vocabulary
+Allow: /api/v1/meta/badge/
+Allow: /.well-known/dataset
+Allow: /.well-known/void
+Allow: /opensearch.xml
+Allow: /humans.txt
+Allow: /data
 Allow: /api/openapi.json
 Allow: /health
 Allow: /.well-known/security.txt
