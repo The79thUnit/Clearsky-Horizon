@@ -112,6 +112,7 @@ def render_main_sitemap(now: datetime) -> str:
         ("/hantavirus/transmission", "weekly", 0.85),
         ("/hantavirus/prevention", "weekly", 0.85),
         ("/hantavirus/treatment", "weekly", 0.85),
+        ("/hantavirus/2026", "daily", 0.95),
         ("/outbreaks", "hourly", 0.95),
         ("/countries", "daily", 0.9),
         ("/articles", "hourly", 0.85),

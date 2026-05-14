@@ -542,6 +542,65 @@ async def page_treatment() -> Response:
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
 
 
+@router.get("/hantavirus/cruise-ship", response_class=HTMLResponse)
+async def page_hantavirus_cruise_ship() -> Response:
+    """Redirect cruise-ship variant to the 2026 outbreak hub."""
+    from fastapi.responses import RedirectResponse as _Redirect
+    return _Redirect("/hantavirus/2026", status_code=301)
+
+
+@router.get("/hantavirus/2026", response_class=HTMLResponse)
+async def page_hantavirus_2026() -> Response:
+    """2026 hantavirus outbreak hub — targets 'hantavirus 2026', 'MV Hondius', cruise ship queries."""
+    spec = PageSpec(
+        path="/hantavirus/2026",
+        title="Hantavirus 2026 Outbreak — MV Hondius Andes Virus Cluster · Live Tracking · HORIZON",
+        description=(
+            "Complete 2026 hantavirus coverage: 28 confirmed MV Hondius Andes virus cases across 11 countries "
+            "(WHO DON 600), seasonal PUUV/HTNV activity, Oxford Kraemer Lab individual line list (CC0 28 columns), "
+            "live case counts from WHO/CDC/ECDC. Authoritative confirmed cases only."
+        ),
+        h1="Hantavirus 2026 — Outbreak Tracker",
+        body_html=seo_content.HANTAVIRUS_2026_BODY,
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="2026 Outbreak", url=f"{BASE_URL}/hantavirus/2026"),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            {
+                "@type": "Article",
+                "@id": f"{BASE_URL}/hantavirus/2026#article",
+                "headline": "Hantavirus 2026 — MV Hondius Andes Virus Cluster and Global Surveillance",
+                "description": (
+                    "Comprehensive 2026 hantavirus situation: MV Hondius cluster (28 confirmed, 11 nationalities), "
+                    "Oxford Kraemer Lab individual line list, and ongoing endemic activity. "
+                    "WHO/CDC/ECDC/PAHO authoritative sources."
+                ),
+                "publisher": {"@id": f"{BASE_URL}/#org"},
+                "datePublished": "2026-03-25",
+                "dateModified": "2026-05-14",
+                "inLanguage": "en-GB",
+                "about": {
+                    "@type": "InfectiousDisease",
+                    "name": "Hantavirus Pulmonary Syndrome",
+                    "code": {"@type": "MedicalCode", "codingSystem": "ICD-10", "codeValue": "B33.4"},
+                },
+            }
+        ],
+        keywords=(
+            "hantavirus 2026, hantavirus outbreak 2026, MV Hondius hantavirus, "
+            "cruise ship hantavirus 2026, Andes virus 2026, hantavirus Argentina 2026, "
+            "Ushuaia hantavirus, hantavirus cases 2026, hantavirus deaths 2026, "
+            "hantavirus Tierra del Fuego, Oxford Kraemer Lab hantavirus line list, "
+            "WHO DON 600 hantavirus, PAHO hantavirus alert 2026"
+        ),
+        news_keywords="hantavirus 2026, MV Hondius, Andes virus, cruise ship outbreak, Argentina hantavirus, WHO DON 600",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=1800)
+
+
 @router.get("/hantavirus/{slug}", response_class=HTMLResponse)
 async def page_serotype(slug: str) -> Response:
     s = serotype_by_slug(slug)
@@ -822,6 +881,8 @@ async def page_outbreaks_index() -> Response:
             '<p class="lead">Active and monitoring incidents tracked by HORIZON. '
             'Each link opens the full ontology graph with authoritative WHO/ECDC case counts, '
             'corroborating articles, and the live event chronology.</p>'
+            + '<p><strong>2026:</strong> The MV Hondius Andes virus cluster is the dominant event. '
+            '<a href="/hantavirus/2026">Full 2026 outbreak tracker →</a></p>'
             + "".join(cards)
             + '<p><a class="cta" href="/">Open the live outbreak map →</a></p>'
         ),

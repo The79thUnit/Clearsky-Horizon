@@ -215,6 +215,18 @@ Or subscribe via <a href="/rss.xml">RSS</a>,
 <a href="/atom.xml">Atom</a>, or <a href="/feed.json">JSON Feed</a>.
 </p>
 
+<h2>2026 outbreak</h2>
+<p>
+The dominant hantavirus event of 2026 is the <strong>MV Hondius Andes virus cluster</strong>
+— 28 confirmed cases across 11 nationalities following Antarctic expedition voyages departing
+Ushuaia, Argentina. WHO DON 600, PAHO, ECDC, and CDC are co-ordinating.
+</p>
+<p>
+<a href="/hantavirus/2026">Full 2026 hantavirus outbreak tracker →</a>
+&nbsp;·&nbsp;
+<a href="/outbreaks/mv-hondius-2026">MV Hondius incident page →</a>
+</p>
+
 <h2>How HORIZON compares to other hantavirus trackers</h2>
 <p>
 HORIZON is the only public hantavirus tracker with 65+ authoritative sources,
@@ -926,6 +938,59 @@ FAQ_ENTRIES: list[tuple[str, str]] = [
         "<a href=\"/methodology\">methodology</a>.",
     ),
     (
+        "How many hantavirus cases are there in 2026?",
+        "The 2026 hantavirus situation is dominated by the <strong>MV Hondius Andes virus "
+        "cluster</strong> — 28 confirmed cases across 11 nationalities (WHO DON 600, "
+        "PAHO Alert 2026-03-25). Most cases are among passengers and crew of the polar "
+        "expedition vessel MV Hondius (IMO 9818709, Oceanwide Expeditions). Separate "
+        "from the cruise cluster, seasonal Puumala virus activity continues across "
+        "northern Europe (Finland, Germany, Sweden, Russia) in line with the 2025-26 "
+        "bank vole cycle. HORIZON tracks all confirmed 2026 cases in real time — see "
+        "<a href=\"/outbreaks/mv-hondius-2026\">the MV Hondius incident page</a> "
+        "for the live count with per-country breakdown.",
+    ),
+    (
+        "Is hantavirus spreading in 2026?",
+        "The 2026 MV Hondius Andes virus cluster is the most significant hantavirus "
+        "event in years. The cluster involves 28 confirmed cases but is <strong>not "
+        "spreading in the general population</strong>. Andes virus requires direct "
+        "exposure to infected rodent excreta or, in rare documented cases, very close "
+        "contact with an infected person. Shipboard transmission from person to person "
+        "is not documented in this cluster. The cluster is actively monitored by WHO, "
+        "ECDC, CDC, and PAHO. See the "
+        "<a href=\"/outbreaks/mv-hondius-2026\">live outbreak page</a> for current "
+        "status. Separately, Puumala HFRS cases continue at normal seasonal levels in "
+        "northern Europe. There is no evidence of new or unusual hantavirus geographic spread.",
+    ),
+    (
+        "Can you get hantavirus on a cruise ship?",
+        "The 2026 MV Hondius cluster is the first documented large-scale Andes virus "
+        "exposure on a cruise vessel. Exposure is believed to have occurred during "
+        "a wildlife excursion near <strong>Ushuaia, Tierra del Fuego, Argentina</strong> — "
+        "not aboard the ship itself. Rodent excreta in the outdoor Argentinian wilderness "
+        "is the suspected source. Person-to-person transmission aboard the vessel has "
+        "not been established. Future passengers on Antarctic expedition voyages that "
+        "include wildlife excursions in rodent-dense areas should be aware of hantavirus "
+        "risk and follow CDC/WHO guidance on avoiding rodent exposure. Full timeline and "
+        "source citations: <a href=\"/outbreaks/mv-hondius-2026\">/outbreaks/mv-hondius-2026</a>.",
+    ),
+    (
+        "What hantavirus outbreak happened on a cruise ship in 2026?",
+        "The <strong>MV Hondius</strong> (IMO 9818709, MMSI 244327000, flag Netherlands, "
+        "operated by Oceanwide Expeditions) carried passengers on Antarctic expedition "
+        "voyages departing Ushuaia in late February / early March 2026. Following the "
+        "voyages, passengers across 11 countries reported Hantavirus Pulmonary Syndrome "
+        "(HPS) caused by Andes virus (ANDV). WHO issued Disease Outbreak News DON 600 "
+        "on 25 March 2026; PAHO, ECDC, CDC, and Argentine Ministerio de Salud issued "
+        "co-ordinated alerts. A total of 28 confirmed cases are tracked by HORIZON from "
+        "WHO, ECDC, and national health authority reports. This is the first documented "
+        "instance of a large-scale ANDV exposure cluster linked to cruise vessel voyages. "
+        "Individual-level data: "
+        "<a href=\"https://github.com/kraemer-lab/Hondius_hantavirus_h2026\" rel=\"external\">"
+        "Oxford Kraemer Lab line list (CC0)</a>. HORIZON incident page: "
+        "<a href=\"/outbreaks/mv-hondius-2026\">/outbreaks/mv-hondius-2026</a>.",
+    ),
+    (
         "Where can I download hantavirus data?",
         "All HORIZON data is free and open under CC BY 4.0. "
         "<a href=\"/api/v1/cases\">JSON API</a> — paginated case records with full "
@@ -1018,6 +1083,136 @@ involving this serotype appear on the
 # ---------------------------------------------------------------------------
 # /data  — Academic dataset landing page
 # ---------------------------------------------------------------------------
+
+HANTAVIRUS_2026_BODY = f"""
+<p class="lead">
+This page is the HORIZON reference for all confirmed hantavirus activity in 2026.
+Updated in real time from WHO Disease Outbreak News, CDC HAN, ECDC CDTR, PAHO, and
+national health authority bulletins. Authoritative confirmed-case counts only.
+</p>
+
+{_NOT_MEDICAL_ADVICE}
+
+<h2>2026 at a glance</h2>
+<table class="facts">
+  <tr><th>Dominant event</th><td>MV Hondius Andes virus cluster (WHO DON 600)</td></tr>
+  <tr><th>Confirmed cases (MV Hondius cluster)</th><td>28 (as of latest WHO/ECDC bulletin)</td></tr>
+  <tr><th>Countries affected (cluster)</th><td>11 nationalities among confirmed cases</td></tr>
+  <tr><th>Causative serotype</th><td>Andes virus (ANDV), Hantavirus Pulmonary Syndrome</td></tr>
+  <tr><th>Suspected exposure site</th><td>Wildlife excursion near Ushuaia, Tierra del Fuego, Argentina</td></tr>
+  <tr><th>Vessel</th><td>MV Hondius (IMO 9818709), Oceanwide Expeditions, Netherlands flag</td></tr>
+  <tr><th>WHO notification</th><td>Disease Outbreak News DON 600, 25 March 2026</td></tr>
+  <tr><th>PAHO alert</th><td>Epidemiological Alert, 25 March 2026</td></tr>
+  <tr><th>Case-fatality (ANDV, historical)</th><td>30&#x2013;50%</td></tr>
+</table>
+
+<h2>The MV Hondius cluster</h2>
+<p>
+The MV Hondius is a polar expedition vessel operated by
+<a href="https://oceanwide-expeditions.com/" rel="external nofollow">Oceanwide Expeditions</a>
+(Netherlands). In late February and early March 2026, the vessel completed two Antarctic
+expedition voyages departing from Ushuaia, Argentina. Passengers participated in wildlife
+excursions in the Tierra del Fuego region. The long-tailed pygmy rice rat
+(<em>Oligoryzomys longicaudatus</em>) is the primary ANDV reservoir in the area;
+aerosolisation of infected excreta during excursions is the suspected transmission mechanism.
+</p>
+<p>
+Following the voyages, passengers from 11 countries reported Hantavirus Pulmonary Syndrome
+(HPS). Argentine health authorities, WHO, ECDC, CDC, and PAHO co-ordinated responses.
+Argentine Ministerio de Salud issued the first domestic alert. WHO published Disease Outbreak
+News DON 600 on 25 March 2026.
+</p>
+<p>
+Person-to-person transmission on the vessel has not been established. Andes virus is the
+only orthohantavirus with documented person-to-person spread, but such transmission
+requires prolonged, very close contact with symptomatic individuals.
+</p>
+<p>
+<a href="/outbreaks/mv-hondius-2026">Live MV Hondius incident page</a> with case count,
+per-country breakdown, event timeline, and source citations.
+</p>
+
+<h2>Individual-level data: Oxford Kraemer Lab line list</h2>
+<p>
+A living CC0 individual-level dataset for the MV Hondius cluster is maintained by
+<a href="https://www.biology.ox.ac.uk/people/moritz-kraemer" rel="external">Dr Moritz Kraemer</a>
+(University of Oxford), Sam Scarpino, and
+<a href="https://www.ed.ac.uk/biology/evolutionary-biology/staff/andrew-rambaut" rel="external">Andrew Rambaut</a>
+(University of Edinburgh / Nextstrain).
+The 28-column per-person dataset includes symptom onset date, clinical outcome, nationality,
+treatment received, hospitalisation status, and Pathoplexus/GenBank genomic accession IDs.
+Hosted at
+<a href="https://github.com/kraemer-lab/Hondius_hantavirus_h2026" rel="external">github.com/kraemer-lab/Hondius_hantavirus_h2026</a>.
+HORIZON is the only public surveillance platform ingesting this dataset in real time.
+</p>
+
+<h2>Other hantavirus activity in 2026</h2>
+<p>
+Beyond the MV Hondius cluster, routine seasonal surveillance continues:
+</p>
+<ul>
+  <li>
+    <strong>Puumala virus (PUUV) &#x2014; northern Europe:</strong>
+    Finland, Germany, Sweden, Russia, Belgium, and other EU/EEA countries report ongoing HFRS
+    cases consistent with the 2025&#x2013;26 bank vole (<em>Myodes glareolus</em>) population cycle.
+    Finland and Germany typically record the highest European PUUV burden during high-vole years.
+  </li>
+  <li>
+    <strong>Seoul virus (SEOV) &#x2014; global:</strong>
+    SEOV in domestic and laboratory rats is reported globally at endemic background levels.
+    No unusual cluster activity in 2026 as of this update.
+  </li>
+  <li>
+    <strong>Hantaan virus (HTNV) &#x2014; east Asia:</strong>
+    Seasonal HFRS continues in China (Shaanxi, Shandong), South Korea, and Russian Far East.
+    Endemic background levels consistent with prior years.
+  </li>
+  <li>
+    <strong>Americas &#x2014; endemic activity:</strong>
+    Argentina, Chile, Brazil, and the United States report sporadic HPS cases in
+    rural areas with rodent contact, consistent with long-run endemic rates.
+  </li>
+</ul>
+<p>
+Browse all tracked 2026 events: <a href="/articles">live article feed</a> ·
+<a href="/chronology">90-day chronology</a> ·
+<a href="/outbreaks">incident index</a>.
+</p>
+
+<h2>2026 Andes virus genomic context</h2>
+<p>
+HORIZON's HantaNet integration links MV Hondius case records to the
+<a href="https://www.ncbi.nlm.nih.gov/nuccore/NC_003467" rel="external">NCBI RefSeq ANDV reference genome</a>
+(NC_003467 / NC_003468 / NC_003466 for S/M/L segments, Chile strain 9717869). The
+Oxford Kraemer Lab line list records include Pathoplexus accession identifiers for cases with
+genomic data, enabling direct linkage from epidemiological record to genomic reference.
+</p>
+
+<h2>Authoritative 2026 sources</h2>
+<ul>
+  <li><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON600" rel="external">WHO DON 600 — Hantavirus disease (Andes) — Argentina (and other countries), 25 March 2026</a></li>
+  <li><a href="https://www.paho.org/en/epidemiological-alerts-and-updates" rel="external">PAHO Epidemiological Alert, March 2026</a></li>
+  <li><a href="https://www.ecdc.europa.eu/" rel="external">ECDC Communicable Disease Threats Report (CDTR) — weekly updates</a></li>
+  <li><a href="https://www.cdc.gov/hantavirus/" rel="external">CDC Hantavirus — information for travellers and clinicians</a></li>
+  <li><a href="https://github.com/kraemer-lab/Hondius_hantavirus_h2026" rel="external">Oxford Kraemer Lab — MV Hondius individual line list (CC0)</a></li>
+</ul>
+
+<h2>About HORIZON</h2>
+<p>
+HORIZON is the only public hantavirus surveillance platform aggregating 65+ sources with
+NATO Admiralty source qualification, individual-level Oxford Kraemer Lab line list integration,
+HantaNet genomic reference layer, and a free open-data API (CC BY 4.0). It is the most
+comprehensive live hantavirus tracker available for 2026.
+</p>
+<p>
+<a href="/compare/hantavirus-live-trackers">Compare HORIZON to other live hantavirus trackers →</a>
+</p>
+
+{_related_serotypes_grid(exclude_slug="andes-virus")}
+
+{_CTA_LIVE_MAP}
+"""
+
 
 DATA_PAGE_BODY = """
 <p class="lead">
