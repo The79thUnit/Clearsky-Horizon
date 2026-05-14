@@ -70,6 +70,13 @@ from ..connectors.science_news import ScienceNewsConnector
 from ..connectors.spf_france import SPFFranceConnector
 from ..connectors.sweden_fhm import SwedenFHMConnector
 from ..connectors.thl_finland import THLFinlandConnector
+# Wire service connectors (migration 053)
+from ..connectors.bbc_health import BBCHealthConnector
+from ..connectors.reuters_health import ReutersHealthConnector
+from ..connectors.ap_news import APNewsConnector
+from ..connectors.afp import AFPConnector
+from ..connectors.efe import EFEConnector
+from ..connectors.mercopress import MercopressConnector
 from ..connectors.hantanet_ref import HantaNetRefConnector
 from ..connectors.kraemer_oxford import KraemerOxfordConnector
 from ..connectors.noaa_enso import NOAAENSOConnector
@@ -223,6 +230,14 @@ CONNECTORS: dict[str, type[BaseConnector]] = {
     # Content-topic dedup handles any overlap with ecdc-cdtr.
     ECDCRiskConnector.SOURCE_CODE: ECDCRiskConnector,
     ECDCEpidUpdatesConnector.SOURCE_CODE: ECDCEpidUpdatesConnector,
+    # Wire services (migration 053): Reuters, AP, AFP, EFE, BBC, Mercopress.
+    # Beat entries exist in celery_app.py; these were missing from the registry.
+    BBCHealthConnector.SOURCE_CODE: BBCHealthConnector,
+    ReutersHealthConnector.SOURCE_CODE: ReutersHealthConnector,
+    APNewsConnector.SOURCE_CODE: APNewsConnector,
+    AFPConnector.SOURCE_CODE: AFPConnector,
+    EFEConnector.SOURCE_CODE: EFEConnector,
+    MercopressConnector.SOURCE_CODE: MercopressConnector,
     # Research line list (migration 057): Oxford Kraemer Lab individual-level
     # MV Hondius ANDV line list. CC0. One ParsedItem per tracked person.
     # 28-column schema: status, symptom_onset, outcome, nationality,
