@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import logging
+import traceback
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
+from fastapi.responses import HTMLResponse, JSONResponse
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.types import ASGIApp
@@ -132,6 +135,110 @@ app.add_middleware(
 )
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+log = logging.getLogger("horizon.errors")
+
+# ---------------------------------------------------------------------------
+# Error pages — never expose a raw 500 to a user or crawler.
+# API paths (/api/*) return JSON; all other paths return a minimal HTML page
+# that looks like the rest of the site.
+# ---------------------------------------------------------------------------
+
+_ERROR_HTML = """\
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
+  <title>{title} | HORIZON</title>
+  <style>
+    *{{box-sizing:border-box;margin:0;padding:0}}
+    body{{background:#0a0c12;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;
+         display:flex;align-items:center;justify-content:center;min-height:100vh}}
+    .card{{text-align:center;max-width:540px;padding:3rem 2rem}}
+    h1{{font-size:3rem;font-weight:700;color:#2d7ff9;margin-bottom:.5rem}}
+    h2{{font-size:1.1rem;color:#94a3b8;margin-bottom:2rem;font-weight:400}}
+    p{{color:#64748b;font-size:.85rem;line-height:1.7;margin-bottom:1.5rem}}
+    a{{color:#2d7ff9;text-decoration:none}}
+    a:hover{{text-decoration:underline}}
+    .badge{{display:inline-block;background:rgba(45,127,249,.1);border:1px solid
+            rgba(45,127,249,.3);padding:.25rem .75rem;border-radius:4px;
+            font-size:.75rem;letter-spacing:.1em;color:#2d7ff9;margin-bottom:2rem}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">HORIZON HANTAVIRUS TRACKER</div>
+    <h1>{code}</h1>
+    <h2>{title}</h2>
+    <p>{detail}</p>
+    <p><a href="/">Return to live tracker</a> &nbsp;|&nbsp;
+       <a href="/outbreaks">Outbreaks</a> &nbsp;|&nbsp;
+       <a href="/articles">Articles</a></p>
+  </div>
+</body>
+</html>
+"""
+
+
+def _is_api(request: Request) -> bool:
+    return request.url.path.startswith("/api/")
+
+
+def _html_error(code: int, title: str, detail: str) -> HTMLResponse:
+    body = _ERROR_HTML.format(code=code, title=title, detail=detail)
+    return HTMLResponse(content=body, status_code=code)
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> Response:
+    detail = str(exc.detail) if exc.detail else "An error occurred."
+    if _is_api(request):
+        return JSONResponse({"error": detail}, status_code=exc.status_code)
+    titles = {
+        400: "Bad Request",
+        403: "Access Denied",
+        404: "Page Not Found",
+        405: "Method Not Allowed",
+        429: "Too Many Requests",
+        503: "Service Unavailable",
+    }
+    title = titles.get(exc.status_code, f"HTTP {exc.status_code}")
+    messages = {
+        404: "This page doesn't exist or has moved. Use the links below to get back on track.",
+        429: "You're making requests too quickly. Please wait a moment and try again.",
+        503: "The tracker is briefly unavailable. It will be back in seconds — please refresh.",
+    }
+    msg = messages.get(exc.status_code, detail)
+    return _html_error(exc.status_code, title, msg)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> Response:
+    errors = [f"{'.'.join(str(l) for l in e['loc'])}: {e['msg']}" for e in exc.errors()]
+    detail = "; ".join(errors)
+    if _is_api(request):
+        return JSONResponse({"error": "Invalid request parameters", "detail": detail}, status_code=422)
+    return _html_error(422, "Invalid Request", "The request contained invalid parameters.")
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> Response:
+    log.error(
+        "Unhandled exception on %s %s: %s\n%s",
+        request.method,
+        request.url.path,
+        exc,
+        traceback.format_exc(),
+    )
+    if _is_api(request):
+        return JSONResponse({"error": "Internal server error"}, status_code=500)
+    return _html_error(
+        500,
+        "Something went wrong",
+        "An internal error occurred. It has been logged and will be fixed. "
+        "The tracker is still running — try refreshing or returning to the homepage.",
+    )
 
 
 @app.middleware("http")
