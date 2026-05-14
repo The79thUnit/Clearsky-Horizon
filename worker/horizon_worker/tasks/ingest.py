@@ -70,6 +70,8 @@ from ..connectors.science_news import ScienceNewsConnector
 from ..connectors.spf_france import SPFFranceConnector
 from ..connectors.sweden_fhm import SwedenFHMConnector
 from ..connectors.thl_finland import THLFinlandConnector
+from ..connectors.hantanet_ref import HantaNetRefConnector
+from ..connectors.kraemer_oxford import KraemerOxfordConnector
 from ..connectors.noaa_enso import NOAAENSOConnector
 from ..connectors.nasa_ndvi import NASANDVIConnector
 from ..connectors.text_utils import topic_hash
@@ -221,6 +223,15 @@ CONNECTORS: dict[str, type[BaseConnector]] = {
     # Content-topic dedup handles any overlap with ecdc-cdtr.
     ECDCRiskConnector.SOURCE_CODE: ECDCRiskConnector,
     ECDCEpidUpdatesConnector.SOURCE_CODE: ECDCEpidUpdatesConnector,
+    # Research line list (migration 057): Oxford Kraemer Lab individual-level
+    # MV Hondius ANDV line list. CC0. One ParsedItem per tracked person.
+    # 28-column schema: status, symptom_onset, outcome, nationality,
+    # treatment, travel, accession_id. Every 6h during active outbreak.
+    KraemerOxfordConnector.SOURCE_CODE: KraemerOxfordConnector,
+    # HantaNet reference genomes (migration 058): full Orthohantavirus RefSeq
+    # set via NCBI E-utilities (no reldate filter). Static annotation layer
+    # distinct from ncbi-virus (reldate=14). NATO A1. Daily.
+    HantaNetRefConnector.SOURCE_CODE: HantaNetRefConnector,
 }
 
 

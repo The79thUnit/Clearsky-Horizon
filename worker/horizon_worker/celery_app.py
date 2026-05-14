@@ -574,4 +574,25 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="8,23,38,53"),
         "args": [],
     },
+    # --- migration 057: Oxford Kraemer Lab MV Hondius line list -------------
+    # Individual-level CC0 ANDV line list. Updated at least daily during the
+    # active outbreak; every 6h ensures new confirmed cases land within one
+    # cycle. Minute=13 at hours 0/6/12/18 UTC: free slot between rki (m=12)
+    # and plos-pathogens (m=11 is the prior slot; m=13 is genuinely empty).
+    "fetch-kraemer-oxford": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute=13, hour="*/6"),
+        "args": ["kraemer-oxford"],
+    },
+    # --- migration 058: CDC HantaNet reference genomes (NCBI RefSeq) --------
+    # Full Orthohantavirus RefSeq set, no date filter. Static annotation layer
+    # (distinct from ncbi-virus which uses reldate=14). RefSeq reference
+    # sequences update infrequently -- once daily is more than sufficient.
+    # Minute=47, hour=7 (07:47 UTC): immediately after the NOAA/NASA
+    # ecological block (06:03, 06:23) but before the high-traffic 08:xx wave.
+    "fetch-cdc-hantanet-ref": {
+        "task": "horizon_worker.tasks.ingest.fetch_source",
+        "schedule": crontab(minute=47, hour=7),
+        "args": ["cdc-hantanet-ref"],
+    },
 }
