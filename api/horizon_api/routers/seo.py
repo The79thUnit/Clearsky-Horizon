@@ -53,6 +53,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Res
 
 from ..db import acquire
 from ..seo import content as seo_content
+from ..seo import content_extensions as seo_ext
 from ..seo import feeds, i18n, i18n_pt, jsonld, sitemaps
 from ..seo.common import (
     BASE_URL,
@@ -67,6 +68,33 @@ from ..seo.common import (
 from ..seo.html_shell import Breadcrumb, PageSpec, render_page
 
 router = APIRouter(tags=["seo"])
+
+
+# ---------------------------------------------------------------------------
+# FAQ rendering helper
+# ---------------------------------------------------------------------------
+
+
+def _render_faq_section(faq_entries: list[tuple[str, str]], heading: str = "Frequently asked questions") -> str:
+    """Render a list of (Q, A) entries as a styled FAQ section.
+
+    The same entries are also fed into `jsonld.faq_page_from_entries` at the
+    page-handler level to emit FAQPage JSON-LD for Google rich results.
+    """
+    if not faq_entries:
+        return ""
+    parts = [f'<section id="faq" itemscope itemtype="https://schema.org/FAQPage"><h2>{esc(heading)}</h2>']
+    for q, a in faq_entries:
+        parts.append(
+            '<details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">'
+            f'<summary itemprop="name">{esc(q)}</summary>'
+            '<div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">'
+            f'<p itemprop="text">{esc(a)}</p>'
+            '</div>'
+            '</details>'
+        )
+    parts.append("</section>")
+    return "".join(parts)
 
 
 # ---------------------------------------------------------------------------
@@ -445,26 +473,29 @@ async def page_timeline() -> Response:
 
 @router.get("/hantavirus", response_class=HTMLResponse)
 async def page_hantavirus() -> Response:
+    canonical = f"{BASE_URL}/hantavirus"
     spec = PageSpec(
         path="/hantavirus",
         title="Hantavirus — Symptoms, Serotypes, Transmission, Outbreaks (2026) · HORIZON",
         description=(
             "Complete reference on hantavirus disease: 12 orthohantavirus serotypes, "
             "HPS and HFRS clinical syndromes, transmission routes, prevention, treatment, "
-            "and live outbreak surveillance from WHO, CDC, ECDC, PAHO, and ProMED."
+            "and live outbreak surveillance from WHO, CDC, ECDC, PAHO, and ProMED. "
+            "Quick-reference card, mortality table, MV Hondius 2026 context."
         ),
         h1="Hantavirus — Live Surveillance and Reference",
-        body_html=seo_content.HANTAVIRUS_HUB_BODY,
+        body_html=seo_content.HANTAVIRUS_HUB_BODY + seo_ext.HANTAVIRUS_HUB_EXT + _render_faq_section(seo_ext.FAQ_HANTAVIRUS_HUB),
         breadcrumbs=[_home_crumb(), Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus")],
         jsonld_nodes=[
             jsonld.medical_condition_hantavirus(),
             jsonld.medical_web_page(
-                f"{BASE_URL}/hantavirus",
+                canonical,
                 "Hantavirus — Live Surveillance and Reference",
                 f"{BASE_URL}/hantavirus#condition",
             ),
+            jsonld.faq_page_from_entries(canonical, seo_ext.FAQ_HANTAVIRUS_HUB),
         ],
-        keywords="hantavirus, orthohantavirus, ANDV, SNV, PUUV, HTNV, SEOV, DOBV, HPS, HFRS, outbreak, surveillance, WHO, CDC, ECDC",
+        keywords="hantavirus, orthohantavirus, ANDV, SNV, PUUV, HTNV, SEOV, DOBV, HPS, HFRS, outbreak, surveillance, WHO, CDC, ECDC, hantavirus 2026",
         news_keywords="hantavirus, Andes virus, Sin Nombre, MV Hondius, outbreak",
         og_type="article",
         article_section="Public Health",
@@ -474,16 +505,18 @@ async def page_hantavirus() -> Response:
 
 @router.get("/hantavirus/symptoms", response_class=HTMLResponse)
 async def page_symptoms() -> Response:
+    canonical = f"{BASE_URL}/hantavirus/symptoms"
     spec = PageSpec(
         path="/hantavirus/symptoms",
         title="Hantavirus Symptoms — HPS vs HFRS, Prodrome, Critical-Care Triad · HORIZON",
         description=(
-            "Detailed hantavirus symptom progression: 1–8 week incubation, flu-like prodrome, "
-            "then HPS (pulmonary collapse, 30–50% CFR for Andes virus) or HFRS (renal failure, "
-            "haemorrhage). Differential diagnosis and when to seek care."
+            "Detailed hantavirus symptom progression: 1-8 week incubation, flu-like prodrome, "
+            "then HPS (pulmonary collapse, 30-50% CFR for Andes virus) or HFRS (renal failure, "
+            "haemorrhage). Day-by-day timeline, paediatric presentation, COVID-19 comparison, "
+            "self-assessment, and when to seek emergency care."
         ),
         h1="Hantavirus Symptoms — Clinical Course of HPS and HFRS",
-        body_html=seo_content.SYMPTOMS_BODY,
+        body_html=seo_content.SYMPTOMS_BODY + seo_ext.SYMPTOMS_EXT + _render_faq_section(seo_ext.FAQ_SYMPTOMS),
         breadcrumbs=[
             _home_crumb(),
             Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
@@ -492,12 +525,13 @@ async def page_symptoms() -> Response:
         jsonld_nodes=[
             jsonld.medical_condition_hantavirus(),
             jsonld.medical_web_page(
-                f"{BASE_URL}/hantavirus/symptoms",
+                canonical,
                 "Hantavirus Symptoms",
                 f"{BASE_URL}/hantavirus#condition",
             ),
+            jsonld.faq_page_from_entries(canonical, seo_ext.FAQ_SYMPTOMS),
         ],
-        keywords="hantavirus symptoms, HPS symptoms, HFRS symptoms, hantavirus prodrome, pulmonary syndrome, renal syndrome, thrombocytopenia",
+        keywords="hantavirus symptoms, HPS symptoms, HFRS symptoms, hantavirus prodrome, pulmonary syndrome, renal syndrome, thrombocytopenia, hantavirus timeline, hantavirus vs covid, hantavirus children",
         news_keywords="hantavirus symptoms, HPS, HFRS, prodrome",
     )
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
@@ -505,16 +539,18 @@ async def page_symptoms() -> Response:
 
 @router.get("/hantavirus/transmission", response_class=HTMLResponse)
 async def page_transmission() -> Response:
+    canonical = f"{BASE_URL}/hantavirus/transmission"
     spec = PageSpec(
         path="/hantavirus/transmission",
         title="Hantavirus Transmission — Rodent Aerosols, Andes-Virus P2P · HORIZON",
         description=(
             "How hantavirus spreads: rodent-to-human aerosol inhalation is the primary route. "
             "Andes virus is the only orthohantavirus with documented person-to-person transmission. "
-            "Reservoir species map, transmission myths debunked."
+            "Full route inventory, reservoir species map by serotype, environmental survival, "
+            "myths debunked (mosquitoes, pets, HVAC), travel risk by region."
         ),
         h1="Hantavirus Transmission — Primary, Secondary, and Person-to-Person Routes",
-        body_html=seo_content.TRANSMISSION_BODY,
+        body_html=seo_content.TRANSMISSION_BODY + seo_ext.TRANSMISSION_EXT + _render_faq_section(seo_ext.FAQ_TRANSMISSION),
         breadcrumbs=[
             _home_crumb(),
             Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
@@ -523,12 +559,13 @@ async def page_transmission() -> Response:
         jsonld_nodes=[
             jsonld.medical_condition_hantavirus(),
             jsonld.medical_web_page(
-                f"{BASE_URL}/hantavirus/transmission",
+                canonical,
                 "Hantavirus Transmission",
                 f"{BASE_URL}/hantavirus#condition",
             ),
+            jsonld.faq_page_from_entries(canonical, seo_ext.FAQ_TRANSMISSION),
         ],
-        keywords="hantavirus transmission, how is hantavirus spread, andes virus person to person, rodent aerosol, reservoir species",
+        keywords="hantavirus transmission, how is hantavirus spread, andes virus person to person, rodent aerosol, reservoir species, hantavirus airborne, hantavirus contagious",
         news_keywords="hantavirus transmission, andes virus, person-to-person",
     )
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
@@ -536,16 +573,52 @@ async def page_transmission() -> Response:
 
 @router.get("/hantavirus/prevention", response_class=HTMLResponse)
 async def page_prevention() -> Response:
+    canonical = f"{BASE_URL}/hantavirus/prevention"
+    # HowTo schema for the CDC bleach cleanup protocol — competes for the
+    # "how to clean rodent droppings" rich result with a step-by-step
+    # answer Google can surface directly in SERP.
+    howto_cleanup = {
+        "@type": "HowTo",
+        "@id": f"{canonical}#howto-cleanup",
+        "name": "How to safely clean rodent-contaminated areas (CDC hantavirus protocol)",
+        "description": (
+            "Evidence-based step-by-step protocol from the US CDC for safely "
+            "cleaning rodent-contaminated indoor spaces without aerosolising "
+            "hantavirus-bearing dust."
+        ),
+        "totalTime": "PT45M",
+        "supply": [
+            {"@type": "HowToSupply", "name": "10% household bleach solution (1 part bleach to 9 parts water)"},
+            {"@type": "HowToSupply", "name": "Disposable nitrile or latex gloves"},
+            {"@type": "HowToSupply", "name": "FFP3 or N95 respirator (not a surgical mask)"},
+            {"@type": "HowToSupply", "name": "Eye protection (goggles)"},
+            {"@type": "HowToSupply", "name": "Long-sleeved washable cover-up"},
+            {"@type": "HowToSupply", "name": "Disposable paper towels"},
+            {"@type": "HowToSupply", "name": "Sealable plastic bags"},
+        ],
+        "step": [
+            {"@type": "HowToStep", "name": "Air out the space", "text": "Open all windows and doors for at least 30 minutes before entry. Leave the area while it airs."},
+            {"@type": "HowToStep", "name": "Put on PPE", "text": "Gloves, FFP3/N95 respirator, eye protection, long-sleeved cover-up. Don PPE before re-entering."},
+            {"@type": "HowToStep", "name": "Spray, do not sweep", "text": "Spray 10% bleach solution heavily on all visible droppings, urine spots, nesting material, and surrounding area. Let soak 5 minutes."},
+            {"@type": "HowToStep", "name": "Wipe up with paper towels", "text": "Pick up disinfected material with disposable paper towels. Place into a sealable plastic bag. Double-bag and seal."},
+            {"@type": "HowToStep", "name": "Mop the floor", "text": "Mop or sponge the entire floor of affected rooms with bleach solution or disinfectant cleaner."},
+            {"@type": "HowToStep", "name": "Wash exposed textiles", "text": "Wash bedding, clothing, and washable furnishings in hot water (60°C minimum) with normal detergent."},
+            {"@type": "HowToStep", "name": "Disinfect hard surfaces", "text": "Wipe countertops, shelves, and other surfaces with disinfectant cleaner or bleach solution. Air-dry."},
+            {"@type": "HowToStep", "name": "Remove PPE last", "text": "Take off gloves last so contaminated hands never touch your face. Wash hands and forearms with soap. Shower as soon as practical."},
+            {"@type": "HowToStep", "name": "Dispose of waste", "text": "Place all cleanup waste in sealed bags in outdoor bins, not indoor wastebaskets."},
+        ],
+    }
     spec = PageSpec(
         path="/hantavirus/prevention",
-        title="Hantavirus Prevention — Rodent Control, Cleaning, N95 Protocols · HORIZON",
+        title="Hantavirus Prevention — CDC Cleanup Protocol, N95, Rodent Exclusion · HORIZON",
         description=(
-            "Evidence-based hantavirus prevention: rodent exclusion, safe cleaning of "
-            "contaminated areas (CDC bleach protocol, N95/FFP3), travel precautions for "
-            "endemic regions. Vaccine status 2026."
+            "Evidence-based hantavirus prevention: 9-step CDC bleach cleanup protocol, "
+            "rodent exclusion, FFP3/N95 respiratory protection, occupational and travel "
+            "precautions for endemic regions. Vaccine status 2026 across Hantavax, "
+            "Hantavac, DNA, mRNA, and monoclonal-antibody candidates."
         ),
         h1="Hantavirus Prevention — Exposure Control",
-        body_html=seo_content.PREVENTION_BODY,
+        body_html=seo_content.PREVENTION_BODY + seo_ext.PREVENTION_EXT + _render_faq_section(seo_ext.FAQ_PREVENTION),
         breadcrumbs=[
             _home_crumb(),
             Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
@@ -554,12 +627,14 @@ async def page_prevention() -> Response:
         jsonld_nodes=[
             jsonld.medical_condition_hantavirus(),
             jsonld.medical_web_page(
-                f"{BASE_URL}/hantavirus/prevention",
+                canonical,
                 "Hantavirus Prevention",
                 f"{BASE_URL}/hantavirus#condition",
             ),
+            howto_cleanup,
+            jsonld.faq_page_from_entries(canonical, seo_ext.FAQ_PREVENTION),
         ],
-        keywords="hantavirus prevention, rodent control, hantavirus cleaning protocol, hantavirus N95, hantavirus vaccine, Hantavax",
+        keywords="hantavirus prevention, rodent control, hantavirus cleaning protocol, hantavirus N95, hantavirus vaccine, Hantavax, CDC bleach protocol, mouse exclusion",
         news_keywords="hantavirus prevention, vaccine, Hantavax",
     )
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
@@ -567,16 +642,18 @@ async def page_prevention() -> Response:
 
 @router.get("/hantavirus/treatment", response_class=HTMLResponse)
 async def page_treatment() -> Response:
+    canonical = f"{BASE_URL}/hantavirus/treatment"
     spec = PageSpec(
         path="/hantavirus/treatment",
-        title="Hantavirus Treatment — ICU Care, ECMO, Ribavirin · HORIZON",
+        title="Hantavirus Treatment — ICU Care, ECMO, Ribavirin, Survival Rates · HORIZON",
         description=(
-            "Hantavirus treatment 2026: no licensed antiviral, supportive critical care, "
-            "ECMO for HPS, ribavirin for early HFRS, monoclonal antibody trials. "
-            "Long-term sequelae and rehabilitation."
+            "Hantavirus treatment 2026: no licensed antiviral, intensive supportive critical "
+            "care, ECMO halves HPS mortality, ribavirin for early HFRS, monoclonal antibody "
+            "trials. CFR per serotype, phase-by-phase HFRS management, investigational drugs, "
+            "post-discharge rehabilitation pathway."
         ),
         h1="Hantavirus Treatment — Supportive Critical Care",
-        body_html=seo_content.TREATMENT_BODY,
+        body_html=seo_content.TREATMENT_BODY + seo_ext.TREATMENT_EXT + _render_faq_section(seo_ext.FAQ_TREATMENT),
         breadcrumbs=[
             _home_crumb(),
             Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
@@ -585,13 +662,1099 @@ async def page_treatment() -> Response:
         jsonld_nodes=[
             jsonld.medical_condition_hantavirus(),
             jsonld.medical_web_page(
-                f"{BASE_URL}/hantavirus/treatment",
+                canonical,
                 "Hantavirus Treatment",
                 f"{BASE_URL}/hantavirus#condition",
             ),
+            jsonld.faq_page_from_entries(canonical, seo_ext.FAQ_TREATMENT),
         ],
-        keywords="hantavirus treatment, HPS treatment, HFRS treatment, ribavirin hantavirus, ECMO hantavirus, hantavirus survival",
+        keywords="hantavirus treatment, HPS treatment, HFRS treatment, ribavirin hantavirus, ECMO hantavirus, hantavirus survival, hantavirus mortality, hantavirus rehabilitation",
         news_keywords="hantavirus treatment, ribavirin, ECMO",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
+# ============================================================================
+# HIGH-VOLUME QUESTION PAGES
+# ============================================================================
+# These pages target high-volume Google search queries that the standard
+# /hantavirus/* topic pages don't fully capture. Each one is 1,500+ words
+# of focused content + FAQPage schema for rich-result eligibility.
+
+
+@router.get("/hantavirus/is-it-contagious", response_class=HTMLResponse)
+@router.get("/hantavirus/contagious", response_class=HTMLResponse)
+async def page_hantavirus_contagious() -> Response:
+    """Targets 'is hantavirus contagious', 'is hantavirus airborne', 'does hantavirus spread person to person'."""
+    canonical = f"{BASE_URL}/hantavirus/is-it-contagious"
+    faq = [
+        ("Is hantavirus contagious between people?",
+         "With one exception, hantaviruses do not transmit between people. The exception is Andes virus (ANDV), which has documented person-to-person transmission via close household contact during the acute illness. Sin Nombre, Puumala, Hantaan, Seoul, and Dobrava-Belgrade are rodent-to-human only."),
+        ("How do you catch hantavirus?",
+         "Inhaling dust contaminated with rodent urine, faeces, or saliva is the dominant route (over 95% of cases). This typically happens in enclosed spaces when contaminated dust is disturbed by sweeping, vacuuming without HEPA, or moving stored items. Direct rodent bites and contaminated food/water are minor secondary routes."),
+        ("Why is Andes virus the only contagious hantavirus?",
+         "Andes virus has structural differences in its glycoproteins that allow higher replication in respiratory tissue compared to other hantaviruses. This produces more infectious respiratory droplets during acute illness, enabling household transmission. Multiple Argentine and Chilean outbreaks have documented clear secondary case chains."),
+        ("Can a hantavirus patient infect their family?",
+         "For Andes virus, yes — household secondary attack rate is approximately 5-10% in close-contact household members. For all other hantaviruses, no. Household contacts of confirmed ANDV patients should self-isolate from vulnerable people (children, elderly, immunocompromised) and follow public-health guidance."),
+        ("How long is a hantavirus patient contagious?",
+         "For Andes virus, infectiousness peaks during the acute prodromal and cardiopulmonary phases (roughly days 5-14 from symptom onset). Asymptomatic shedding before or after this window has not been clearly documented as a transmission source. For other hantaviruses, the question doesn't apply — they don't transmit between people."),
+        ("Can healthcare workers catch hantavirus from patients?",
+         "For Andes virus, yes — healthcare worker secondary cases have been documented, prompting standard droplet + contact precautions, FFP3/N95 respirator use, and where possible negative-pressure isolation. For all other hantaviruses, no occupational transmission from patients has been documented."),
+        ("Is hantavirus airborne like measles or COVID-19?",
+         "Hantavirus is not airborne in the epidemiological sense of measles or pulmonary tuberculosis — it does not float in room air or travel between rooms via HVAC. It IS aerosolised by mechanical disturbance of contaminated dust, producing a short-range aerosol. Practical implication: a room with dried rodent excreta becomes hazardous when the dust is disturbed."),
+        ("Can pets transmit hantavirus to humans?",
+         "Pet dogs, cats, hamsters, guinea pigs, and rabbits do not carry hantavirus under normal circumstances. The only documented exception is pet brown rats (and rarely pet hamsters) exposed to wild brown rats carrying Seoul virus — extremely rare, documented mainly among rat-breeder communities in the UK and US."),
+        ("Can you get hantavirus from a mosquito or tick bite?",
+         "No. Hantaviruses are not arthropod-borne. Mosquitoes, ticks, fleas, and midges do not carry or transmit hantavirus. Other rodent-associated diseases (e.g. Lyme disease, plague) involve arthropod vectors, but hantavirus is strictly an aerosol/contact pathogen via rodent excreta."),
+        ("Is the MV Hondius hantavirus outbreak contagious between passengers?",
+         "The MV Hondius cluster is Andes virus — which CAN transmit between people via close household contact. Whether passenger-to-passenger transmission occurred aboard the ship versus all cases arising from the original Tierra del Fuego exposure is still under investigation by WHO and the involved national authorities. Cabin-mate clusters suggest some secondary transmission did occur."),
+    ]
+    body = """
+<p class="lead">
+The short answer: <strong>only Andes virus is contagious between people, and
+only via close household contact.</strong> All other hantaviruses — Sin Nombre,
+Puumala, Hantaan, Seoul, Dobrava-Belgrade — are caught from rodents, never
+from another infected person.
+</p>
+
+<h2>Quick answer table</h2>
+<table class="facts">
+<thead><tr><th>Hantavirus strain</th><th>Contagious between people?</th><th>Main transmission</th></tr></thead>
+<tbody>
+<tr><th>Andes virus (ANDV)</th><td><strong>Yes</strong> (close household contact)</td><td>Rodents + person-to-person</td></tr>
+<tr><th>Sin Nombre (SNV)</th><td>No</td><td>Rodent aerosol only</td></tr>
+<tr><th>Puumala (PUUV)</th><td>No</td><td>Rodent aerosol only</td></tr>
+<tr><th>Hantaan (HTNV)</th><td>No</td><td>Rodent aerosol only</td></tr>
+<tr><th>Seoul (SEOV)</th><td>No</td><td>Rodent aerosol only</td></tr>
+<tr><th>Dobrava-Belgrade (DOBV)</th><td>No</td><td>Rodent aerosol only</td></tr>
+</tbody>
+</table>
+
+<h2>Why is Andes virus the exception?</h2>
+<p>
+Andes virus is the only orthohantavirus with documented and reproducible
+person-to-person transmission. The biological basis is not fully resolved
+but appears to involve structural differences in the ANDV glycoproteins
+(Gn and Gc) that allow higher viral replication in respiratory tissue,
+producing more infectious aerosols and respiratory droplets during the
+acute illness.
+</p>
+<p>
+The 1996 El Bolsón outbreak in Argentine Patagonia first established
+person-to-person transmission as a feature of ANDV. The 2018-2019 Epuyén
+outbreak — also in Argentine Patagonia — included 34 cases with clear
+secondary chains, leading to international updates in clinical guidance.
+The 2026 MV Hondius cluster has prompted further refinement of contact
+tracing protocols by UKHSA, ECDC, and RIVM.
+</p>
+
+<h2>Andes virus secondary attack rate</h2>
+<p>
+Cohort data from the Argentine and Chilean outbreaks indicate the secondary
+attack rate (probability that a household close contact develops disease)
+for Andes virus is approximately:
+</p>
+<ul>
+<li>5-10% in close household contacts.</li>
+<li>Higher (up to 15-20%) in sexual partners and primary caregivers.</li>
+<li>Lower (less than 1%) in non-household close contacts (e.g. co-workers,
+classmates).</li>
+<li>Negligible in casual contacts.</li>
+</ul>
+
+<h2>Practical implications for ANDV contacts</h2>
+<p>
+If you have been a close contact of a person with confirmed or suspected
+Andes virus disease, current national public-health guidance
+(<a href="/sources/ukhsa">UKHSA</a>, ECDC, Chilean Ministry of Health) is:
+</p>
+<ul>
+<li>Self-monitor for fever and respiratory symptoms for 45 days from the
+last close contact.</li>
+<li>Self-isolate from vulnerable people (children, elderly,
+immunocompromised) until cleared by public-health follow-up.</li>
+<li>Routine social contact outside the household does not need to be
+restricted while asymptomatic.</li>
+<li>If you develop fever OR any respiratory symptom, contact your national
+health service immediately and mention ANDV exposure explicitly.</li>
+</ul>
+
+<h2>What about coughing or sneezing?</h2>
+<p>
+For Andes virus, respiratory droplets are part of the transmission picture,
+particularly during the cardiopulmonary phase. For all other hantaviruses,
+respiratory droplets from an infected person play no role — the patient is
+not contagious in any clinically meaningful way.
+</p>
+
+<h2>Healthcare worker precautions</h2>
+<p>
+For confirmed or suspected ANDV-HPS patients:
+</p>
+<ul>
+<li>Standard precautions PLUS droplet and contact precautions.</li>
+<li>FFP3 (UK/EU) or N95 (US/CA) respirator, eye protection, gowns, and
+gloves.</li>
+<li>Negative-pressure isolation where available.</li>
+<li>Designated patient-care equipment to limit cross-contamination.</li>
+</ul>
+<p>
+For all other hantaviruses, standard precautions are sufficient. No
+healthcare worker transmission has been documented for SNV, PUUV, HTNV,
+SEOV, or DOBV.
+</p>
+
+<h2>What is NOT a hantavirus transmission route</h2>
+<p>
+Despite persistent misinformation, hantavirus is NOT transmitted by:
+mosquito or tick bites; domestic pets (with the rare Seoul virus exception);
+air conditioning or HVAC systems; sexual contact (separate from the general
+close-household ANDV route); blood donation; public water supplies; or
+casual social contact such as shaking hands, sharing a meal, or sitting
+near someone in public.
+</p>
+
+<p>For the full transmission inventory, see the
+<a href="/hantavirus/transmission">main hantavirus transmission page →</a></p>
+
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
+"""
+    spec = PageSpec(
+        path="/hantavirus/is-it-contagious",
+        title="Is Hantavirus Contagious? — Andes Virus Person-to-Person Only · HORIZON",
+        description=(
+            "Definitive answer: only Andes virus is contagious between people, and only via "
+            "close household contact (5-10% secondary attack rate). Sin Nombre, Puumala, "
+            "Hantaan, Seoul, Dobrava-Belgrade are NOT contagious person-to-person. Why ANDV "
+            "is the exception, healthcare worker precautions, MV Hondius implications."
+        ),
+        h1="Is Hantavirus Contagious? — Strain-by-Strain Answer",
+        body_html=body + _render_faq_section(faq),
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="Is it contagious?", url=canonical),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            jsonld.medical_web_page(canonical, "Is Hantavirus Contagious?", f"{BASE_URL}/hantavirus#condition"),
+            jsonld.faq_page_from_entries(canonical, faq),
+        ],
+        keywords="is hantavirus contagious, hantavirus person to person, hantavirus airborne, andes virus contagious, hantavirus spread between people, hantavirus household transmission",
+        news_keywords="hantavirus contagious, andes virus, person-to-person",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
+@router.get("/hantavirus/death-rate", response_class=HTMLResponse)
+@router.get("/hantavirus/mortality", response_class=HTMLResponse)
+@router.get("/hantavirus/fatality-rate", response_class=HTMLResponse)
+async def page_hantavirus_death_rate() -> Response:
+    """Targets 'hantavirus death rate', 'hantavirus mortality rate', 'how deadly is hantavirus'."""
+    canonical = f"{BASE_URL}/hantavirus/death-rate"
+    faq = [
+        ("What is the death rate for hantavirus?",
+         "Case-fatality varies sharply by strain. Sin Nombre virus HPS: 36-38%. Andes virus HPS: 30-50%. Puumala virus HFRS: under 1%. Hantaan virus HFRS: 5-15%. Seoul virus HFRS: under 1%. Dobrava-Belgrade virus HFRS: 5-12%. The dominant strain in the 2026 MV Hondius outbreak is Andes virus."),
+        ("How deadly is the MV Hondius hantavirus outbreak?",
+         "The MV Hondius cluster involves Andes virus, with case-fatality rate of 30-50%. Live outcome data is tracked on the incident page. Survival is strongly dependent on early ICU admission and access to ECMO for severe cases."),
+        ("Is hantavirus the deadliest virus in the world?",
+         "Hantavirus is not the deadliest — Ebola virus, rabies (untreated), Nipah virus, and Marburg virus all have higher case-fatality rates in untreated patients. But hantavirus has the highest case-fatality rate among viruses currently active in the Americas, and the highest of any virus regularly encountered by travellers in Patagonia or the US Southwest."),
+        ("Why does Andes virus kill so many people?",
+         "Andes virus deteriorates rapidly: 12-48 hours from cough to respiratory failure. The pulmonary oedema is non-cardiogenic and capillary-leak driven, which means aggressive fluid resuscitation makes it worse. Without early ICU admission and ideally ECMO, survival is poor. Case-fatality drops substantially in centres with ECMO capacity."),
+        ("How does hantavirus mortality compare to COVID-19?",
+         "Hantavirus Pulmonary Syndrome has 30-50% case-fatality. COVID-19 has approximately 1% case-fatality overall (varies by age and variant). Hantavirus is roughly 30-50x more lethal per case but vastly less common — global hantavirus deaths per year are in the low thousands; COVID-19 global deaths peaked in the millions."),
+        ("Has the hantavirus death rate changed over time?",
+         "Yes — modestly. Earlier outbreaks (Four Corners 1993) had higher case-fatality (~50%) because the disease was unrecognised and ICU strategies hadn't been adapted. Modern care with restrictive fluids, lung-protective ventilation, vasopressor-first haemodynamic support, and ECMO has reduced SNV HPS case-fatality to 36-38%. ECMO availability is the single biggest modifiable factor."),
+        ("What proportion of hantavirus deaths occur before hospital admission?",
+         "About 15-25% of fatal HPS cases die before reaching definitive critical care. The pre-hospital deaths are largely driven by misdiagnosis (atypical pneumonia, influenza, COVID-19) and rapid deterioration during the prodromal phase. Cases identified and admitted early to ICU have substantially better outcomes."),
+        ("Do hantavirus survivors fully recover?",
+         "Most do, but not all. About 70-80% return to baseline function over 6-12 months. The remainder have persistent pulmonary function reduction (HPS), proteinuria or hypertension (HFRS), exercise intolerance, or post-ICU psychological symptoms. Pulmonary rehabilitation can recover most of the deficit."),
+        ("Which country has the lowest hantavirus death rate?",
+         "Finland and Sweden — because their dominant strain is Puumala virus (HFRS with case-fatality under 1%). South Korea also has low mortality because of the Hantavax vaccine programme in agricultural workers."),
+        ("Is hantavirus 100% fatal if untreated?",
+         "No. Even untreated hantavirus disease has variable outcomes depending on serotype and host. Puumala HFRS resolves spontaneously in most patients with no specific treatment. Sin Nombre and Andes HPS have ~40-60% mortality even without treatment. With modern intensive care, mortality drops by half or more."),
+    ]
+    body = """
+<p class="lead">
+Hantavirus case-fatality rate (CFR) varies dramatically by strain. The most
+lethal strains kill 30-50% of confirmed cases; the mildest kill under 1%.
+This page summarises the CFR data, explains why outcomes vary so widely,
+and lists the factors that most affect survival.
+</p>
+
+<h2>Case-fatality rate by serotype</h2>
+<table class="facts">
+<thead><tr><th>Serotype</th><th>Syndrome</th><th>Case-fatality rate</th><th>Survival rate</th><th>Key factor</th></tr></thead>
+<tbody>
+<tr><th>Sin Nombre (SNV)</th><td>HPS</td><td>36-38%</td><td>62-64%</td><td>Early ICU, ECMO availability</td></tr>
+<tr><th>Andes (ANDV)</th><td>HPS</td><td>30-50%</td><td>50-70%</td><td>ECMO halves mortality</td></tr>
+<tr><th>Hantaan (HTNV)</th><td>HFRS (severe)</td><td>5-15%</td><td>85-95%</td><td>Early ribavirin, dialysis</td></tr>
+<tr><th>Dobrava-Belgrade (DOBV)</th><td>HFRS (severe)</td><td>5-12%</td><td>88-95%</td><td>Bleeding control, dialysis</td></tr>
+<tr><th>Bayou (BAYV)</th><td>HPS</td><td>~33%</td><td>~67%</td><td>Sporadic cases, regional</td></tr>
+<tr><th>Laguna Negra (LANV)</th><td>HPS</td><td>~12%</td><td>~88%</td><td>Mostly mild presentations</td></tr>
+<tr><th>Choclo (CHOV)</th><td>HPS (mild)</td><td>~10%</td><td>~90%</td><td>Generally less severe HPS</td></tr>
+<tr><th>Puumala (PUUV)</th><td>HFRS (mild)</td><td>&lt;1%</td><td>&gt;99%</td><td>Self-limiting in most</td></tr>
+<tr><th>Seoul (SEOV)</th><td>HFRS (mild)</td><td>&lt;1%</td><td>&gt;99%</td><td>Mild course</td></tr>
+<tr><th>Tula (TULV)</th><td>HFRS (mild, rare)</td><td>&lt;1%</td><td>&gt;99%</td><td>Rare clinical cases</td></tr>
+</tbody>
+</table>
+
+<h2>What determines hantavirus mortality</h2>
+<p>Mortality varies among patients infected with the same strain. The
+factors with the strongest evidence:</p>
+<ul>
+<li><strong>Time to ICU admission.</strong> Every hour of delay increases
+mortality. Patients admitted before respiratory symptoms have substantially
+better outcomes than those admitted after.</li>
+<li><strong>ECMO availability.</strong> Cohort studies from Chile,
+Argentina, and the USA show veno-venous ECMO halves HPS mortality in
+patients with refractory hypoxia.</li>
+<li><strong>Fluid management.</strong> Aggressive crystalloid resuscitation
+worsens non-cardiogenic pulmonary oedema. Restrictive fluids plus
+vasopressor-first haemodynamic support is now standard.</li>
+<li><strong>Age.</strong> Older patients have higher mortality, partly due
+to lower cardiac reserve.</li>
+<li><strong>Pre-existing conditions.</strong> Hypertension, diabetes, and
+chronic kidney disease increase HFRS mortality. Chronic lung disease
+increases HPS mortality.</li>
+<li><strong>Strain.</strong> See the table above — strain choice dominates
+all other prognostic factors.</li>
+<li><strong>Time from symptom onset to diagnosis.</strong> Misdiagnosis as
+influenza, COVID-19, atypical pneumonia, or appendicitis delays treatment
+and worsens outcomes.</li>
+</ul>
+
+<h2>Hantavirus death rate compared to other diseases</h2>
+<table class="facts">
+<thead><tr><th>Disease</th><th>Case-fatality rate (typical)</th></tr></thead>
+<tbody>
+<tr><th>Rabies (untreated)</th><td>~100%</td></tr>
+<tr><th>Ebola virus disease (untreated)</th><td>40-90%</td></tr>
+<tr><th>Andes virus HPS</th><td>30-50%</td></tr>
+<tr><th>Sin Nombre virus HPS</th><td>36-38%</td></tr>
+<tr><th>Untreated MERS</th><td>~35%</td></tr>
+<tr><th>SARS (original)</th><td>~10%</td></tr>
+<tr><th>Hantaan virus HFRS</th><td>5-15%</td></tr>
+<tr><th>Yellow fever (severe form)</th><td>20-50%</td></tr>
+<tr><th>Influenza H5N1 (human)</th><td>~50%</td></tr>
+<tr><th>COVID-19 (Omicron era)</th><td>~0.1-1%</td></tr>
+<tr><th>Puumala virus HFRS</th><td>&lt;1%</td></tr>
+<tr><th>Seasonal influenza</th><td>&lt;0.1%</td></tr>
+</tbody>
+</table>
+
+<h2>Global hantavirus deaths per year</h2>
+<p>
+Estimating global hantavirus mortality is hampered by underreporting in
+some regions, particularly Russia and rural China. Best-available figures:
+</p>
+<ul>
+<li><strong>China</strong>: 200-500 deaths per year (mostly Hantaan HFRS).</li>
+<li><strong>Russia</strong>: 50-200 deaths per year (Puumala-dominant in
+European Russia; Hantaan in the Far East).</li>
+<li><strong>South Korea</strong>: 5-15 deaths per year (Hantavax has reduced
+this substantially).</li>
+<li><strong>Americas total</strong>: 200-400 deaths per year combining HPS
+in the USA, Mexico, Argentina, Chile, Brazil, Paraguay, Bolivia.</li>
+<li><strong>Europe total</strong>: 5-30 deaths per year (Puumala is mild;
+DOBV more severe but localised).</li>
+<li><strong>Global total estimate</strong>: 500-1,200 deaths per year.</li>
+</ul>
+
+<h2>How HORIZON tracks hantavirus mortality</h2>
+<p>
+Every authoritative-source update (WHO DON, ECDC CDTR, PAHO, national
+ministry) is ingested every 15 minutes. Death counts are surfaced on the
+homepage and per-country and per-incident pages, with the source's NATO
+Admiralty Scale reliability rating visible. The
+<a href="/data">open dataset</a> exposes the full historical series under
+CC BY 4.0.
+</p>
+
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
+"""
+    spec = PageSpec(
+        path="/hantavirus/death-rate",
+        title="Hantavirus Death Rate — 30-50% for Andes Virus, Under 1% for Puumala · HORIZON",
+        description=(
+            "Hantavirus case-fatality rate by strain: Sin Nombre 36-38%, Andes virus 30-50%, "
+            "Hantaan 5-15%, Puumala under 1%. Comparison with COVID-19, Ebola, influenza. "
+            "Why ECMO halves HPS mortality. Global hantavirus deaths per year. Live MV Hondius "
+            "cluster mortality."
+        ),
+        h1="Hantavirus Death Rate — Case-Fatality by Strain",
+        body_html=body + _render_faq_section(faq),
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="Death rate", url=canonical),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            jsonld.medical_web_page(canonical, "Hantavirus Death Rate", f"{BASE_URL}/hantavirus#condition"),
+            jsonld.faq_page_from_entries(canonical, faq),
+        ],
+        keywords="hantavirus death rate, hantavirus mortality rate, hantavirus fatality rate, how deadly is hantavirus, andes virus death rate, sin nombre virus mortality, hantavirus vs ebola",
+        news_keywords="hantavirus mortality, andes virus, death rate",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
+@router.get("/hantavirus/incubation-period", response_class=HTMLResponse)
+@router.get("/hantavirus/incubation", response_class=HTMLResponse)
+async def page_hantavirus_incubation() -> Response:
+    """Targets 'hantavirus incubation period', 'how long before hantavirus symptoms', 'how soon does hantavirus appear'."""
+    canonical = f"{BASE_URL}/hantavirus/incubation-period"
+    faq = [
+        ("What is the incubation period for hantavirus?",
+         "Hantavirus has a 1-8 week incubation period, with most cases becoming symptomatic 2-4 weeks after exposure. The median is approximately 14 days. Specific ranges by strain: Sin Nombre virus 7-39 days (median ~14); Andes virus 7-45 days (median ~18); Puumala virus 14-46 days (median ~21); Hantaan virus 12-21 days."),
+        ("How long after exposure to hantavirus do you get sick?",
+         "Most people become symptomatic 2-4 weeks after exposure. Symptoms can appear as early as 1 week post-exposure or as late as 8 weeks. After 8 weeks symptom-free, infection from that exposure is extremely unlikely. The 45-day self-monitoring window used after MV Hondius exposure is deliberately conservative."),
+        ("Is the incubation period the same for all hantavirus strains?",
+         "No. Sin Nombre virus typically incubates 7-39 days. Andes virus has a slightly longer documented range, 7-45 days. Puumala virus tends to be longer (median ~21 days). Hantaan virus is shorter and more uniform (12-21 days). These differences matter for contact tracing and self-monitoring guidance."),
+        ("Why is the hantavirus incubation period so long?",
+         "Hantaviruses replicate slowly and the immune response takes weeks to mount. Initial infection establishes in lung endothelial cells (HPS) or kidney endothelium (HFRS) and remains subclinical until viral load and immune activation cross a threshold producing the prodromal symptoms."),
+        ("Can you spread hantavirus during the incubation period?",
+         "For all strains except Andes virus, no — hantaviruses don't spread between people at all. For Andes virus, asymptomatic shedding during incubation has not been clearly documented as a transmission source. Infectiousness peaks during the acute illness (prodromal and cardiopulmonary phases)."),
+        ("How long should you self-monitor after hantavirus exposure?",
+         "Public-health guidance varies. For routine rodent exposure (cleanup, occupational): 35 days. For MV Hondius / Andes virus exposure (where in-cluster transmission risk exists): 45 days. After the relevant window without symptoms, infection from that exposure is extremely unlikely."),
+        ("Does the incubation period predict severity?",
+         "No clear evidence links incubation length to disease severity in individual cases. Variation in incubation reflects host immune response, inoculum size, and individual virological factors rather than predicting how severe the illness will be."),
+        ("Can hantavirus be detected during the incubation period?",
+         "Yes, by PCR on serum during the late incubation phase (typically the last few days before symptom onset). Antibody tests are negative until just after symptom onset. Pre-symptomatic detection is not currently part of routine public-health practice but is being explored for contact tracing after high-profile exposures like MV Hondius."),
+        ("How fast does hantavirus get worse after symptoms appear?",
+         "Once symptomatic: HPS deteriorates fast — 12-48 hours from cough or breathlessness to respiratory failure. HFRS has a slower, more predictable phased course over 2-4 weeks. The pre-symptomatic incubation gives no warning; the acute phase is rapidly progressive once it starts."),
+        ("If I was exposed to hantavirus 2 weeks ago and feel fine, am I safe?",
+         "Possibly, but continue self-monitoring through 35-45 days post-exposure. Most cases appear in the 2-4 week window, but later presentation does occur. If you develop any fever or respiratory symptom during the monitoring window, seek medical assessment immediately and mention the exposure explicitly."),
+    ]
+    body = """
+<p class="lead">
+Hantavirus has a long incubation period — 1 to 8 weeks from exposure to
+first symptoms, with most cases appearing 2-4 weeks post-exposure. The
+median incubation is approximately 14 days. This page summarises incubation
+by strain, what it means for self-monitoring, and why hantavirus tests
+behave differently before and after symptoms start.
+</p>
+
+<h2>Hantavirus incubation period by strain</h2>
+<table class="facts">
+<thead><tr><th>Strain</th><th>Range</th><th>Median</th><th>Self-monitoring window</th></tr></thead>
+<tbody>
+<tr><th>Sin Nombre virus (SNV)</th><td>7-39 days</td><td>~14 days</td><td>35 days post-exposure</td></tr>
+<tr><th>Andes virus (ANDV)</th><td>7-45 days</td><td>~18 days</td><td>45 days post-exposure</td></tr>
+<tr><th>Puumala virus (PUUV)</th><td>14-46 days</td><td>~21 days</td><td>35-45 days post-exposure</td></tr>
+<tr><th>Hantaan virus (HTNV)</th><td>12-21 days</td><td>~14 days</td><td>30 days post-exposure</td></tr>
+<tr><th>Seoul virus (SEOV)</th><td>5-42 days</td><td>~16 days</td><td>35 days post-exposure</td></tr>
+<tr><th>Dobrava-Belgrade (DOBV)</th><td>14-35 days</td><td>~21 days</td><td>35 days post-exposure</td></tr>
+</tbody>
+</table>
+
+<h2>What "incubation period" actually means</h2>
+<p>
+The incubation period is the time between the moment of infection and the
+first appearance of clinical symptoms. During this window the virus is
+replicating inside the body but the person is asymptomatic and (for all
+strains except possibly ANDV) non-infectious.
+</p>
+<p>
+The hantavirus incubation period is longer than most acute viral illnesses
+because the virus replicates slowly, primarily in endothelial cells of the
+target organ (lungs for HPS, kidneys for HFRS). The clinical illness only
+becomes apparent once viral load is high and the immune response causes
+endothelial damage with vascular leak.
+</p>
+
+<h2>Self-monitoring after hantavirus exposure</h2>
+<p>
+If you have had a credible exposure — cleanup of rodent-infested premises,
+agricultural or conservation work in endemic areas, or travel matching the
+MV Hondius itinerary — current public-health guidance is to self-monitor
+for the full window appropriate to the strain.
+</p>
+<p>
+For Andes virus specifically (relevant to MV Hondius passengers and crew),
+UKHSA, ECDC, and Chilean Ministry of Health guidance is:
+</p>
+<ul>
+<li>Self-monitor for fever and respiratory symptoms for <strong>45 days</strong>
+from the last possible exposure.</li>
+<li>If any fever (&gt;38°C) or any respiratory symptom appears, contact
+your national health service immediately and mention the exposure
+explicitly.</li>
+<li>Self-isolate from vulnerable household members during any febrile
+illness occurring within the window.</li>
+<li>After 45 symptom-free days, infection from that exposure is extremely
+unlikely.</li>
+</ul>
+
+<h2>Testing during incubation</h2>
+<p>
+Standard hantavirus diagnostic tests behave differently before and after
+symptoms appear:
+</p>
+<ul>
+<li><strong>IgM and IgG antibody tests</strong>: usually negative during
+incubation, become positive within 1-3 days of symptom onset, and remain
+detectable for months to years. Best test for symptomatic patients.</li>
+<li><strong>RT-PCR on serum</strong>: can become positive in the last few
+days before symptom onset, peaks during the acute illness, then declines
+over weeks. Best test for outbreak investigations and contact tracing.</li>
+<li><strong>RT-PCR on respiratory secretions or urine</strong>: useful in
+severe HPS or HFRS for confirming diagnosis and tracking viral
+clearance.</li>
+<li><strong>Pre-symptomatic screening</strong>: not currently standard
+practice. Being explored for ANDV after MV Hondius-style high-risk exposure
+events.</li>
+</ul>
+
+<h2>Does the incubation period predict outcome?</h2>
+<p>
+No strong evidence links incubation length to disease severity for an
+individual case. Variation in incubation reflects:
+</p>
+<ul>
+<li>Host immune response speed.</li>
+<li>Inoculum size (a heavy dust exposure produces shorter incubation than a
+trivial one).</li>
+<li>Individual virological factors (host receptor variation, viral
+load).</li>
+</ul>
+
+<h2>What if symptoms appear beyond the monitoring window?</h2>
+<p>
+Symptoms beyond 8 weeks post-exposure are extremely unusual for any
+hantavirus strain. If a febrile respiratory illness develops more than 8
+weeks after the only candidate exposure, hantavirus is improbable but
+should still be considered if no alternative diagnosis is reached and the
+clinical picture is suggestive (thrombocytopenia, immunoblasts, rapid
+pulmonary deterioration).
+</p>
+
+<p>For full symptom information, see the
+<a href="/hantavirus/symptoms">hantavirus symptoms page →</a></p>
+
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
+"""
+    spec = PageSpec(
+        path="/hantavirus/incubation-period",
+        title="Hantavirus Incubation Period — 1 to 8 Weeks, Median 14 Days · HORIZON",
+        description=(
+            "Hantavirus incubation by strain: Sin Nombre 7-39 days, Andes virus 7-45 days, "
+            "Puumala 14-46 days, Hantaan 12-21 days. MV Hondius 45-day self-monitoring window. "
+            "When tests turn positive, what to do if exposed, what symptoms to watch for."
+        ),
+        h1="Hantavirus Incubation Period — How Long Between Exposure and Symptoms",
+        body_html=body + _render_faq_section(faq),
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="Incubation period", url=canonical),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            jsonld.medical_web_page(canonical, "Hantavirus Incubation Period", f"{BASE_URL}/hantavirus#condition"),
+            jsonld.faq_page_from_entries(canonical, faq),
+        ],
+        keywords="hantavirus incubation period, hantavirus incubation time, how long for hantavirus symptoms, andes virus incubation, sin nombre incubation, puumala incubation, hantavirus exposure window",
+        news_keywords="hantavirus incubation, exposure, self-monitoring",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
+@router.get("/hantavirus/vaccine", response_class=HTMLResponse)
+async def page_hantavirus_vaccine() -> Response:
+    """Targets 'hantavirus vaccine', 'is there a hantavirus vaccine', 'when will hantavirus vaccine'."""
+    canonical = f"{BASE_URL}/hantavirus/vaccine"
+    faq = [
+        ("Is there a hantavirus vaccine?",
+         "Two regional vaccines are licensed but not available in the UK, EU, USA, Canada, or Australia: Hantavax (South Korea, Hantaan virus, ~70% efficacy) and Hantavac (China, Hantaan + Seoul virus). Several DNA, mRNA, and monoclonal-antibody candidates are in early clinical trials but no Western-licensed vaccine exists as of May 2026."),
+        ("Why is there no hantavirus vaccine in the UK or US?",
+         "Hantavirus disease is uncommon in the UK and US compared to influenza, COVID-19, and routine childhood diseases. Regulatory thresholds for vaccine licensing require both safety data and demonstrated benefit in the target population. The disease burden has not historically justified the development cost, though this may change after the MV Hondius cluster and ongoing climate-driven range shifts in rodent reservoirs."),
+        ("How effective is the Korean Hantavax vaccine?",
+         "Field efficacy studies in Korean military and agricultural cohorts have reported approximately 70% protection against Hantaan-virus HFRS. The vaccine is inactivated whole-virus, given as a 3-dose primary series with annual boosters. It offers no protection against HPS strains (Sin Nombre, Andes) because those are antigenically distinct."),
+        ("Are mRNA hantavirus vaccines being developed?",
+         "Yes. Several groups including Moderna, BioNTech, and the US Army WRAIR have publicly reported pre-clinical and early Phase 1 work on lipid-nanoparticle mRNA constructs targeting Andes virus glycoproteins. No Phase 3 trial timeline has been announced as of May 2026. The technology platform proved effective for COVID-19; whether it translates to hantavirus is being actively tested."),
+        ("Can I get a hantavirus vaccine in 2026?",
+         "Only if you live in or travel to South Korea or China, where regional vaccines are deployed in agricultural workers. No vaccine is available to UK, EU, US, Canadian, or Australian residents through routine medical care. Compassionate-access programmes for ANDV mAbs (passive immunisation) may exist for high-risk exposures like MV Hondius contacts."),
+        ("What are hantavirus monoclonal antibodies?",
+         "Monoclonal antibodies that neutralise hantavirus surface glycoproteins, given as passive immunisation to prevent or treat disease. The most advanced candidates target Andes virus and are in Phase 1/2 clinical trials. The Chilean group (Ferrés et al.) has reported on intravenous immunoglobulin from ANDV convalescent donors with possible benefit when given early in contact-traced cases."),
+        ("When will a Western hantavirus vaccine be available?",
+         "No precise timeline exists. Best estimates: a monoclonal antibody for ANDV post-exposure prophylaxis could be approved for compassionate use within 2-3 years if MV Hondius-style outbreaks continue to drive interest. A broadly protective vaccine licensable in the UK/EU/US is likely 5-10 years away under current investment levels."),
+        ("Is the COVID-19 vaccine effective against hantavirus?",
+         "No. COVID-19 vaccines (mRNA, viral-vector, inactivated, protein-subunit) target SARS-CoV-2 spike protein and do not cross-protect against hantavirus. The two virus families are completely unrelated (Coronaviridae vs Hantaviridae)."),
+        ("Should I be worried about hantavirus without a vaccine?",
+         "For most people in the UK, EU, USA, Canada, and Australia, baseline hantavirus risk is very low. Behavioural prevention — rodent exclusion, CDC bleach cleanup protocol, FFP3/N95 when entering known-infested structures — provides effective protection. People travelling to high-risk endemic areas should follow standard precautions."),
+        ("Are there pre-clinical hantavirus vaccines I should know about?",
+         "Active candidates include: DNA vaccines encoding GnGc glycoproteins (NIAID Phase 1/2 trial); various mRNA constructs (Moderna, BioNTech, WRAIR); recombinant glycoprotein subunit vaccines; viral-vectored vaccines using adenovirus or VSV platforms. None are licensed for general use."),
+    ]
+    body = """
+<p class="lead">
+<strong>No hantavirus vaccine is licensed in the UK, EU, USA, Canada, or
+Australia as of May 2026.</strong> Two regional vaccines are deployed in
+South Korea (Hantavax) and China (Hantavac), targeting Hantaan virus. A
+range of next-generation candidates — mRNA, DNA, viral-vector, monoclonal
+antibodies — are in early clinical trials, but no Phase 3 timeline has
+been publicly announced.
+</p>
+
+<h2>Hantavirus vaccines available in 2026 — global summary</h2>
+<table class="facts">
+<thead><tr><th>Vaccine</th><th>Type</th><th>Target</th><th>Status</th><th>Region</th></tr></thead>
+<tbody>
+<tr><th>Hantavax</th><td>Inactivated whole virus</td><td>Hantaan virus</td><td>Licensed 1990</td><td>South Korea only</td></tr>
+<tr><th>Hantavac</th><td>Inactivated bivalent</td><td>Hantaan + Seoul</td><td>Licensed</td><td>China only</td></tr>
+<tr><th>NIAID DNA vaccine</th><td>DNA</td><td>ANDV + SNV (HPS)</td><td>Phase 2</td><td>USA</td></tr>
+<tr><th>Moderna mRNA</th><td>Lipid-nanoparticle mRNA</td><td>ANDV</td><td>Pre-clinical / Phase 1</td><td>USA</td></tr>
+<tr><th>BioNTech mRNA</th><td>Lipid-nanoparticle mRNA</td><td>ANDV (reported)</td><td>Pre-clinical</td><td>Germany</td></tr>
+<tr><th>WRAIR mRNA</th><td>Lipid-nanoparticle mRNA</td><td>ANDV + SNV</td><td>Pre-clinical / Phase 1</td><td>USA (military)</td></tr>
+<tr><th>ANDV mAb (Chile)</th><td>Monoclonal antibody</td><td>ANDV (passive)</td><td>Phase 1/2</td><td>Chile / international</td></tr>
+<tr><th>ANDV IVIG (Argentina)</th><td>Polyclonal convalescent</td><td>ANDV (passive)</td><td>Compassionate use</td><td>Argentina</td></tr>
+</tbody>
+</table>
+
+<h2>Why is there no Western hantavirus vaccine?</h2>
+<p>The honest answer is economics and prioritisation:</p>
+<ul>
+<li>Hantavirus disease is rare in absolute terms compared to influenza,
+COVID-19, RSV, and the routine childhood-vaccination diseases. Annual
+HPS case counts in the Americas are typically under 1,000.</li>
+<li>Regulatory approval requires Phase 3 trials with thousands of
+participants. With the disease so rare, demonstrating efficacy requires
+either very long trials or human-challenge studies that aren't ethical
+for a 30-50% case-fatality illness.</li>
+<li>Until the MV Hondius cluster, there had been no major hantavirus
+"event" with a Western political constituency demanding action.</li>
+<li>Climate-driven rodent range shifts and the MV Hondius cluster may be
+shifting this calculus — several mRNA platforms now have ANDV constructs
+in active development.</li>
+</ul>
+
+<h2>Hantavax — the existing Korean vaccine</h2>
+<p>
+Hantavax is the oldest and most-deployed hantavirus vaccine. Manufactured
+by the Korean Green Cross Corporation, licensed in South Korea since 1990,
+it is an inactivated whole-virus formulation derived from suckling-mouse
+brain culture (a traditional vaccine production method).
+</p>
+<ul>
+<li><strong>Target</strong>: Hantaan virus, the dominant HFRS strain in
+Korea.</li>
+<li><strong>Schedule</strong>: 3-dose primary series (0, 1, 12 months),
+annual boosters in high-risk populations.</li>
+<li><strong>Efficacy</strong>: field studies have reported approximately
+70% protection against HTNV-HFRS in military and agricultural cohorts.</li>
+<li><strong>Limitations</strong>: no cross-protection against HPS strains
+(SNV, ANDV) which are antigenically distinct. The whole-virus inactivated
+platform is older technology; reactogenicity is higher than modern
+subunit or mRNA vaccines.</li>
+</ul>
+
+<h2>The case for an Andes virus vaccine</h2>
+<p>
+The MV Hondius cluster has refocused attention on ANDV vaccine development
+for several reasons:
+</p>
+<ul>
+<li>ANDV is the only hantavirus with person-to-person transmission,
+making outbreak control harder.</li>
+<li>Case-fatality is 30-50%, the highest among hantaviruses regularly
+encountered in modern travel.</li>
+<li>Endemic regions (Patagonia, Magallanes, Aysén) are tourist destinations,
+exposing travellers from all over the world.</li>
+<li>Climate change is expected to expand the range of the long-tailed
+pygmy rice rat reservoir northward, increasing exposure risk.</li>
+<li>The mRNA platforms validated by COVID-19 reduce development time
+substantially — a Phase 1 ANDV mRNA could begin within 12-18 months of
+a sponsor decision.</li>
+</ul>
+
+<h2>Hantavirus monoclonal antibodies — the near-term option</h2>
+<p>
+Monoclonal antibodies (mAbs) targeting ANDV neutralising epitopes are the
+most advanced near-term option. Unlike a vaccine, an mAb provides immediate
+passive immunity without requiring the recipient's immune system to mount
+a response. Use case:
+</p>
+<ul>
+<li>Post-exposure prophylaxis after high-risk contact with a confirmed
+ANDV case.</li>
+<li>Early treatment in patients already symptomatic.</li>
+<li>Pre-exposure prophylaxis for emergency responders or laboratory
+personnel.</li>
+</ul>
+<p>
+Chilean and US groups have ANDV mAbs in Phase 1/2 trials. The Argentine
+convalescent-serum / IVIG protocol has been used compassionately in
+contact-traced household cases with promising results.
+</p>
+
+<h2>What to do without a vaccine</h2>
+<p>
+Behavioural prevention remains the foundation. Specifically:
+</p>
+<ul>
+<li>Follow the <a href="/hantavirus/prevention">CDC cleanup protocol</a>
+when dealing with rodent-contaminated areas.</li>
+<li>Use FFP3 or N95 respirators when entering known-infested
+structures.</li>
+<li>Avoid remote cabins or shelters with visible rodent activity in
+endemic areas (Patagonia, US Southwest, Scandinavia in autumn).</li>
+<li>Travel to endemic areas does not require special vaccination but
+should include awareness of <a href="/hantavirus/symptoms">symptoms</a>
+and <a href="/hantavirus/incubation-period">monitoring windows</a> if
+high-risk exposure occurs.</li>
+<li>If you were on MV Hondius, follow UKHSA/ECDC self-monitoring guidance
+for 45 days.</li>
+</ul>
+
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
+"""
+    spec = PageSpec(
+        path="/hantavirus/vaccine",
+        title="Hantavirus Vaccine 2026 — Hantavax, mRNA Candidates, Monoclonal Antibodies · HORIZON",
+        description=(
+            "No hantavirus vaccine is licensed in the UK, EU, USA, Canada, or Australia. "
+            "Hantavax (Korea) and Hantavac (China) target Hantaan virus. mRNA, DNA, and "
+            "monoclonal antibody candidates targeting Andes virus are in Phase 1/2 trials. "
+            "Why MV Hondius is changing investment, and what to do without a vaccine."
+        ),
+        h1="Hantavirus Vaccine — Status, Candidates, and Outlook",
+        body_html=body + _render_faq_section(faq),
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="Vaccine", url=canonical),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            jsonld.medical_web_page(canonical, "Hantavirus Vaccine", f"{BASE_URL}/hantavirus#condition"),
+            jsonld.faq_page_from_entries(canonical, faq),
+        ],
+        keywords="hantavirus vaccine, andes virus vaccine, hantavax, hantavac, mRNA hantavirus vaccine, hantavirus monoclonal antibody, is there a hantavirus vaccine, hantavirus vaccine 2026",
+        news_keywords="hantavirus vaccine, andes virus vaccine, mRNA",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
+# ============================================================================
+# COMPARISON LANDING PAGES — hantavirus vs other diseases
+# ============================================================================
+
+
+@router.get("/hantavirus/vs/covid", response_class=HTMLResponse)
+@router.get("/hantavirus/vs/covid-19", response_class=HTMLResponse)
+async def page_hantavirus_vs_covid() -> Response:
+    """Targets 'hantavirus vs covid', 'hantavirus vs covid-19', 'difference between hantavirus and covid'."""
+    canonical = f"{BASE_URL}/hantavirus/vs/covid"
+    faq = [
+        ("Is hantavirus the same as COVID-19?",
+         "No. Hantavirus and COVID-19 are caused by completely unrelated viruses from different families. Hantavirus is Hantaviridae (an RNA virus carried by rodents). COVID-19 is Coronaviridae (an RNA virus that spread person-to-person). The symptoms overlap superficially but the diseases differ in transmission, severity, treatment, and prevention."),
+        ("How do you tell hantavirus from COVID-19?",
+         "Clinical clues that favour hantavirus: rapid progression to non-cardiogenic pulmonary oedema with shock; thrombocytopenia (low platelets); recent rodent exposure or travel to endemic area; severe muscle pain especially in the thighs. Clues favouring COVID-19: loss of smell or taste; close-contact history with a confirmed case; positive lateral flow or PCR. Both can present with fever, cough, fatigue, and GI symptoms in the early days."),
+        ("Is hantavirus more deadly than COVID-19?",
+         "Per case, yes — substantially. Hantavirus Pulmonary Syndrome has 30-50% case-fatality. COVID-19 has approximately 1% case-fatality overall in the Omicron era (varies by age and immunity). But COVID-19 has caused vastly more deaths globally because it spreads efficiently between people. Hantavirus does not."),
+        ("Can you have hantavirus and COVID-19 at the same time?",
+         "Theoretically yes — they're caused by completely different viruses, so dual infection is biologically possible. No co-infection cases have been prominently documented, but the rapid progression of HPS likely means many co-infections would be misdiagnosed as severe COVID-19 unless hantavirus was specifically considered."),
+        ("Did COVID-19 increase hantavirus cases?",
+         "Probably yes, indirectly. Lockdowns and rural migration during COVID-19 led to more outdoor and rural activity in some populations, with associated rodent exposure. Several countries reported small spikes in hantavirus cases during 2020-2021. The data are not definitive."),
+        ("Do COVID-19 vaccines protect against hantavirus?",
+         "No. COVID-19 vaccines target SARS-CoV-2 spike protein and provide no cross-protection against hantavirus, which is from a completely different viral family."),
+        ("Can a hantavirus patient be cared for in a COVID-19 ward?",
+         "For Sin Nombre, Puumala, and most hantaviruses — yes, with standard precautions. For Andes virus — no, ANDV-HPS patients require droplet + contact precautions and ideally negative-pressure isolation because of person-to-person transmission risk."),
+        ("Has hantavirus mortality dropped because of COVID-era ICU improvements?",
+         "Plausibly. Many of the ICU practices refined during COVID-19 (lung-protective ventilation, prone positioning, early ECMO referral, restrictive fluids in ARDS) directly apply to severe HPS. Whether case-fatality has measurably dropped post-COVID is hard to establish given the small case numbers."),
+    ]
+    body = """
+<p class="lead">
+Hantavirus and COVID-19 share a few early symptoms but are caused by
+completely unrelated viruses, with different transmission routes, severity,
+and treatment. This page covers the key differences clinicians, patients,
+and travellers should know.
+</p>
+
+<h2>Hantavirus vs COVID-19 — at-a-glance comparison</h2>
+<table class="facts">
+<thead><tr><th>Feature</th><th>Hantavirus</th><th>COVID-19</th></tr></thead>
+<tbody>
+<tr><th>Causative agent</th><td>Orthohantavirus (Hantaviridae)</td><td>SARS-CoV-2 (Coronaviridae)</td></tr>
+<tr><th>Discovered</th><td>1976 (Hantaan); 1993 (Sin Nombre)</td><td>2019</td></tr>
+<tr><th>Reservoir</th><td>Specific rodent species</td><td>Bats (likely), plus circulating in humans</td></tr>
+<tr><th>Primary transmission</th><td>Aerosolised rodent excreta</td><td>Respiratory droplets, person-to-person</td></tr>
+<tr><th>Person-to-person?</th><td>Andes virus only</td><td>Yes, the defining feature</td></tr>
+<tr><th>Incubation</th><td>1-8 weeks</td><td>2-14 days</td></tr>
+<tr><th>Prodrome</th><td>3-7 days of fever, myalgia, GI symptoms</td><td>1-3 days of fever, cough, fatigue</td></tr>
+<tr><th>Loss of smell/taste</th><td>No</td><td>Common</td></tr>
+<tr><th>Thrombocytopenia</th><td><strong>Universal in HPS</strong></td><td>Mild if any</td></tr>
+<tr><th>Pulmonary deterioration</th><td>Rapid (12-48 hours)</td><td>Slower (days to weeks)</td></tr>
+<tr><th>Lung pathology</th><td>Non-cardiogenic capillary leak</td><td>Diffuse alveolar damage, ARDS</td></tr>
+<tr><th>Case-fatality</th><td>30-50% (HPS), under 1% (Puumala)</td><td>~1% overall</td></tr>
+<tr><th>Vaccine</th><td>Only regional (Korea, China)</td><td>Multiple licensed worldwide</td></tr>
+<tr><th>Specific antiviral</th><td>None (ribavirin in HFRS only)</td><td>Paxlovid, remdesivir, molnupiravir</td></tr>
+<tr><th>Annual global cases</th><td>~150,000-200,000</td><td>Tens of millions</td></tr>
+<tr><th>Annual global deaths</th><td>~500-1,200</td><td>Hundreds of thousands</td></tr>
+</tbody>
+</table>
+
+<h2>How clinicians distinguish them</h2>
+<p>
+In a febrile patient with respiratory symptoms, several discriminators help
+narrow the differential:
+</p>
+<ul>
+<li><strong>Exposure history.</strong> Rodent contact, occupational exposure
+to rodent-infested structures, travel to endemic areas, or matching the MV
+Hondius itinerary point strongly to hantavirus. Close contact with a
+confirmed COVID-19 case points to COVID-19.</li>
+<li><strong>Blood smear and CBC.</strong> Thrombocytopenia, left-shifted
+white cells, and circulating immunoblasts on blood smear are highly
+suggestive of hantavirus (the classical haematological triad).</li>
+<li><strong>Loss of smell or taste.</strong> Specific to COVID-19 and not
+seen in hantavirus.</li>
+<li><strong>SARS-CoV-2 testing.</strong> A positive lateral flow or PCR
+rapidly confirms COVID-19. A negative test in a critically ill patient
+should prompt consideration of alternative diagnoses including
+hantavirus.</li>
+<li><strong>Chest imaging.</strong> Both can show bilateral infiltrates.
+HPS classically shows rapid-onset capillary-leak pulmonary oedema; COVID-19
+shows progressive ground-glass opacities over days.</li>
+<li><strong>Speed of deterioration.</strong> Hantavirus HPS can go from
+cough to respiratory failure in 12-48 hours. COVID-19 deterioration is
+typically slower.</li>
+</ul>
+
+<h2>When BOTH should be tested for</h2>
+<p>
+Any patient with fever, respiratory symptoms, AND a credible rodent
+exposure or relevant travel history should be tested for both hantavirus
+and COVID-19. The two are not mutually exclusive — both should be
+considered until ruled out.
+</p>
+
+<h2>Treatment comparison</h2>
+<table class="facts">
+<thead><tr><th>Treatment</th><th>Hantavirus (HPS)</th><th>COVID-19</th></tr></thead>
+<tbody>
+<tr><th>Specific antiviral</th><td>None licensed</td><td>Paxlovid (early), remdesivir, molnupiravir</td></tr>
+<tr><th>Monoclonal antibodies</th><td>ANDV mAbs in Phase 1/2</td><td>Multiple licensed (early use)</td></tr>
+<tr><th>Steroids</th><td>Not standard</td><td>Dexamethasone in severe disease</td></tr>
+<tr><th>Mechanical ventilation</th><td>Standard ARDS protocols</td><td>Standard ARDS protocols</td></tr>
+<tr><th>Prone positioning</th><td>Yes, in refractory hypoxia</td><td>Yes, in refractory hypoxia</td></tr>
+<tr><th>ECMO</th><td>Outcome-changing, refer early</td><td>Used in refractory cases</td></tr>
+<tr><th>Restrictive fluids</th><td>Critical (non-cardiogenic oedema)</td><td>Useful in ARDS</td></tr>
+</tbody>
+</table>
+
+<h2>For travellers and the worried well</h2>
+<p>
+For most people in most places, COVID-19 is the much more likely cause of a
+febrile respiratory illness. Hantavirus should be considered only with a
+genuinely credible exposure history — not just being in an endemic country
+without specific high-risk activities.
+</p>
+<p>
+If you have been on MV Hondius, follow the
+<a href="/outbreaks/mv-hondius-2026">incident-specific guidance</a> for
+self-monitoring and clinical care.
+</p>
+
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
+"""
+    spec = PageSpec(
+        path="/hantavirus/vs/covid",
+        title="Hantavirus vs COVID-19 — Symptoms, Severity, Transmission Compared · HORIZON",
+        description=(
+            "Hantavirus and COVID-19 are caused by unrelated viruses (Hantaviridae vs "
+            "Coronaviridae). Per-case mortality: HPS 30-50% vs COVID-19 ~1%. Hantavirus "
+            "doesn't spread between people (except Andes virus). Full side-by-side comparison "
+            "of symptoms, transmission, treatment, and prevention."
+        ),
+        h1="Hantavirus vs COVID-19 — Side-by-Side Comparison",
+        body_html=body + _render_faq_section(faq),
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="vs COVID-19", url=canonical),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            jsonld.medical_web_page(canonical, "Hantavirus vs COVID-19", f"{BASE_URL}/hantavirus#condition"),
+            jsonld.faq_page_from_entries(canonical, faq),
+        ],
+        keywords="hantavirus vs covid, hantavirus vs covid-19, hantavirus or covid, difference between hantavirus and covid, hantavirus pneumonia vs covid pneumonia",
+        news_keywords="hantavirus, covid, comparison",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
+@router.get("/hantavirus/vs/flu", response_class=HTMLResponse)
+@router.get("/hantavirus/vs/influenza", response_class=HTMLResponse)
+async def page_hantavirus_vs_flu() -> Response:
+    """Targets 'hantavirus vs flu', 'hantavirus vs influenza', 'is it flu or hantavirus'."""
+    canonical = f"{BASE_URL}/hantavirus/vs/flu"
+    faq = [
+        ("Is hantavirus like the flu?",
+         "Only in the first 3-7 days. The early hantavirus prodrome (fever, muscle aches, headache, fatigue, GI symptoms) is virtually indistinguishable from severe influenza. The crucial difference: hantavirus then progresses to either rapid-onset pulmonary failure (HPS) or kidney failure with bleeding (HFRS). Influenza usually resolves over 5-7 days."),
+        ("How can you tell hantavirus from the flu?",
+         "Three key features point to hantavirus: (1) thrombocytopenia (low platelets) on blood count; (2) credible rodent or endemic-area exposure; (3) rapid progression to respiratory distress out of proportion to flu. If any of these are present in a febrile patient, hantavirus should be tested for."),
+        ("Is hantavirus deadlier than flu?",
+         "Yes, dramatically. Seasonal influenza has case-fatality under 0.1%. Hantavirus Pulmonary Syndrome has 30-50% case-fatality. Per case, hantavirus is approximately 500-1,000 times more lethal than seasonal flu. But influenza causes far more deaths in absolute terms because it infects millions of people every year."),
+        ("Can the flu vaccine prevent hantavirus?",
+         "No. The flu vaccine targets influenza A and B viruses and provides no cross-protection against hantavirus. There is no equivalent licensed vaccine for hantavirus in the UK, EU, USA, Canada, or Australia."),
+        ("What's worse: hantavirus or flu in healthy adults?",
+         "Hantavirus, by a wide margin. Healthy adults with influenza usually recover at home in 5-7 days. Healthy adults with HPS face a 30-50% chance of dying despite intensive care. Even mild hantavirus (Puumala) usually involves hospital admission, whereas mild flu does not."),
+        ("Can hantavirus and flu happen at the same time?",
+         "Theoretically yes — they are different viruses. Co-infection has not been a prominent feature in the clinical literature, but in a patient with credible hantavirus exposure during flu season, both should be tested for."),
+        ("How long does hantavirus illness last vs flu?",
+         "Influenza acute illness lasts 5-7 days, full recovery in 1-2 weeks. Hantavirus HPS acute illness lasts 7-14 days in survivors with full recovery taking 3-12 months. HFRS acute illness lasts 2-4 weeks through its five clinical phases, with recovery over months."),
+        ("Why do hantavirus and flu look the same at first?",
+         "Both viruses initially cause a systemic inflammatory response with cytokine release that produces fever, muscle pain, headache, fatigue, and GI symptoms. The clinical pictures diverge only when the virus's specific target tissue (lungs for HPS, kidneys for HFRS) becomes involved. Until then, they're indistinguishable on symptoms alone."),
+    ]
+    body = """
+<p class="lead">
+The early hantavirus prodrome looks almost identical to severe influenza:
+sudden fever, muscle pain, headache, fatigue, often GI symptoms.
+<strong>The discriminating features only become clear once the disease
+progresses</strong> — to non-cardiogenic pulmonary oedema (HPS) or kidney
+failure with bleeding (HFRS). Influenza usually resolves over 5-7 days;
+hantavirus does not.
+</p>
+
+<h2>Hantavirus vs influenza — symptom comparison</h2>
+<table class="facts">
+<thead><tr><th>Feature</th><th>Hantavirus (HPS prodrome)</th><th>Influenza A/B</th></tr></thead>
+<tbody>
+<tr><th>Onset</th><td>Sudden, severe</td><td>Sudden</td></tr>
+<tr><th>Fever</th><td>39-40°C, sustained</td><td>38-40°C, often peaking</td></tr>
+<tr><th>Muscle pain</th><td><strong>Severe, thighs/lower back</strong></td><td>Diffuse, moderate</td></tr>
+<tr><th>Headache</th><td>Yes, prominent</td><td>Yes, common</td></tr>
+<tr><th>Cough</th><td>Late, with hypoxia</td><td>Common, early, dry</td></tr>
+<tr><th>Sore throat</th><td>Uncommon</td><td>Common</td></tr>
+<tr><th>Runny nose</th><td>Uncommon</td><td>Common</td></tr>
+<tr><th>Nausea, vomiting</th><td><strong>Common, prominent</strong></td><td>Occasional</td></tr>
+<tr><th>Diarrhoea</th><td>Occasional</td><td>Uncommon (some strains)</td></tr>
+<tr><th>Thrombocytopenia</th><td><strong>Universal</strong></td><td>Rare</td></tr>
+<tr><th>Pulmonary deterioration</th><td>Rapid, severe (12-48h)</td><td>Mild unless complicated</td></tr>
+<tr><th>Recovery</th><td>Weeks to months</td><td>5-7 days</td></tr>
+<tr><th>Case-fatality</th><td>30-50% (HPS)</td><td>&lt;0.1% (seasonal)</td></tr>
+</tbody>
+</table>
+
+<h2>The classic clinical scenario that should prompt hantavirus testing</h2>
+<p>
+A previously healthy adult presents with:
+</p>
+<ul>
+<li>Sudden fever, severe muscle aches (especially thighs and back), and GI
+upset — looks like bad flu.</li>
+<li>The illness is not improving by day 5 as flu typically would.</li>
+<li>The patient develops cough, breathlessness, or chest tightness on day
+5-7.</li>
+<li>Blood count shows thrombocytopenia (often dramatic — platelets &lt;100,000).</li>
+<li>Exposure history includes recent rural travel, rodent contact, cleanup
+of infested premises, or matches the MV Hondius itinerary.</li>
+</ul>
+<p>
+Hantavirus testing and ICU-level supportive care should be initiated
+immediately. Delay is what kills HPS patients.
+</p>
+
+<h2>Mortality and burden — putting both in context</h2>
+<p>
+Seasonal influenza causes 290,000-650,000 deaths per year globally, mostly
+in older adults and people with chronic disease. Hantavirus causes
+approximately 500-1,200 deaths per year globally, mostly in previously
+healthy adults of working age. Per case, hantavirus is 500-1,000 times
+more lethal. In absolute terms, influenza kills several hundred times more
+people each year because of how widely it spreads.
+</p>
+<p>
+The implication: hantavirus is rare but catastrophic per case. Public-
+health priority for routine vaccination, surveillance, and treatment focuses
+on influenza because of total deaths; but for an individual patient with
+the right exposure, hantavirus is a far higher-stakes diagnosis.
+</p>
+
+<h2>Testing</h2>
+<ul>
+<li><strong>Influenza</strong>: rapid antigen test (10-15 minutes), PCR
+(1-4 hours), point-of-care immunofluorescence. Widely available.</li>
+<li><strong>Hantavirus</strong>: IgM/IgG serology (days), RT-PCR on serum
+(specialised reference lab, usually 24-72 hours). Not routinely available
+in primary care or many emergency departments. National reference labs
+(UKHSA, CDC, NICD) handle confirmatory testing.</li>
+</ul>
+
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
+"""
+    spec = PageSpec(
+        path="/hantavirus/vs/flu",
+        title="Hantavirus vs Flu (Influenza) — Symptom Differences, Survival, Testing · HORIZON",
+        description=(
+            "Hantavirus and influenza share early symptoms but diverge sharply. HPS has "
+            "30-50% case-fatality vs under 0.1% for seasonal flu. Thrombocytopenia, rapid "
+            "pulmonary deterioration, and rodent exposure history point to hantavirus over "
+            "flu. Side-by-side symptom and treatment comparison."
+        ),
+        h1="Hantavirus vs Flu — When to Worry It's Not Just Flu",
+        body_html=body + _render_faq_section(faq),
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="vs Flu", url=canonical),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            jsonld.medical_web_page(canonical, "Hantavirus vs Flu", f"{BASE_URL}/hantavirus#condition"),
+            jsonld.faq_page_from_entries(canonical, faq),
+        ],
+        keywords="hantavirus vs flu, hantavirus vs influenza, is it flu or hantavirus, hantavirus flu symptoms, difference between flu and hantavirus",
+        news_keywords="hantavirus, flu, influenza, comparison",
+    )
+    return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
+
+
+@router.get("/hantavirus/vs/pneumonia", response_class=HTMLResponse)
+async def page_hantavirus_vs_pneumonia() -> Response:
+    """Targets 'hantavirus vs pneumonia', 'is hantavirus pneumonia', 'hantavirus pneumonia'."""
+    canonical = f"{BASE_URL}/hantavirus/vs/pneumonia"
+    faq = [
+        ("Is hantavirus a type of pneumonia?",
+         "Hantavirus Pulmonary Syndrome (HPS) is not a true bacterial or community-acquired pneumonia. It is a non-cardiogenic capillary-leak pulmonary oedema caused by viral infection of pulmonary endothelial cells. The lungs fill with fluid because of damaged capillaries, not because of bacterial infection of the alveoli."),
+        ("How does hantavirus differ from bacterial pneumonia?",
+         "Bacterial pneumonia (Streptococcus pneumoniae, Mycoplasma, Legionella) produces alveolar consolidation with productive cough, leucocytosis, and responds to antibiotics. Hantavirus HPS produces capillary-leak pulmonary oedema with rapid hypoxia, thrombocytopenia, and no response to antibiotics. Treatment is fundamentally different."),
+        ("Can antibiotics treat hantavirus?",
+         "No. Hantavirus is a virus, not a bacterium. Antibiotics have no effect. The mainstay of treatment is intensive supportive care including ECMO for severe HPS. Empirical antibiotics are often started initially because clinicians cannot tell bacterial pneumonia from HPS on first presentation — but they should be stopped once hantavirus is confirmed."),
+        ("How fast does hantavirus pneumonia progress vs bacterial pneumonia?",
+         "HPS pulmonary oedema can progress from mild cough to severe hypoxia and respiratory failure in 12-48 hours. Bacterial pneumonia typically worsens over days, with antibiotic response within 24-72 hours of starting treatment. The speed of deterioration in HPS is a key diagnostic clue."),
+        ("What is the case-fatality for hantavirus vs bacterial pneumonia?",
+         "Hantavirus Pulmonary Syndrome: 30-50%. Community-acquired bacterial pneumonia in healthy adults: 5-10% (severe cases). Hospitalised pneumonia overall: 10-15%. Hantavirus is 3-5x more lethal than even severe bacterial pneumonia."),
+        ("Can hantavirus look like atypical pneumonia (Legionella, Mycoplasma)?",
+         "Initially yes. Mycoplasma and Legionella can cause atypical pneumonia with severe muscle aches, dry cough, and headache that overlaps with the hantavirus prodrome. The discriminating features are thrombocytopenia (almost universal in HPS, rare in atypicals), rapid pulmonary deterioration, and exposure history."),
+        ("Does pneumonia vaccine protect against hantavirus?",
+         "No. The pneumococcal vaccines (PCV13, PPSV23) target Streptococcus pneumoniae bacteria, not hantavirus. There is no licensed pneumonia vaccine that covers hantavirus."),
+        ("Can hantavirus cause secondary bacterial pneumonia?",
+         "Possible but not commonly reported. The acute capillary-leak pulmonary oedema of HPS dominates the clinical picture; if patients survive the acute phase, ventilator-associated pneumonia can develop during prolonged ICU care, but primary hantavirus-driven bacterial co-infection is unusual."),
+    ]
+    body = """
+<p class="lead">
+<strong>Hantavirus Pulmonary Syndrome (HPS) is often described as "hantavirus
+pneumonia" but it is not a true pneumonia.</strong> Pneumonia is inflammation
+and infection of the lung's air sacs (alveoli). HPS is capillary leak — the
+blood vessels in the lungs become permeable and the lungs fill with
+plasma-like fluid. The treatments are completely different.
+</p>
+
+<h2>Side-by-side: HPS vs bacterial pneumonia</h2>
+<table class="facts">
+<thead><tr><th>Feature</th><th>Hantavirus HPS</th><th>Bacterial pneumonia</th></tr></thead>
+<tbody>
+<tr><th>Cause</th><td>Hantavirus (RNA virus)</td><td>Bacteria (S. pneumoniae, H. influenzae, S. aureus, etc.)</td></tr>
+<tr><th>Pathology</th><td>Capillary leak, pulmonary oedema</td><td>Alveolar consolidation, inflammation</td></tr>
+<tr><th>Onset</th><td>Sudden, prodromal phase 3-7 days</td><td>Variable, often 1-3 days</td></tr>
+<tr><th>Cough</th><td>Dry, late</td><td>Productive, often purulent</td></tr>
+<tr><th>Sputum</th><td>Pink, frothy if any</td><td>Yellow/green, copious</td></tr>
+<tr><th>Chest X-ray</th><td>Bilateral diffuse infiltrates, rapid</td><td>Lobar consolidation or patchy</td></tr>
+<tr><th>White cell count</th><td>Normal or low with left shift</td><td>High (leucocytosis)</td></tr>
+<tr><th>Platelets</th><td><strong>Low (thrombocytopenia)</strong></td><td>Usually normal</td></tr>
+<tr><th>Antibiotics</th><td>No effect</td><td>Treatment mainstay</td></tr>
+<tr><th>Treatment</th><td>ICU, ECMO, supportive</td><td>Antibiotics + supportive</td></tr>
+<tr><th>Mortality (healthy adults)</th><td>30-50%</td><td>5-10% (severe)</td></tr>
+<tr><th>Deterioration speed</th><td>Hours to days</td><td>Days</td></tr>
+</tbody>
+</table>
+
+<h2>Why HPS is mistaken for pneumonia</h2>
+<p>
+Emergency-department clinicians evaluating a febrile patient with cough,
+shortness of breath, and bilateral chest X-ray infiltrates default to a
+working diagnosis of community-acquired pneumonia. Empirical antibiotics
+(typically a beta-lactam + macrolide combination) are started. This is
+appropriate initial care, since bacterial pneumonia is far more common
+than hantavirus.
+</p>
+<p>
+The patient who turns out to have HPS continues to deteriorate despite
+antibiotics. Clues that should prompt re-evaluation:
+</p>
+<ul>
+<li>Rapid worsening within 24-48 hours of admission despite appropriate
+antibiotic cover.</li>
+<li>Severe thrombocytopenia (platelet count under 100,000) — atypical for
+bacterial pneumonia.</li>
+<li>Haemoconcentration (raised haematocrit) — atypical for bacterial
+pneumonia.</li>
+<li>No sputum production despite severe pulmonary symptoms.</li>
+<li>Relevant exposure history elicited on second-look history-taking.</li>
+</ul>
+
+<h2>Why HPS is also mistaken for atypical pneumonia</h2>
+<p>
+Mycoplasma, Legionella, and Chlamydia pneumoniae cause "atypical" pneumonia
+characterised by:
+</p>
+<ul>
+<li>Prominent constitutional symptoms (fever, muscle aches, headache).</li>
+<li>Dry cough.</li>
+<li>Slow response to standard pneumonia antibiotics.</li>
+<li>Modest white-cell count rise.</li>
+</ul>
+<p>
+This overlaps the hantavirus prodrome. The discriminating features remain
+thrombocytopenia, rapid pulmonary deterioration, and exposure history.
+Legionella urinary antigen and Mycoplasma PCR/serology should be sent
+alongside hantavirus testing in any unclear case.
+</p>
+
+<h2>Pneumonia vaccines do not protect against hantavirus</h2>
+<p>
+The pneumococcal conjugate vaccine (PCV13/PCV15/PCV20) and pneumococcal
+polysaccharide vaccine (PPSV23) target Streptococcus pneumoniae. The Hib
+vaccine targets Haemophilus influenzae type b. None protect against
+hantavirus.
+</p>
+
+<h2>Treatment differs fundamentally</h2>
+<table class="facts">
+<thead><tr><th>Treatment</th><th>HPS</th><th>Bacterial pneumonia</th></tr></thead>
+<tbody>
+<tr><th>Antibiotics</th><td>No (empirical until ruled out)</td><td>Yes, immediate</td></tr>
+<tr><th>Antivirals</th><td>None licensed</td><td>N/A</td></tr>
+<tr><th>Restrictive fluids</th><td>Critical</td><td>Standard fluids</td></tr>
+<tr><th>Vasopressors</th><td>First-line for hypotension</td><td>Used in septic shock</td></tr>
+<tr><th>Mechanical ventilation</th><td>Lung-protective ARDS strategy</td><td>As needed</td></tr>
+<tr><th>ECMO</th><td>Outcome-changing, refer early</td><td>Severe cases only</td></tr>
+<tr><th>Steroids</th><td>Not standard</td><td>Yes in severe</td></tr>
+</tbody>
+</table>
+
+<p>For full hantavirus treatment information, see the
+<a href="/hantavirus/treatment">treatment page →</a>.</p>
+
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
+"""
+    spec = PageSpec(
+        path="/hantavirus/vs/pneumonia",
+        title="Hantavirus vs Pneumonia — Why HPS Isn't True Pneumonia · HORIZON",
+        description=(
+            "Hantavirus Pulmonary Syndrome (HPS) is capillary-leak pulmonary oedema, not "
+            "bacterial pneumonia. Antibiotics don't work. 30-50% case-fatality vs 5-10% for "
+            "severe bacterial pneumonia. How to tell them apart, why thrombocytopenia is the "
+            "key clue, and treatment differences."
+        ),
+        h1="Hantavirus vs Pneumonia — Why HPS Is Different",
+        body_html=body + _render_faq_section(faq),
+        breadcrumbs=[
+            _home_crumb(),
+            Breadcrumb(name="Hantavirus", url=f"{BASE_URL}/hantavirus"),
+            Breadcrumb(name="vs Pneumonia", url=canonical),
+        ],
+        jsonld_nodes=[
+            jsonld.medical_condition_hantavirus(),
+            jsonld.medical_web_page(canonical, "Hantavirus vs Pneumonia", f"{BASE_URL}/hantavirus#condition"),
+            jsonld.faq_page_from_entries(canonical, faq),
+        ],
+        keywords="hantavirus vs pneumonia, hantavirus pneumonia, is hantavirus a pneumonia, hantavirus pulmonary syndrome vs pneumonia, antibiotics hantavirus",
+        news_keywords="hantavirus, pneumonia, comparison",
     )
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=3600)
 
@@ -922,23 +2085,28 @@ async def page_outbreaks_index() -> Response:
         )
     cards.append('</div>')
 
+    canonical = f"{BASE_URL}/outbreaks"
     spec = PageSpec(
         path="/outbreaks",
-        title="Live Hantavirus Outbreaks — MV Hondius, Active Clusters · HORIZON",
+        title="Live Hantavirus Outbreaks 2026 — MV Hondius, Active Clusters, Historical · HORIZON",
         description=(
-            "All active and monitored hantavirus outbreaks tracked by HORIZON. "
-            "Each incident page carries authoritative case counts from WHO/ECDC, "
-            "the full ontology graph, and live updates."
+            "Every active, monitored, and historical hantavirus outbreak tracked by HORIZON. "
+            "MV Hondius Andes virus cluster, Four Corners 1993, El Bolsón 1996, Epuyén 2018, "
+            "Belgium 2017 PUUV. Live case counts from WHO/ECDC/PAHO/CDC. NATO-scaled source "
+            "provenance. CC BY 4.0 open data."
         ),
         h1="Hantavirus Outbreaks",
         body_html=(
-            '<p class="lead">Active and monitoring incidents tracked by HORIZON. '
-            'Each link opens the full ontology graph with authoritative WHO/ECDC case counts, '
-            'corroborating articles, and the live event chronology.</p>'
+            '<p class="lead">Active, monitoring, and historical hantavirus incidents tracked by '
+            'HORIZON. Each link opens the full ontology graph with authoritative WHO/ECDC case '
+            'counts, corroborating articles, and the live event chronology.</p>'
             + '<p><strong>2026:</strong> The MV Hondius Andes virus cluster is the dominant event. '
-            '<a href="/hantavirus/2026">Full 2026 outbreak tracker →</a></p>'
+            '<a href="/hantavirus/2026">Full 2026 outbreak tracker →</a> | '
+            '<a href="/outbreaks/mv-hondius-2026">MV Hondius incident page →</a></p>'
             + "".join(cards)
-            + '<p><a class="cta" href="/">Open the live outbreak map →</a></p>'
+            + seo_ext.OUTBREAKS_INDEX_EXT
+            + _render_faq_section(seo_ext.FAQ_OUTBREAKS_INDEX)
+            + '<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>'
         ),
         breadcrumbs=[
             _home_crumb(),
@@ -946,13 +2114,14 @@ async def page_outbreaks_index() -> Response:
         ],
         jsonld_nodes=[
             jsonld.collection_page(
-                f"{BASE_URL}/outbreaks",
+                canonical,
                 "HORIZON Outbreaks Index",
                 "All hantavirus incidents tracked by HORIZON.",
                 [(r["name"], f"{BASE_URL}/outbreaks/{r['code']}") for r in rows],
             ),
+            jsonld.faq_page_from_entries(canonical, seo_ext.FAQ_OUTBREAKS_INDEX),
         ],
-        keywords="hantavirus outbreak, hantavirus cluster, MV Hondius, andes virus outbreak, hantavirus cases 2026",
+        keywords="hantavirus outbreak, hantavirus cluster, MV Hondius, andes virus outbreak, hantavirus cases 2026, Four Corners 1993, Epuyén 2018, Belgium 2017",
         news_keywords="hantavirus outbreak, MV Hondius, ANDV",
     )
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=300)
@@ -1293,6 +2462,21 @@ async def page_incident(code: str) -> Response:
             jsonld.faq_page_from_entries(canonical, faq_entries)
         )
 
+    # LiveBlogPosting schema for active outbreaks — drives Google News rich
+    # results for breaking events. Only emitted when the incident is active
+    # and we have at least one corroborating article to surface as an update.
+    if row["status"] == "active" and article_rows:
+        liveblog_events = [
+            {
+                "id": str(a["id"]),
+                "headline": (a["title"] or f"Update — {row['name']}")[:110],
+                "date": (a["reported_date"] or a["ingested_at"].date()).strftime("%Y-%m-%dT00:00:00+00:00"),
+                "url": f"{BASE_URL}/articles/{a['id']}",
+            }
+            for a in article_rows[:15]
+        ]
+        jsonld_nodes.append(jsonld.live_blog_posting(canonical, row["name"], liveblog_events))
+
     spec = PageSpec(
         path=f"/outbreaks/{row['code']}",
         title=f'{row["name"]} — Live Hantavirus Outbreak · HORIZON',
@@ -1332,13 +2516,15 @@ async def page_countries_index() -> Response:
         )
     cards.append('</div>')
 
+    canonical = f"{BASE_URL}/countries"
     spec = PageSpec(
         path="/countries",
-        title="Hantavirus by Country — Argentina, USA, Germany, Finland · HORIZON",
+        title="Hantavirus by Country 2026 — Argentina, USA, Germany, Finland, Chile · HORIZON",
         description=(
-            "Hantavirus surveillance by country. Per-country case chronology, "
-            "authoritative-source linkage, endemic-serotype context. "
-            "Coverage: Americas, Europe, east Asia, plus emerging regions."
+            "Hantavirus surveillance by country: Argentina, USA, Chile, Germany, Finland, "
+            "China, Russia, UK and 30+ more. Per-country annual incidence, dominant serotype, "
+            "reservoir species, and authoritative-source linkage. Where in the world hantavirus "
+            "is most common and why."
         ),
         h1="Hantavirus by Country",
         body_html=(
@@ -1346,6 +2532,8 @@ async def page_countries_index() -> Response:
             'reports. Country pages include case chronology, the serotype context, and links '
             'to the authoritative national public-health authority.</p>'
             + "".join(cards)
+            + seo_ext.COUNTRIES_INDEX_EXT
+            + _render_faq_section(seo_ext.FAQ_COUNTRIES_INDEX)
         ),
         breadcrumbs=[
             _home_crumb(),
@@ -1353,13 +2541,14 @@ async def page_countries_index() -> Response:
         ],
         jsonld_nodes=[
             jsonld.collection_page(
-                f"{BASE_URL}/countries",
+                canonical,
                 "Hantavirus by country",
                 "Country index for HORIZON hantavirus surveillance.",
                 [(country_name(r["iso"].upper()), f"{BASE_URL}/countries/{r['iso'].lower()}") for r in valid_rows[:50]],
             ),
+            jsonld.faq_page_from_entries(canonical, seo_ext.FAQ_COUNTRIES_INDEX),
         ],
-        keywords="hantavirus countries, hantavirus by country, hantavirus argentina, hantavirus usa, hantavirus germany, hantavirus finland",
+        keywords="hantavirus countries, hantavirus by country, hantavirus argentina, hantavirus usa, hantavirus germany, hantavirus finland, hantavirus chile, hantavirus china, hantavirus uk",
     )
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=900)
 
