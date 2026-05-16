@@ -3306,6 +3306,13 @@ async def page_pt_incident(code: str) -> Response:
 
 @router.get("/seo-snapshot", response_class=HTMLResponse)
 async def page_seo_snapshot() -> Response:
+    # Noise sources: social media, ecological databases, aggregators that produce
+    # raw hashtag posts. Excluded from the crawled "latest reports" list so
+    # Google indexes real news headlines rather than Mastodon fragments.
+    _NOISE_SOURCES = (
+        "mastodon-hantavirus", "mastodon-hondius", "reddit",
+        "inaturalist", "gbif", "google-news", "gdelt",
+    )
     async with acquire() as conn:
         stats = await conn.fetchrow(
             """
@@ -3328,98 +3335,344 @@ async def page_seo_snapshot() -> Response:
             """
         )
         incident_rows = await conn.fetch(_Q_INCIDENTS)
-        cutoff = datetime.now(timezone.utc) - timedelta(days=14)
-        recent = await conn.fetch(_Q_RECENT_ARTICLES, cutoff, 10)
+        cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+        # Fetch more than needed so we can filter noise in Python
+        recent_raw = await conn.fetch(_Q_RECENT_ARTICLES, cutoff, 200)
+        # Top country breakdown for the case table
+        country_counts = await conn.fetch(
+            """
+            SELECT cr.country_iso2, COUNT(*)::int AS n
+            FROM case_reports cr
+            JOIN sources s ON s.id = cr.source_id
+            WHERE cr.country_iso2 IS NOT NULL
+              AND s.code NOT IN ('inaturalist','gbif','reddit')
+            GROUP BY cr.country_iso2
+            ORDER BY n DESC
+            LIMIT 15
+            """
+        )
+
+    # Filter to quality news/journal/official sources only
+    recent = [
+        r for r in recent_raw
+        if r["source_code"] not in _NOISE_SOURCES
+    ][:12]
+
+    today = datetime.now(timezone.utc).strftime("%d %B %Y")
 
     incidents_html = "".join(
         f'<li><a href="/outbreaks/{esc(r["code"])}"><strong>{esc(r["name"])}</strong></a> '
         f'<span class="kv">— {esc(r["status"].upper())} · {int(r["sum_confirmed"] or 0)} confirmed · {int(r["sum_deaths"] or 0)} deaths</span></li>'
         for r in incident_rows
-    )
+    ) or "<li>No active outbreaks at this time.</li>"
 
     articles_html = "".join(
         f'<li><a href="/articles/{esc(r["id"])}">{esc(r["title"] or "Untitled")}</a> '
-        f'<span class="kv">— {esc(r["source_code"])} · {(r["reported_date"] or r["ingested_at"].date()).strftime("%Y-%m-%d")}</span></li>'
+        f'<span class="kv">— {esc(r["source_name"] or r["source_code"])} · {(r["reported_date"] or r["ingested_at"].date()).strftime("%-d %B %Y")}</span></li>'
         for r in recent
+    ) or "<li>No recent articles.</li>"
+
+    country_rows_html = "".join(
+        f'<tr><td>{esc(r["country_iso2"])}</td><td>{r["n"]}</td></tr>'
+        for r in country_counts
     )
+
+    conf = int(stats["conf"] or 0)
+    susp = int(stats["susp"] or 0)
+    deaths = int(stats["deaths"] or 0)
+    incidents_n = int(stats["incidents"] or 0)
+    countries_n = int(stats["countries"] or 0)
+    sources_n = int(stats["sources"] or 0)
+    reports_n = int(stats["reports"] or 0)
+
+    # FAQ items — also rendered as FAQPage JSON-LD below
+    _FAQ = [
+        (
+            "What is hantavirus?",
+            "Hantavirus (genus <em>Orthohantavirus</em>) is a family of rodent-borne RNA viruses that cause "
+            "two distinct syndromes in humans: Hantavirus Pulmonary Syndrome (HPS) in the Americas, and "
+            "Haemorrhagic Fever with Renal Syndrome (HFRS) across Eurasia. The virus is carried by specific "
+            "rodent reservoir species and shed in their urine, faeces, and saliva. Humans become infected by "
+            "inhaling aerosolised particles from dried rodent excreta — typically in enclosed or poorly "
+            "ventilated spaces where rodents have been active.",
+        ),
+        (
+            "Can hantavirus spread from person to person?",
+            "With one exception, hantaviruses do not transmit between people. The exception is Andes virus "
+            "(ANDV), endemic to southern South America, which has documented person-to-person transmission "
+            "in rare cases involving very close and prolonged contact — typically household members providing "
+            "care to a severely ill patient. The 2026 MV Hondius cluster is caused by Andes virus. All other "
+            "hantaviruses, including Sin Nombre virus (North America) and Puumala virus (Europe), are "
+            "rodent-to-human only.",
+        ),
+        (
+            "What are the symptoms of hantavirus?",
+            "Symptoms begin 1 to 8 weeks after exposure. The prodromal phase lasts 3 to 5 days with fever, "
+            "severe myalgia (muscle pain), headache, dizziness, and sometimes gastrointestinal symptoms. In "
+            "HPS this is followed by rapid onset of shortness of breath as the lungs fill with fluid "
+            "(non-cardiogenic pulmonary oedema) — this cardiopulmonary phase can progress to respiratory "
+            "failure within 24 hours. HFRS presents with haemorrhage, hypotension, and acute kidney injury. "
+            "There is no licensed antiviral and no vaccine outside South Korea.",
+        ),
+        (
+            "What is the hantavirus death rate (case fatality rate)?",
+            "Case fatality rates vary sharply by serotype. Sin Nombre virus (SNV, North America) carries "
+            "approximately 36–38% CFR per CDC surveillance. Andes virus (ANDV, South America) is similar "
+            "at 25–35%. Hantaan virus (HTNV, east Asia) causes severe HFRS with 5–15% CFR. Puumala virus "
+            "(PUUV, Europe) is much milder at under 1%. Seoul virus (SEOV, worldwide via rats) is under 1%. "
+            "The MV Hondius 2026 cluster, caused by Andes virus, had 3 deaths among 8 confirmed cases "
+            "as of May 2026 — a case fatality rate of approximately 37%.",
+        ),
+        (
+            "What is the MV Hondius hantavirus outbreak in 2026?",
+            "The MV Hondius is a Dutch expedition cruise ship operated by Oceanwide Expeditions. In April 2026 "
+            "it sailed from Ushuaia, Argentina, carrying passengers who had undertaken a wildlife excursion in "
+            "Tierra del Fuego — an Andes virus endemic area. Cases of Hantavirus Pulmonary Syndrome were "
+            "confirmed among passengers of multiple nationalities. By May 2026, WHO Disease Outbreak News "
+            "DON600/DON601 reported 8 confirmed cases and 3 deaths across at least 6 countries. This is the "
+            "first documented hantavirus outbreak linked to international travel on a cruise vessel.",
+        ),
+        (
+            "Which countries have hantavirus cases in 2026?",
+            "The 2026 MV Hondius cluster has confirmed or suspected cases in passengers from Argentina, "
+            "the United Kingdom, France, Germany, the Netherlands, and South Africa, among others. Endemic "
+            "transmission continues year-round in the United States (Sin Nombre virus, particularly in the "
+            "Four Corners region and western states), Chile and Argentina (Andes virus), Finland, Sweden and "
+            "Germany (Puumala virus), and China and South Korea (Hantaan and Seoul virus). HORIZON tracks "
+            f"reports from {countries_n} countries.",
+        ),
+        (
+            "Where is hantavirus found in the United States?",
+            "Sin Nombre virus (SNV) is the primary hantavirus in the US, carried by the deer mouse "
+            "(<em>Peromyscus maniculatus</em>). It is endemic across the western United States, with the "
+            "highest case rates in New Mexico, Colorado, Arizona, Utah, Montana, and the Four Corners region. "
+            "Bayou virus (Louisiana), Black Creek Canal virus (Florida), and New York virus (northeastern US) "
+            "are additional North American serotypes but cause far fewer cases. The CDC has recorded "
+            "approximately 850 HPS cases in the US since 1993, with a case fatality rate around 36%.",
+        ),
+        (
+            "How is hantavirus transmitted?",
+            "The primary route is inhalation of aerosolised rodent excreta — dried urine, faeces, or saliva "
+            "that become airborne when disturbed. This most often occurs when cleaning rodent-infested spaces "
+            "without respiratory protection. Direct contact with infected rodents (bites, handling) is a "
+            "secondary route. Ingestion of contaminated food or water is possible but uncommon. "
+            "For Andes virus only, person-to-person spread via respiratory droplets or very close contact "
+            "with a severely ill patient has been documented.",
+        ),
+        (
+            "Is there a vaccine or treatment for hantavirus?",
+            "There is no licensed antiviral treatment for HPS. Care is supportive: oxygen therapy, "
+            "mechanical ventilation, fluid management, vasopressors, and ECMO in severe cases. Ribavirin "
+            "has shown some benefit in early HFRS but not in HPS. South Korea has licensed Hantavax, "
+            "a killed Hantaan virus vaccine, but it is not available elsewhere and does not protect against "
+            "Andes or Sin Nombre virus. As of May 2026, multiple research programmes are investigating "
+            "mRNA-based hantavirus vaccines but none have reached Phase 3 trials.",
+        ),
+        (
+            "How long is the hantavirus incubation period?",
+            "The incubation period for hantavirus is typically 1 to 8 weeks, with an average of 2 to 4 weeks. "
+            "This is important for the MV Hondius outbreak: passengers who were on the ship in April 2026 "
+            "may not develop symptoms until May or even June 2026. Public health authorities in affected "
+            "countries issued guidance that exposed passengers should monitor for symptoms for up to 45 days "
+            "after their last potential exposure.",
+        ),
+        (
+            "What is Andes virus (ANDV)?",
+            "Andes virus is an orthohantavirus endemic to southern South America, particularly Chile and "
+            "Argentina. It is carried by the long-tailed pygmy rice rat (<em>Oligoryzomys longicaudatus</em>). "
+            "It causes Hantavirus Pulmonary Syndrome with a case fatality rate of approximately 25–35%. "
+            "It is the only hantavirus with confirmed person-to-person transmission. The 2026 MV Hondius "
+            "outbreak strain was confirmed as Andes virus by laboratory analysis in South Africa and "
+            "Switzerland. HORIZON tracks all Andes virus reports in its ANDV serotype cluster.",
+        ),
+        (
+            "How does HORIZON track hantavirus?",
+            "HORIZON aggregates signal from 66+ live sources including WHO Disease Outbreak News, CDC Health "
+            "Alert Network, ECDC Communicable Disease Threats Reports, PAHO alerts, Eurosurveillance, "
+            "Journal of Virology, mBio, PubMed, bioRxiv, ProMED, Reuters, AP, BBC, AFP, and national public "
+            "health agencies across 40+ countries. Every record is rated on the NATO Admiralty Scale "
+            "(reliability A–F, credibility 1–6) and assigned a dual pipeline/analyst confidence score. "
+            "The open dataset is available under CC BY 4.0 via the HORIZON API.",
+        ),
+    ]
+
+    faq_html = '<section id="faq"><h2>Frequently asked questions about hantavirus 2026</h2>'
+    for q, a in _FAQ:
+        faq_html += f'<h3>{esc(q)}</h3><p>{a}</p>'
+    faq_html += "</section>"
+
+    faq_jsonld_entries = [
+        {
+            "@type": "Question",
+            "name": q,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": a.replace("<em>", "").replace("</em>", "").replace("<strong>", "").replace("</strong>", ""),
+            },
+        }
+        for q, a in _FAQ
+    ]
 
     body = f"""
 <p class="lead">
-HORIZON is the most comprehensive live hantavirus outbreak surveillance
-platform on the public internet. Real-time aggregation of WHO, CDC, ECDC,
-PAHO, ProMED, peer-reviewed literature, and open news. Audit-grade source
-provenance on every record: NATO Admiralty Scale rating, ICD 206 source
-citation, dual-confidence model, Berkeley Protocol chain-of-custody hash.
+Live hantavirus outbreak tracker for 2026 — aggregating WHO, CDC, ECDC, PAHO, ProMED,
+peer-reviewed journals, and news from {sources_n} sources across {countries_n} countries.
+Audit-grade source provenance on every record. Open data under CC BY 4.0.
 </p>
 
 <div class="stats">
-<div class="stat"><div class="n">{int(stats["conf"] or 0)}</div><div class="l">Confirmed cases</div></div>
-<div class="stat"><div class="n">{int(stats["susp"] or 0)}</div><div class="l">Suspected</div></div>
-<div class="stat"><div class="n">{int(stats["deaths"] or 0)}</div><div class="l">Deaths</div></div>
-<div class="stat"><div class="n">{int(stats["incidents"] or 0)}</div><div class="l">Active outbreaks</div></div>
-<div class="stat"><div class="n">{int(stats["countries"] or 0)}</div><div class="l">Countries reporting</div></div>
-<div class="stat"><div class="n">{int(stats["sources"] or 0)}</div><div class="l">Live sources</div></div>
-<div class="stat"><div class="n">{int(stats["reports"] or 0)}</div><div class="l">Reports indexed</div></div>
+<div class="stat"><div class="n">{conf}</div><div class="l">Confirmed cases</div></div>
+<div class="stat"><div class="n">{susp}</div><div class="l">Suspected</div></div>
+<div class="stat"><div class="n">{deaths}</div><div class="l">Deaths</div></div>
+<div class="stat"><div class="n">{incidents_n}</div><div class="l">Active outbreaks</div></div>
+<div class="stat"><div class="n">{countries_n}</div><div class="l">Countries reporting</div></div>
+<div class="stat"><div class="n">{sources_n}</div><div class="l">Live sources</div></div>
+<div class="stat"><div class="n">{reports_n}</div><div class="l">Reports indexed</div></div>
 </div>
 
-<h2>Active outbreaks</h2>
+<p class="muted">Last updated: {today} UTC. Data sourced from WHO, CDC, ECDC, PAHO and
+<a href="/sources">66 additional live feeds</a>. Not medical advice —
+see <a href="https://www.cdc.gov/hantavirus/" rel="external noopener">CDC</a> or
+<a href="https://www.who.int/news-room/fact-sheets/detail/hantavirus-disease" rel="external noopener">WHO</a>
+if you have health concerns.</p>
+
+<h2>Active outbreaks — 2026</h2>
 <ul>{incidents_html}</ul>
+
+<h2>MV Hondius hantavirus outbreak 2026</h2>
+<p>
+The largest hantavirus outbreak of 2026 — and the first ever linked to a cruise ship —
+centres on the MV Hondius, a Dutch expedition vessel operated by Oceanwide Expeditions.
+The ship sailed from Ushuaia, Tierra del Fuego, Argentina in April 2026. Passengers on
+a pre-departure wildlife excursion were exposed to Andes virus (ANDV), which is endemic
+in the rodent population of the region. As of {today}, WHO Disease Outbreak News
+(DON600, DON601) reports <strong>{conf} confirmed cases</strong> and <strong>{deaths} deaths</strong>
+across passengers from at least 6 countries.
+</p>
+<p>
+The strain was confirmed as Andes virus by PCR and sequencing at reference laboratories
+in South Africa and Switzerland. Andes virus is the only hantavirus with documented
+person-to-person transmission potential, which is why national public health authorities
+in the UK, France, Germany, the Netherlands, and Argentina issued monitoring and
+self-isolation guidance for returning passengers. Exposed passengers were advised to
+self-monitor for up to 45 days.
+</p>
+<p>
+HORIZON is tracking the MV Hondius cluster in real time.
+<a href="/outbreaks/mv-hondius-2026">Full MV Hondius outbreak timeline and case details →</a>
+</p>
+
+<h2>Hantavirus cases by country — 2026 surveillance</h2>
+<p>HORIZON aggregates surveillance reports from national public health agencies,
+WHO Disease Outbreak Notices, ECDC CDTR, and open news. The table below shows
+the countries with the highest report volume in the HORIZON dataset.</p>
+<table class="facts">
+<thead><tr><th>Country</th><th>Reports in HORIZON dataset</th></tr></thead>
+<tbody>{country_rows_html}</tbody>
+</table>
+<p><a href="/countries">Full country-by-country breakdown →</a></p>
+
+<h2>Hantavirus serotypes tracked</h2>
+<p>HORIZON tracks all orthohantaviruses of documented public-health concern.
+Each serotype has a dedicated page with reservoir species, endemic range, clinical
+syndrome, case-fatality estimate, and links to WHO/CDC source data.</p>
+<table class="facts">
+<thead><tr><th>Serotype</th><th>Region</th><th>Syndrome</th><th>CFR (est.)</th></tr></thead>
+<tbody>
+<tr><td><a href="/hantavirus/andes-virus">Andes virus (ANDV)</a></td><td>Chile, Argentina</td><td>HPS</td><td>25–35%</td></tr>
+<tr><td><a href="/hantavirus/sin-nombre-virus">Sin Nombre virus (SNV)</a></td><td>North America</td><td>HPS</td><td>36–38%</td></tr>
+<tr><td><a href="/hantavirus/puumala-virus">Puumala virus (PUUV)</a></td><td>Europe, Scandinavia</td><td>HFRS (mild)</td><td>&lt;1%</td></tr>
+<tr><td><a href="/hantavirus/hantaan-virus">Hantaan virus (HTNV)</a></td><td>East Asia</td><td>HFRS (severe)</td><td>5–15%</td></tr>
+<tr><td><a href="/hantavirus/seoul-virus">Seoul virus (SEOV)</a></td><td>Worldwide (rats)</td><td>HFRS (mild)</td><td>&lt;1%</td></tr>
+<tr><td><a href="/hantavirus/dobrava-belgrade-virus">Dobrava-Belgrade virus (DOBV)</a></td><td>Balkans, Eastern Europe</td><td>HFRS (severe)</td><td>5–12%</td></tr>
+</tbody>
+</table>
+<p><a href="/hantavirus">All 12 tracked serotypes →</a></p>
+
+<h2>What is hantavirus?</h2>
+<p>
+Hantaviruses (genus <em>Orthohantavirus</em>, family <em>Hantaviridae</em>) are
+tri-segmented negative-sense single-stranded RNA viruses. Each serotype co-evolved
+with a specific rodent reservoir over millions of years — this host specificity is so
+strong that the virus phylogeny mirrors its host rodent phylogeny almost exactly.
+</p>
+<p>
+Humans are dead-end hosts: the virus cannot complete its lifecycle in a human and does
+not normally spread onward. The single exception is Andes virus, which has been
+documented spreading between people in rare circumstances of prolonged close contact.
+</p>
+<p>
+Two distinct clinical presentations exist:
+</p>
+<ul>
+<li><strong>Hantavirus Pulmonary Syndrome (HPS)</strong> — the New World form, caused
+by Sin Nombre virus, Andes virus, and related American serotypes. Rapid-onset
+non-cardiogenic pulmonary oedema following a flu-like prodrome. Case fatality
+25–38% depending on serotype. No antiviral treatment; supportive care only.</li>
+<li><strong>Haemorrhagic Fever with Renal Syndrome (HFRS)</strong> — the Old World form,
+caused by Hantaan, Seoul, Puumala, and Dobrava-Belgrade virus. Acute kidney injury,
+haemorrhage, and hypotension. Severity ranges from mild (Puumala, CFR &lt;1%) to
+severe (Hantaan, CFR 5–15%).</li>
+</ul>
+<p>
+<a href="/hantavirus">Full hantavirus medical reference →</a> |
+<a href="/hantavirus/symptoms">Symptoms →</a> |
+<a href="/hantavirus/transmission">Transmission →</a> |
+<a href="/hantavirus/prevention">Prevention →</a>
+</p>
 
 <h2>Latest reports</h2>
 <ul>{articles_html}</ul>
+<p><a href="/articles">All recent reports →</a> | <a href="/chronology">90-day chronology →</a></p>
 
-<h2>Available content</h2>
-<ul>
-<li><a href="/hantavirus">Hantavirus — comprehensive medical reference</a> (12 serotypes, 4 clinical topic pages)</li>
-<li><a href="/outbreaks">Live outbreak index</a></li>
-<li><a href="/countries">Country-by-country surveillance</a></li>
-<li><a href="/articles">Live article feed</a> with NATO source qualification</li>
-<li><a href="/chronology">90-day chronology</a> as a live blog</li>
-<li><a href="/compare">Clinical comparison pages</a></li>
-<li><a href="/sources">Source registry</a> (every WHO/CDC/ECDC/PAHO feed with NATO rating)</li>
-<li><a href="/methodology">Methodology</a> — NATO Admiralty Scale, ICD 206, Berkeley Protocol</li>
-<li><a href="/glossary">Glossary</a> — hantavirus + OSINT tradecraft terminology</li>
-<li><a href="/faq">FAQ</a></li>
-</ul>
+{faq_html}
 
-<h2>Spanish + Portuguese</h2>
-<ul>
-<li><a href="/es/" hreflang="es">Español</a> — full hantavirus reference and incident pages for LatAm readers</li>
-<li><a href="/pt-br/" hreflang="pt-BR">Português brasileiro</a> — Brazilian medical vocabulary, includes Juquitiba/Araraquara serotype context</li>
-</ul>
+<h2>Open data</h2>
+<p>
+All HORIZON data is available under <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+Free to use with attribution. Data feeds:
+<a href="/rss.xml">RSS</a> ·
+<a href="/atom.xml">Atom</a> ·
+<a href="/feed.json">JSON Feed</a> ·
+<a href="/api/openapi.json">REST API</a> ·
+<a href="/sitemap.xml">Sitemap</a>
+</p>
 
-<h2>Open data + feeds</h2>
-<ul>
-<li>API: <a href="/api/openapi.json">/api/openapi.json</a></li>
-<li>RSS: <a href="/rss.xml">/rss.xml</a></li>
-<li>Atom: <a href="/atom.xml">/atom.xml</a></li>
-<li>JSON Feed: <a href="/feed.json">/feed.json</a></li>
-<li>Sitemap: <a href="/sitemap.xml">/sitemap.xml</a> · News sitemap: <a href="/news-sitemap.xml">/news-sitemap.xml</a></li>
-<li>Embeddable widgets: <a href="/widgets">/widgets</a></li>
-</ul>
-
-<p><a class="cta" href="/">Open the interactive map →</a></p>
+<p><a class="cta" href="/">Open the live interactive map →</a></p>
 """
+
+    faq_page_schema = {
+        "@type": "FAQPage",
+        "@id": f"{BASE_URL}/#faq",
+        "mainEntity": faq_jsonld_entries,
+    }
+
     spec = PageSpec(
-        path="/seo-snapshot",
-        title="HORIZON — Live Hantavirus Outbreak Tracker (snapshot for indexing)",
+        # path="/" so the canonical tag points to the real homepage URL, not /seo-snapshot.
+        # Google's dynamic rendering pattern: crawlers hit /seo-snapshot but the
+        # canonical is /, so PageRank consolidates on the user-facing URL.
+        path="/",
+        title="Hantavirus Tracker 2026 — Live Outbreak Map, Cases & Deaths | HORIZON",
         description=(
-            "Server-rendered crawler-friendly snapshot of the HORIZON homepage. "
-            "Live hantavirus outbreak counts, active incidents, latest reports, "
-            "all topic clusters, EN/ES/PT-BR coverage, audit-grade provenance."
+            f"Live hantavirus tracker: {conf} confirmed cases, {deaths} deaths, {countries_n} countries. "
+            "MV Hondius 2026 outbreak (Andes virus). WHO, CDC, ECDC data. Updated continuously."
         ),
-        h1="HORIZON — Live Hantavirus Outbreak Tracker",
+        h1="Hantavirus Outbreak Tracker 2026 — Live Cases, Map & Updates",
         body_html=body,
         breadcrumbs=[Breadcrumb(name="HORIZON", url=f"{BASE_URL}/")],
         jsonld_nodes=[
             jsonld.medical_condition_hantavirus(),
+            faq_page_schema,
         ],
-        keywords="hantavirus tracker, live hantavirus outbreak, hantavirus surveillance, hantavirus map, WHO, CDC, ECDC, PAHO",
-        news_keywords="hantavirus, outbreak, surveillance, MV Hondius",
+        keywords=(
+            "hantavirus tracker, hantavirus 2026, live hantavirus outbreak, hantavirus map, "
+            "MV Hondius hantavirus, Andes virus outbreak, hantavirus cases by country, "
+            "hantavirus deaths 2026, WHO hantavirus, CDC hantavirus"
+        ),
+        news_keywords="hantavirus, Andes virus, MV Hondius, outbreak 2026, hantavirus tracker",
         og_type="website",
         hreflang_path="/",
     )
-    # Short cache so live numbers refresh; crawlers don't need second-by-second freshness.
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=300)
 
 
