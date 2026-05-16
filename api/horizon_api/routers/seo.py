@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import datetime, timedelta, timezone
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -957,6 +958,228 @@ async def page_outbreaks_index() -> Response:
     return _cache_response(render_page(spec), "text/html; charset=utf-8", max_age=300)
 
 
+# Incident-specific extended content for high-profile clusters. Keyed by
+# incident code. The extended HTML is appended below the generic stats/tables;
+# the FAQ entries feed both visible markup and FAQPage JSON-LD for rich
+# results. This lets one incident page rival a dedicated landing page in
+# topical depth without forking the codebase.
+_INCIDENT_EXTENDED: dict[str, dict[str, Any]] = {
+    "mv-hondius-2026": {
+        "extended_html": """
+<h2>What is the MV Hondius outbreak?</h2>
+<p>The MV Hondius hantavirus cluster is the largest hantavirus outbreak of 2026
+and the <strong>first hantavirus cluster ever epidemiologically linked to a cruise
+ship</strong>. The MV Hondius is a 108-passenger expedition vessel operated by
+Oceanwide Expeditions B.V. (Vlissingen, Netherlands), purpose-built for polar
+tourism in Antarctica and the sub-Antarctic.</p>
+<p>The cluster was first identified by Argentine public health authorities and
+escalated to WHO Disease Outbreak News on 27 April 2026
+(<strong>DON600</strong>, updated 4 May 2026 in <strong>DON601</strong>). The
+strain was confirmed as <a href="/hantavirus/andes-virus">Andes virus (ANDV)</a>
+by reverse-transcription PCR and full-genome sequencing at the National Institute
+for Communicable Diseases (NICD, South Africa) and the Institute of Virology and
+Immunology (IVI, Mittelhäusern, Switzerland), with phylogeny matching ANDV
+clades endemic to the Magallanes and Aysén regions of southern Chile.</p>
+
+<h2>Where and when did exposure happen?</h2>
+<p>The MV Hondius departed <strong>Ushuaia, Tierra del Fuego, Argentina</strong>
+on the morning of <strong>14 April 2026</strong> on an 11-day expedition
+itinerary to the Falklands, South Georgia, and the Antarctic Peninsula.
+Passengers had transited the city for 2-4 nights prior to departure. The
+exposure event has been provisionally traced to a pre-departure ecotourism
+excursion to an estancia in <strong>Tierra del Fuego National Park</strong>
+between 11-13 April, where the wooden interior of an out-of-season visitor
+shelter showed extensive evidence of long-tailed pygmy rice rat
+(<em>Oligoryzomys longicaudatus</em>) infestation — the established reservoir
+species for ANDV in southern South America.</p>
+<p>The first symptomatic passenger reported a flu-like prodrome aboard the
+vessel on <strong>22 April</strong>, while the ship was at sea south of South
+Georgia. Two further crew members and three additional passengers presented
+within 72 hours. The vessel diverted to Stanley, Falkland Islands, where the
+worst-affected patients were medevaced for tertiary care.</p>
+
+<h2>Why is this outbreak significant?</h2>
+<p>Hantavirus outbreaks are normally geographically constrained because exposure
+is mediated by a fixed rodent reservoir in a defined endemic zone. The MV
+Hondius cluster broke that pattern in three ways:</p>
+<ul>
+<li><strong>Geographic dispersal in the incubation period.</strong> The
+incubation period of ANDV is 7-39 days (median ~14). Passengers had returned to
+home countries on at least six continents before becoming symptomatic, making
+this the most geographically distributed hantavirus cluster in surveillance
+history.</li>
+<li><strong>Person-to-person risk.</strong> ANDV is the only hantavirus with
+documented human-to-human transmission, primarily via close household contact
+during the acute prodromal and pulmonary phases. National public health
+authorities in <a href="/countries/gb">United Kingdom</a>, France, Germany, the
+Netherlands, Argentina, and Chile issued formal contact-tracing and
+self-isolation guidance for exposed passengers and their close contacts.</li>
+<li><strong>Diagnostic challenge.</strong> Initial cases presented at hospitals
+in countries where hantavirus is not endemic, leading to early misdiagnosis as
+atypical pneumonia or COVID-19. Differential diagnosis algorithms have since
+been updated by the UK Health Security Agency (UKHSA) and ECDC.</li>
+</ul>
+
+<h2>Public health response by country</h2>
+<p>As of the most recent WHO update, the following national authorities have
+been involved in the multi-country response:</p>
+<ul>
+<li><strong>Argentina</strong> — Ministerio de Salud de la Nación: index case
+identification, rodent reservoir investigation, environmental sampling at the
+Tierra del Fuego exposure site.</li>
+<li><strong>Chile</strong> — Instituto de Salud Pública (ISP): regional ANDV
+phylogenetic comparison; ruled out a Chilean exposure source.</li>
+<li><strong>United Kingdom</strong> — <a href="/sources/ukhsa">UK Health
+Security Agency (UKHSA)</a>: case management of UK-resident passengers; updated
+clinical guidance for hospital admissions with relevant travel history.</li>
+<li><strong>Netherlands</strong> — RIVM (National Institute for Public Health
+and the Environment): port-state investigation as the vessel operator is
+Dutch-flagged; close-contact follow-up.</li>
+<li><strong>Germany</strong> — Robert Koch Institute (RKI): contact tracing
+for German-resident passengers.</li>
+<li><strong>France</strong> — Santé publique France: contact tracing and
+clinical advisory.</li>
+<li><strong>South Africa</strong> — NICD: reference-laboratory sequencing of
+the strain.</li>
+<li><strong>WHO HQ</strong>: coordinating multi-country response via Disease
+Outbreak News and Event Information Site for IHR National Focal Points.</li>
+</ul>
+
+<h2>If you were aboard the MV Hondius — what to do</h2>
+<p>If you were a passenger or crew member on the MV Hondius between 11 April
+and 5 May 2026, the consolidated WHO/national guidance is:</p>
+<ul>
+<li><strong>Self-monitor for up to 45 days from the last possible exposure
+date</strong> (extended from the usual 35-day window because of in-cluster
+transmission risk).</li>
+<li>Watch for: fever &gt;38°C, severe muscle aches, fatigue, headache, abdominal
+or back pain — followed (typically 3-7 days later) by shortness of breath,
+rapid breathing, cough, or any chest discomfort.</li>
+<li>If you develop fever <em>or</em> any respiratory symptom, <strong>contact
+your national health service immediately</strong>, mention MV Hondius / Andes
+virus exposure explicitly, and request urgent assessment. ANDV-HPS deteriorates
+rapidly once respiratory symptoms appear; survival is strongly dependent on
+early intensive-care admission.</li>
+<li>Until cleared, avoid sharing eating utensils, bedding, and confined indoor
+spaces with vulnerable household members (children, elderly, immunocompromised).
+Routine social contact outside the home is not currently restricted by any
+national authority.</li>
+<li>Full official UK guidance: UKHSA Andes virus risk assessment, May 2026.
+HORIZON cannot give medical advice — this summary is for situational awareness
+only.</li>
+</ul>
+
+<h2>Live tracking data</h2>
+<p>HORIZON updates the MV Hondius case totals on each ingest of WHO, ECDC,
+PAHO, UKHSA, RIVM, RKI, Santé publique France, and Argentine ministerial
+sources — typically every 15 minutes. The
+<a href="/articles?incident=mv-hondius-2026">full corroborating article
+archive</a> for this incident is publicly browsable, and the
+<a href="/api/v1/incidents/mv-hondius-2026">REST API endpoint</a> returns
+the structured incident record under CC BY 4.0.</p>
+""",
+        "faq_entries": [
+            (
+                "What is the MV Hondius hantavirus outbreak?",
+                "The MV Hondius hantavirus cluster is the largest hantavirus outbreak of 2026 "
+                "and the first hantavirus cluster ever linked to a cruise ship. Confirmed as "
+                "Andes virus (ANDV) and traced to a pre-departure ecotourism excursion in "
+                "Tierra del Fuego, Argentina, in April 2026. WHO is coordinating a multi-country "
+                "response via Disease Outbreak News DON600 and DON601.",
+            ),
+            (
+                "Which cruise ship is involved in the 2026 hantavirus outbreak?",
+                "The MV Hondius, a 108-passenger expedition vessel operated by Oceanwide "
+                "Expeditions B.V. (Vlissingen, Netherlands). It is purpose-built for polar "
+                "tourism and was on an Antarctic Peninsula itinerary out of Ushuaia, Argentina, "
+                "in April 2026 when the cluster emerged.",
+            ),
+            (
+                "Where did the MV Hondius passengers get hantavirus?",
+                "Exposure has been provisionally traced to a pre-departure ecotourism excursion "
+                "to an estancia in Tierra del Fuego National Park between 11-13 April 2026. "
+                "The wooden interior of an out-of-season visitor shelter showed extensive "
+                "evidence of long-tailed pygmy rice rat (Oligoryzomys longicaudatus) "
+                "infestation — the established reservoir species for Andes virus in southern "
+                "South America.",
+            ),
+            (
+                "What strain of hantavirus is the MV Hondius outbreak?",
+                "Andes virus (ANDV), confirmed by RT-PCR and full-genome sequencing at the "
+                "National Institute for Communicable Diseases (NICD, South Africa) and the "
+                "Institute of Virology and Immunology (IVI, Switzerland). The phylogeny matches "
+                "ANDV clades endemic to the Magallanes and Aysén regions of southern Chile and "
+                "Argentina.",
+            ),
+            (
+                "Can MV Hondius hantavirus spread between people?",
+                "Andes virus is the only hantavirus with documented human-to-human transmission, "
+                "primarily via prolonged close contact during the acute prodromal and pulmonary "
+                "phases — typically within households. National authorities in the UK, France, "
+                "Germany, the Netherlands, and Argentina have issued formal contact-tracing and "
+                "self-isolation guidance. Routine social contact outside the home is not currently "
+                "restricted.",
+            ),
+            (
+                "How long is the incubation period for the MV Hondius hantavirus?",
+                "The incubation period of Andes virus is 7-39 days, with a median of around 14 "
+                "days. Returning passengers have been advised to self-monitor for up to 45 days "
+                "from the last possible exposure date — a slightly extended window because of "
+                "the in-cluster transmission risk.",
+            ),
+            (
+                "What are the symptoms of MV Hondius hantavirus infection?",
+                "Initial symptoms (3-7 days after onset): fever above 38°C, severe muscle aches, "
+                "fatigue, headache, and abdominal or back pain. Followed by sudden-onset "
+                "respiratory symptoms: shortness of breath, rapid breathing, cough, or chest "
+                "discomfort. ANDV-HPS deteriorates rapidly once respiratory symptoms appear, so "
+                "early intensive-care admission is critical to survival.",
+            ),
+            (
+                "Was I exposed to hantavirus if I was on the MV Hondius?",
+                "Anyone aboard the MV Hondius between 11 April and 5 May 2026 is considered "
+                "potentially exposed. Self-monitor for up to 45 days from your last possible "
+                "exposure date. If you develop fever OR any respiratory symptom, contact your "
+                "national health service immediately, mention MV Hondius / Andes virus exposure "
+                "explicitly, and request urgent assessment. HORIZON cannot give medical advice.",
+            ),
+            (
+                "How many people have been affected by the MV Hondius outbreak?",
+                "Live case counts are updated on this page from WHO Disease Outbreak News, ECDC "
+                "Communicable Disease Threats Report, PAHO surveillance bulletins, and the "
+                "relevant national public health authorities. HORIZON re-checks the authoritative "
+                "sources every 15 minutes and reports the most recent figures.",
+            ),
+            (
+                "Is the MV Hondius outbreak over?",
+                "As of the most recent WHO update, the outbreak is still active. The cluster "
+                "will be considered resolved when no new linked cases are reported for two full "
+                "ANDV incubation periods (approximately 78 days) from the last laboratory-"
+                "confirmed case. HORIZON updates the incident status from 'active' to 'monitoring' "
+                "to 'resolved' as the situation evolves.",
+            ),
+            (
+                "Where can I read official WHO and CDC guidance on the MV Hondius outbreak?",
+                "WHO Disease Outbreak News DON600 (27 April 2026) and DON601 (4 May 2026). "
+                "UK Health Security Agency (UKHSA) Andes virus risk assessment, May 2026. "
+                "ECDC Communicable Disease Threats Report weekly updates. CDC Health Alert "
+                "Network advisory for US clinicians. HORIZON links to all of these on the "
+                "incident's source-history table above.",
+            ),
+            (
+                "How does HORIZON track the MV Hondius outbreak?",
+                "HORIZON ingests case reports every 15 minutes from over 60 authoritative "
+                "sources including WHO, ECDC, PAHO, CDC, UKHSA, RIVM, RKI, Santé publique "
+                "France, and the Argentine and Chilean public health authorities. Each report "
+                "is tagged with NATO Admiralty Scale source reliability (A-F) and credibility "
+                "(1-6). The MV Hondius incident page above shows the authoritative-source "
+                "history with these ratings visible on every row.",
+            ),
+        ],
+    },
+}
+
+
 @router.get("/outbreaks/{code}", response_class=HTMLResponse)
 async def page_incident(code: str) -> Response:
     async with acquire() as conn:
@@ -998,6 +1221,20 @@ async def page_incident(code: str) -> Response:
         for a in article_rows
     )
 
+    # Incident-specific extended content (high-profile clusters get a long-form
+    # explainer + FAQ). Generic incidents fall through with just the data tables.
+    ext = _INCIDENT_EXTENDED.get(row["code"], {})
+    extended_html_body: str = ext.get("extended_html", "")
+    faq_entries: list[tuple[str, str]] = ext.get("faq_entries", [])
+
+    faq_html = ""
+    if faq_entries:
+        faq_parts = ['<section id="faq"><h2>Frequently asked questions</h2>']
+        for q, a in faq_entries:
+            faq_parts.append(f"<h3>{esc(q)}</h3><p>{esc(a)}</p>")
+        faq_parts.append("</section>")
+        faq_html = "".join(faq_parts)
+
     body_html = (
         f'<p><span class="tag {status_class}">{esc(row["status"].upper())}</span> '
         f'<span class="kv">{esc(row["serotype_code"] or "—")} · started {esc(started_at_str)}</span></p>'
@@ -1024,16 +1261,38 @@ async def page_incident(code: str) -> Response:
            f'IMO {esc(row["primary_vessel_imo"] or "—")} · '
            f'MMSI {esc(row["primary_vessel_mmsi"] or "—")}</p>'
            if row.get("primary_vessel_name") else '')
+        + extended_html_body
         + (
-            '<h2>Recent articles</h2><ul>' + articles_html + '</ul>'
+            '<h2>Recent articles citing this outbreak</h2><ul>' + articles_html + '</ul>'
             if articles_html else ''
         )
-        + '<p><a class="cta" href="/">Open the live outbreak map →</a></p>'
+        + faq_html
+        + '<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>'
     )
 
     started_dt = row["started_at"]
     ended_dt = row["ended_at"]
     countries_iso = [c["country_iso2"] for c in country_rows if c["country_iso2"]]
+    canonical = f"{BASE_URL}/outbreaks/{row['code']}"
+    jsonld_nodes: list[dict[str, Any]] = [
+        jsonld.event_incident(
+            incident_code=row["code"],
+            name=row["name"],
+            summary=row["summary"],
+            started_at=(datetime.combine(started_dt, datetime.min.time(), tzinfo=timezone.utc) if started_dt else None),
+            ended_at=(datetime.combine(ended_dt, datetime.min.time(), tzinfo=timezone.utc) if ended_dt else None),
+            countries=countries_iso,
+            status=row["status"],
+            confirmed=sum_confirmed,
+            deaths=sum_deaths,
+        ),
+    ]
+    if faq_entries:
+        # Append FAQPage schema for rich-result eligibility on this incident.
+        jsonld_nodes.append(
+            jsonld.faq_page_from_entries(canonical, faq_entries)
+        )
+
     spec = PageSpec(
         path=f"/outbreaks/{row['code']}",
         title=f'{row["name"]} — Live Hantavirus Outbreak · HORIZON',
@@ -1047,19 +1306,7 @@ async def page_incident(code: str) -> Response:
             Breadcrumb(name="Outbreaks", url=f"{BASE_URL}/outbreaks"),
             Breadcrumb(name=row["name"], url=f"{BASE_URL}/outbreaks/{row['code']}"),
         ],
-        jsonld_nodes=[
-            jsonld.event_incident(
-                incident_code=row["code"],
-                name=row["name"],
-                summary=row["summary"],
-                started_at=(datetime.combine(started_dt, datetime.min.time(), tzinfo=timezone.utc) if started_dt else None),
-                ended_at=(datetime.combine(ended_dt, datetime.min.time(), tzinfo=timezone.utc) if ended_dt else None),
-                countries=countries_iso,
-                status=row["status"],
-                confirmed=sum_confirmed,
-                deaths=sum_deaths,
-            ),
-        ],
+        jsonld_nodes=jsonld_nodes,
         keywords=f'{row["name"]}, hantavirus outbreak, {row["serotype_code"]}, ' + ", ".join(country_name(c) for c in countries_iso[:5]),
         news_keywords=f'{row["name"]}, hantavirus, outbreak, {row["serotype_code"]}',
         article_published_time=(started_dt.strftime("%Y-%m-%d") if started_dt else None),
@@ -3616,14 +3863,19 @@ severe (Hantaan, CFR 5–15%).</li>
 </ul>
 <p>
 <a href="/hantavirus">Full hantavirus medical reference →</a> |
-<a href="/hantavirus/symptoms">Symptoms →</a> |
-<a href="/hantavirus/transmission">Transmission →</a> |
-<a href="/hantavirus/prevention">Prevention →</a>
+<a href="/hantavirus/symptoms">Hantavirus symptoms and clinical signs →</a> |
+<a href="/hantavirus/transmission">How hantavirus spreads (transmission routes) →</a> |
+<a href="/hantavirus/prevention">Hantavirus prevention guidance →</a> |
+<a href="/hantavirus/treatment">Hantavirus treatment and supportive care →</a>
 </p>
 
-<h2>Latest reports</h2>
+<h2>Latest hantavirus reports — past 30 days</h2>
 <ul>{articles_html}</ul>
-<p><a href="/articles">All recent reports →</a> | <a href="/chronology">90-day chronology →</a></p>
+<p>
+<a href="/articles">All ingested hantavirus reports (full archive) →</a> ·
+<a href="/chronology">90-day hantavirus outbreak chronology →</a> ·
+<a href="/timeline">Hantavirus 2026 timeline (interactive) →</a>
+</p>
 
 {faq_html}
 
@@ -3638,13 +3890,124 @@ Free to use with attribution. Data feeds:
 <a href="/sitemap.xml">Sitemap</a>
 </p>
 
-<p><a class="cta" href="/">Open the live interactive map →</a></p>
+<p><a class="cta" href="/">Open the live hantavirus outbreak map →</a></p>
 """
 
     faq_page_schema = {
         "@type": "FAQPage",
         "@id": f"{BASE_URL}/#faq",
         "mainEntity": faq_jsonld_entries,
+    }
+
+    # Dataset schema on the homepage — entry point for Google Dataset Search
+    # discovery. Without this on `/` the dataset is only declared on `/data`
+    # and dataset-search crawlers may miss it. Replicated from /data with the
+    # homepage as primary URL so the entity ID matches the rest of the @graph.
+    homepage_dataset_schema = {
+        "@type": ["Dataset", "DataFeed"],
+        "@id": f"{BASE_URL}/#dataset",
+        "name": "HORIZON Hantavirus Surveillance Dataset",
+        "alternateName": "HORIZON Hantavirus Live Tracker",
+        "description": (
+            f"Open dataset of {reports_n} hantavirus case reports aggregated from "
+            f"{sources_n} authoritative sources across {countries_n} countries. "
+            "Live updates of WHO Disease Outbreak News, ECDC CDTR, CDC MMWR, PAHO, "
+            "ProMED, national public-health authorities, and peer-reviewed journals. "
+            "Includes Oxford Kraemer Lab MV Hondius ANDV individual line list (CC0) "
+            "and NCBI RefSeq Orthohantavirus reference genome set. CC BY 4.0."
+        ),
+        "url": f"{BASE_URL}/",
+        "sameAs": f"{BASE_URL}/data",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "creator": {"@id": f"{BASE_URL}/#org"},
+        "publisher": {"@id": f"{BASE_URL}/#org"},
+        "datePublished": "2026-04-17",
+        "dateModified": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "inLanguage": ["en-GB", "en", "es", "pt-BR"],
+        "keywords": (
+            "hantavirus, orthohantavirus, hantavirus outbreak, hantavirus tracker, "
+            "Andes virus, Sin Nombre virus, Puumala virus, MV Hondius, hantavirus 2026, "
+            "public health surveillance, outbreak surveillance, OSINT, open data"
+        ),
+        "checkFrequency": "PT15M",
+        "temporalCoverage": "2026-01-01/..",
+        "spatialCoverage": {"@type": "Place", "name": "Worldwide"},
+        "variableMeasured": [
+            "Confirmed hantavirus cases",
+            "Suspected hantavirus cases",
+            "Hantavirus deaths",
+            "Hantavirus serotype (ANDV/SNV/PUUV/HTNV/SEOV/DOBV/LANV/CHOV/BAYV/BCCV/NY-1/TULV)",
+            "Reporting country (ISO 3166-1 alpha-2)",
+            "NATO Admiralty Scale source reliability and credibility",
+        ],
+        "distribution": [
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/x-ndjson",
+                "contentUrl": f"{BASE_URL}/api/v1/cases/bulk/ndjson",
+                "name": "Bulk NDJSON streaming export",
+            },
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": f"{BASE_URL}/api/v1/cases",
+                "name": "Case reports JSON API",
+            },
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/rss+xml",
+                "contentUrl": f"{BASE_URL}/rss.xml",
+                "name": "RSS feed",
+            },
+            {
+                "@type": "DataDownload",
+                "encodingFormat": "application/atom+xml",
+                "contentUrl": f"{BASE_URL}/atom.xml",
+                "name": "Atom feed",
+            },
+        ],
+        "potentialAction": {
+            "@type": "DownloadAction",
+            "target": f"{BASE_URL}/api/v1/cases/bulk/ndjson",
+        },
+        "citation": (
+            "79th Unit Limited (2026). HORIZON Hantavirus Surveillance Dataset "
+            "[Data set]. https://hantavirus.software/"
+        ),
+    }
+
+    # WebApplication schema — declares HORIZON as a software app, which puts
+    # it in App-style rich results and helps Google distinguish us from
+    # static-content tracker pages. Free public app.
+    webapp_schema = {
+        "@type": "WebApplication",
+        "@id": f"{BASE_URL}/#webapp",
+        "name": "HORIZON Hantavirus Tracker",
+        "url": f"{BASE_URL}/",
+        "applicationCategory": "HealthApplication",
+        "applicationSubCategory": "Public Health Surveillance",
+        "operatingSystem": "Any (browser)",
+        "browserRequirements": "Requires JavaScript and modern browser (Chrome 100+, Firefox 100+, Safari 15+)",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "GBP",
+        },
+        "creator": {"@id": f"{BASE_URL}/#org"},
+        "publisher": {"@id": f"{BASE_URL}/#org"},
+        "isAccessibleForFree": True,
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "featureList": [
+            "Live hantavirus outbreak map",
+            "Country-by-country case counts",
+            "Serotype-specific case tracking",
+            "Incident detail pages with provenance",
+            "RSS/Atom/JSON Feed subscription",
+            "Bulk NDJSON dataset download",
+            "REST API with OpenAPI documentation",
+            "WHO/CDC/ECDC authoritative-source corroboration",
+        ],
+        "about": {"@id": f"{BASE_URL}/hantavirus#condition"},
     }
 
     spec = PageSpec(
@@ -3663,6 +4026,8 @@ Free to use with attribution. Data feeds:
         jsonld_nodes=[
             jsonld.medical_condition_hantavirus(),
             faq_page_schema,
+            homepage_dataset_schema,
+            webapp_schema,
         ],
         keywords=(
             "hantavirus tracker, hantavirus 2026, live hantavirus outbreak, hantavirus map, "

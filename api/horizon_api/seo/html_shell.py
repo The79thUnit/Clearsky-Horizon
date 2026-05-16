@@ -24,11 +24,36 @@ The pages are designed for:
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
 from .common import BASE_URL, esc
+
+
+def _wikidata_sameas() -> list[str]:
+    """Return Wikidata `sameAs` URLs for the operator + dataset, if QIDs are set.
+
+    Read from env at module import time:
+      * `WIKIDATA_ORG_QID`     — operator (79th Unit Limited) QID, e.g. `Q12345678`
+      * `WIKIDATA_DATASET_QID` — HORIZON dataset QID, e.g. `Q12345679`
+
+    Once `docs/wikidata-submission.md` is run through QuickStatements and the
+    returned QIDs are saved here, Google Knowledge Graph picks up the entity
+    bidirectional link automatically (Wikidata is its primary KG source).
+    """
+    out: list[str] = []
+    org_qid = os.environ.get("WIKIDATA_ORG_QID", "").strip()
+    ds_qid = os.environ.get("WIKIDATA_DATASET_QID", "").strip()
+    if org_qid:
+        out.append(f"https://www.wikidata.org/wiki/{org_qid}")
+    if ds_qid:
+        out.append(f"https://www.wikidata.org/wiki/{ds_qid}")
+    return out
+
+
+_WIKIDATA_SAMEAS = _wikidata_sameas()
 
 
 @dataclass(slots=True)
@@ -306,7 +331,12 @@ def _jsonld_graph(spec: PageSpec, mod_time: datetime) -> str:
                 "Outbreak epidemiology",
             ],
             "areaServed": "Worldwide",
-            "sameAs": ["https://79thunit.co.uk", "https://hantavirus.software"],
+            "sameAs": [
+                "https://79thunit.co.uk",
+                "https://hantavirus.software",
+                "https://github.com/The-79th-Unit/Clearsky-Horizon",
+                *_WIKIDATA_SAMEAS,
+            ],
         },
         {
             "@type": "Organization",

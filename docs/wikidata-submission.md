@@ -101,14 +101,53 @@ Should return exactly one row pointing at the new Q-number.
 
 Once the Wikidata item is live:
 
-1. Add the QID to `web/index.html` Organization JSON-LD as a `sameAs`
-   entry: `"sameAs": [..., "https://www.wikidata.org/wiki/Qxxxxx"]`.
+1. **Set the QIDs as environment variables on the API container.** The
+   shared Organization JSON-LD reads them at startup and emits Wikidata
+   URLs in `sameAs` automatically (`api/horizon_api/seo/html_shell.py`,
+   `_wikidata_sameas()`):
+
+   ```bash
+   # On the prod VPS (/opt/horizon/.env or systemd override):
+   WIKIDATA_ORG_QID=Qxxxxx      # 79th Unit Limited
+   WIKIDATA_DATASET_QID=Qyyyyy  # HORIZON dataset
+   ```
+
+   Then `docker compose restart horizon-api` and the `sameAs` array on
+   every server-rendered SEO page picks up the new URLs.
+
 2. The serotype pages already `sameAs` to Wikidata orthohantavirus QIDs
    (Q575211, Q1422156, Q577220, etc.) — Wikidata bidirectionally links
    back via P953 / P973 / P3219 once we're an item.
+
 3. Google's Knowledge Graph indexes Wikidata heavily; entity matching
    between hantavirus.software and the orthohantavirus QID happens
    automatically once the sameAs cycle is complete.
+
 4. Wikipedia editors looking for live-tracker citations will find us
-   via the Wikidata reverse-citations query — typically generates 5–15
+   via the Wikidata reverse-citations query — typically generates 5-15
    Wikipedia citations within the first month of indexing.
+
+## One-shot submission workflow
+
+For an operator with an existing Wikidata account (recommended over
+QuickStatements OAuth for first-timers):
+
+1. Visit <https://www.wikidata.org/wiki/Special:NewItem> and create the
+   `79th Unit Limited` item manually with `P31 → Q4830453` (business),
+   `P17 → Q145` (United Kingdom), `P1297 → "17133814"` (Companies House
+   ID), and `P856 → https://79thunit.co.uk/`. Save. Note the QID
+   (e.g. `Q123456`).
+
+2. Open QuickStatements at <https://quickstatements.toolforge.org/#/batch>
+   and paste the HORIZON v1 block above, replacing `Q123456` with the
+   operator QID from step 1. Run. Note the dataset QID returned.
+
+3. Save both QIDs into the prod env (`WIKIDATA_ORG_QID`,
+   `WIKIDATA_DATASET_QID`) and restart `horizon-api`.
+
+4. Verify with `curl -A Googlebot/2.1 https://hantavirus.software/ |
+   grep -o "wikidata.org/wiki/[^\"]*"` — should print both QIDs.
+
+5. Submit the homepage URL to Google Search Console under URL Inspection
+   → Request Indexing to pull the Wikidata sameAs into Google's
+   Knowledge Graph crawl queue faster (24-48 h vs. 2-3 weeks organic).

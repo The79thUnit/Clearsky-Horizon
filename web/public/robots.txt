@@ -4,7 +4,22 @@
 
 User-agent: *
 Allow: /
+# Streaming + bulk endpoints — kept discoverable via Dataset schema and /data,
+# but crawlers should not GET them directly (huge responses, infinite stream).
 Disallow: /api/v1/stream/
+Disallow: /api/v1/cases/bulk/
+# Internal crawler-only routes — /seo-snapshot is reached via nginx rewrite for
+# Googlebot (canonical -> /), and /seo-validate is a developer diagnostic.
+# We deliberately do NOT disallow /seo-snapshot because the nginx rewrite
+# routes Googlebot's GET of "/" to "/seo-snapshot" under the hood — blocking
+# it here would break dynamic rendering. /seo-validate is fine to disallow.
+Disallow: /seo-validate
+# Health endpoint — not useful to index. Monitors ignore robots.txt anyway.
+Disallow: /health
+# Per-image dynamic OG endpoint — let Googlebot-Image fetch on demand
+# (Twitter/Slack/Facebook unfurl) but don't waste mass-crawl budget walking
+# every slug variant from the sitemap.
+Disallow: /api/v1/og/
 
 # Allow public data API endpoints (open JSON under CC BY 4.0).
 Allow: /api/v1/cases
@@ -16,13 +31,13 @@ Allow: /api/v1/meta/citation
 Allow: /api/v1/meta/dcat
 Allow: /api/v1/meta/vocabulary
 Allow: /api/v1/meta/badge/
+Allow: /api/v1/jsonld/
 Allow: /.well-known/dataset
 Allow: /.well-known/void
 Allow: /opensearch.xml
 Allow: /humans.txt
 Allow: /data
 Allow: /api/openapi.json
-Allow: /health
 Allow: /.well-known/security.txt
 
 # Server-rendered SEO surface — these are crawler-indexable HTML pages
